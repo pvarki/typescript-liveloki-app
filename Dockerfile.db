@@ -1,9 +1,0 @@
-FROM postgres:16
-
-# Environment variables for the database
-ENV POSTGRES_DB=event_tracker
-ENV POSTGRES_USER=postgres
-ENV POSTGRES_PASSWORD=r3zqpj2psdp98fuwf
-
-# Copy the initialization script to the Docker entrypoint init directory
-COPY db/init /docker-entrypoint-initdb.d/

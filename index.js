@@ -1,14 +1,16 @@
+const config = require('./config.js');
 const express = require('express');
 const { Pool } = require('pg');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const app = express();
+const router = express.Router();
 
 // Middleware
-app.use(express.json());
+router.use(express.json());
 
 // Serve static files from the "public" directory
-app.use(express.static(path.join(__dirname, 'public')));
+router.use(express.static(path.join(__dirname, 'public')));
 
 // PostgreSQL connection pool
 const pool = new Pool({
@@ -16,7 +18,7 @@ const pool = new Pool({
 });
 
 // Endpoint to add events
-app.post('/events', async (req, res) => {
+router.post('/events', async (req, res) => {
     const { events } = req.body; // Expecting an array of events
 
     if (!events || !Array.isArray(events)) {
@@ -32,7 +34,7 @@ app.post('/events', async (req, res) => {
             const { header, link, source, keywords } = event;
             const id = uuidv4();
             const keywordArray = keywords ? keywords.split(',').map(k => k.trim()) : [];
-            
+
             return client.query(
                 'INSERT INTO events (id, header, link, source, keywords) VALUES ($1, $2, $3, $4, $5)',
                 [id, header, link, source, keywordArray]
@@ -52,7 +54,7 @@ app.post('/events', async (req, res) => {
 });
 
 // Endpoint to fetch events
-app.get('/events', async (req, res) => {
+router.get('/events', async (req, res) => {
     const client = await pool.connect();
     try {
         const result = await client.query('SELECT * FROM events');
@@ -63,6 +65,8 @@ app.get('/events', async (req, res) => {
         client.release();
     }
 });
+
+app.use(config.baseUrl, router);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

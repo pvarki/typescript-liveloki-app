@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Event Tracker</title>
 </head>
+
 <body>
     <h1>Submit Events</h1>
     <form id="eventForm">
@@ -54,7 +56,7 @@
             }
 
             try {
-                const response = await fetch('/events', {
+                const response = await fetch('events', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ events })
@@ -74,7 +76,7 @@
 
         async function loadEvents() {
             try {
-                const response = await fetch('/events');
+                const response = await fetch('events');
                 const events = await response.json();
                 eventsList.innerHTML = '';
                 events.forEach(event => {
@@ -97,4 +99,5 @@
         window.onload = loadEvents;
     </script>
 </body>
+
 </html>

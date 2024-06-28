@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Tracker</title>
+</head>
+<body>
+    <h1>Submit Events</h1>
+    <form id="eventForm">
+        <div id="eventContainer">
+            <div class="event">
+                <input type="text" name="header" placeholder="Header" required>
+                <input type="text" name="link" placeholder="Link">
+                <input type="text" name="source" placeholder="Source">
+                <input type="text" name="keywords" placeholder="Keywords (comma separated)">
+            </div>
+        </div>
+        <button type="button" onclick="addEvent()">Add Another Event</button>
+        <button type="submit">Submit Events</button>
+    </form>
+
+    <h2>Existing Events</h2>
+    <div id="eventsList"></div>
+
+    <script>
+        const eventForm = document.getElementById('eventForm');
+        const eventContainer = document.getElementById('eventContainer');
+        const eventsList = document.getElementById('eventsList');
+
+        function addEvent() {
+            const newEvent = document.createElement('div');
+            newEvent.classList.add('event');
+            newEvent.innerHTML = `
+                <input type="text" name="header" placeholder="Header" required>
+                <input type="text" name="link" placeholder="Link">
+                <input type="text" name="source" placeholder="Source">
+                <input type="text" name="keywords" placeholder="Keywords (comma separated)">
+            `;
+            eventContainer.appendChild(newEvent);
+        }
+
+        eventForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(eventForm);
+            const events = [];
+            for (let i = 0; i < formData.getAll('header').length; i++) {
+                events.push({
+                    header: formData.getAll('header')[i],
+                    link: formData.getAll('link')[i],
+                    source: formData.getAll('source')[i],
+                    keywords: formData.getAll('keywords')[i]
+                });
+            }
+
+            try {
+                const response = await fetch('/events', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ events })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('Events submitted successfully');
+                    loadEvents(); // Reload events after submission
+                } else {
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        });
+
+        async function loadEvents() {
+            try {
+                const response = await fetch('/events');
+                const events = await response.json();
+                eventsList.innerHTML = '';
+                events.forEach(event => {
+                    const eventElement = document.createElement('div');
+                    eventElement.classList.add('event-item');
+                    eventElement.innerHTML = `
+                        <h3>${event.header}</h3>
+                        <p><a href="${event.link}" target="_blank">${event.link}</a></p>
+                        <p>Source: ${event.source}</p>
+                        <p>Keywords: ${event.keywords.join(', ')}</p>
+                    `;
+                    eventsList.appendChild(eventElement);
+                });
+            } catch (error) {
+                eventsList.innerHTML = `<p>Error loading events: ${error.message}</p>`;
+            }
+        }
+
+        // Load events on page load
+        window.onload = loadEvents;
+    </script>
+</body>
+</html>

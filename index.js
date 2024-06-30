@@ -25,19 +25,21 @@ router.post('/events', async (req, res) => {
         return res.status(400).json({ error: 'Invalid input format' });
     }
 
+    console.log(req.body);
+
     const client = await pool.connect();
 
     try {
         await client.query('BEGIN');
 
         const eventPromises = events.map(event => {
-            const { header, link, source, keywords } = event;
+            const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, creation_time} = event;
             const id = uuidv4();
             const keywordArray = keywords ? keywords.split(',').map(k => k.trim()) : [];
 
             return client.query(
-                'INSERT INTO events (id, header, link, source, keywords) VALUES ($1, $2, $3, $4, $5)',
-                [id, header, link, source, keywordArray]
+                'INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+                [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time]
             );
         });
 
@@ -45,6 +47,7 @@ router.post('/events', async (req, res) => {
 
         await client.query('COMMIT');
         res.status(201).json({ message: 'Events added successfully' });
+        console.log(req.body);
     } catch (error) {
         await client.query('ROLLBACK');
         res.status(500).json({ error: error.message });

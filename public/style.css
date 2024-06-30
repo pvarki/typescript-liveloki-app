@@ -106,6 +106,17 @@ tbody tr:nth-child(odd) {
     font-weight: 700;
 }
 
+.search {
+    flex: 1 1 20%;
+    min-width: 200px;
+    padding: 10px;
+    background-color: #333333;
+    color: #e0e0e0;
+    border: none;
+    border-radius: 4px;
+    margin-bottom: 25px;
+}
+
 /* Fix hover for dark theme */
 .mdl-data-table tbody tr:hover {
     background-color: #333333 !important;

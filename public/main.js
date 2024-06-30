@@ -1,6 +1,7 @@
 const eventForm = document.getElementById('eventForm');
 const eventContainer = document.getElementById('eventContainer');
 const eventsList = document.getElementById('eventsList');
+const searchList = document.getElementById('');
 
 function addEvent() {
     const newEvent = document.createElement('div');
@@ -53,7 +54,7 @@ async function loadEvents() {
     try {
         const response = await fetch('events');
         const events = await response.json();
-        eventsList.innerHTML = '';
+        eventsList.innerHTML = '<input type="text" placeholder="Search" class="mdl-textfield__input search"/>';
         if (events.length > 0) {
             const table = document.createElement('table');
             table.classList.add('mdl-data-table', 'mdl-js-data-table', 'mdl-shadow--2dp');
@@ -70,30 +71,38 @@ async function loadEvents() {
                         <th class="mdl-data-table__cell--non-numeric">Keywords</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="list">
                     ${events.map(event => `
                         <tr>
-                            <td class="mdl-data-table__cell--non-numeric">${event.header}</td>
-                            <td class="mdl-data-table__cell--non-numeric"><a href="${event.link}" target="_blank">${event.link}</a></td>
-                            <td class="mdl-data-table__cell--non-numeric">${event.source}</td>
-                            <td class="mdl-data-table__cell--non-numeric">${event.admiralty_reliability}</td>
-                            <td class="mdl-data-table__cell--non-numeric">${event.admiralty_accuracy}</td>
-                            <td class="mdl-data-table__cell--non-numeric">${event.event_time}</td>
-                            <td class="mdl-data-table__cell--non-numeric">${event.creation_time}</td>
-                            <td class="mdl-data-table__cell--non-numeric">${event.keywords.join(', ')}</td>
+                            <td class="mdl-data-table__cell--non-numeric header">${event.header}</td>
+                            <td class="mdl-data-table__cell--non-numeric link"><a href="${event.link}" target="_blank">${event.link}</a></td>
+                            <td class="mdl-data-table__cell--non-numeric source">${event.source}</td>
+                            <td class="mdl-data-table__cell--non-numeric admiralty_reliability">${event.admiralty_reliability}</td>
+                            <td class="mdl-data-table__cell--non-numeric admiralty_accuracy">${event.admiralty_accuracy}</td>
+                            <td class="mdl-data-table__cell--non-numeric event_time">${event.event_time}</td>
+                            <td class="mdl-data-table__cell--non-numeric creation_time">${event.creation_time}</td>
+                            <td class="mdl-data-table__cell--non-numeric keywords">${event.keywords.join(', ')}</td>
                         </tr>
                     `).join('')}
                 </tbody>
             `;
             eventsList.appendChild(table);
             componentHandler.upgradeElement(table);
+            var options = {
+                valueNames: [ 'header', 'link', 'source', 'admiralty_reliability', 'admiralty_accuracy', 'event_time', 'creation_time', 'keywords' ]
+              };
+            
+            var userList = new List('eventsList', options);
+
         } else {
             eventsList.innerHTML = '<p>No events found.</p>';
         }
     } catch (error) {
         eventsList.innerHTML = `<p>Error loading events: ${error.message}</p>`;
     }
+
 }
 
 // Load events on page load
 window.onload = loadEvents;
+

@@ -9,3 +9,5 @@ CREATE TABLE events (
     event_time TEXT,
     creation_time timestamp with time zone default now()
 );
+
+COPY events (id,header,link,source,admiralty_reliability,admiralty_accuracy,keywords,event_time) FROM '/tmp/preseed.csv' delimiter ',' csv header;

@@ -33,7 +33,7 @@ router.post('/events', async (req, res) => {
         await client.query('BEGIN');
 
         const eventPromises = events.map(event => {
-            const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, creation_time} = event;
+            const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time } = event;
             const id = uuidv4();
             const keywordArray = keywords ? keywords.split(',').map(k => k.trim()) : [];
 

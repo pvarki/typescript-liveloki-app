@@ -1,47 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>LiveLoki</title>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LiveLoki</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-</head>
-
-<body>
-    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
-        <header class="mdl-layout__header">
-            <div class="mdl-layout__header-row">
-                <span class="mdl-layout-title">LiveLoki</span>
-                <div class="mdl-layout-spacer"></div>
-            </div>
-        </header>
-        <main class="mdl-layout__content">
-            <div class="page-content">
-                <h1>Submit Events</h1>
-                <form id="eventForm">
-                    <div id="eventContainer">
-                        <div class="event">
-                            <input type="text" name="header" placeholder="Header" required class="mdl-textfield__input">
-                            <input type="text" name="link" placeholder="Link" class="mdl-textfield__input">
-                            <input type="text" name="source" placeholder="Source" class="mdl-textfield__input">
-                            <input type="text" name="admiralty_reliability" placeholder="Reliability" class="mdl-textfield__input">
-                            <input type="text" name="admiralty_accuracy" placeholder="Accuracy" class="mdl-textfield__input">
-                            <input type="text" name="event_time" placeholder="Event time" class="mdl-textfield__input">
-                            <input type="text" name="keywords" placeholder="Keywords (comma separated)" class="mdl-textfield__input">
-                        </div>
-                    </div>
-                    <button type="button" onclick="addEvent()" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">Add Another Event</button>
-                    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">Submit Events</button>
-                </form>
-
-                <h2>Existing Events</h2>
-                <div id="eventsList" class="table-container">
-                    <!-- Table will be inserted here -->
-                </div>
-            </div>
-        </main>
-    </div>
-    <script type="module" src="./src/main.js"></script>
-</body>
+    <body>
+        <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header" id="root"></div>
+        <script type="module" src="./src/main.tsx"></script>
+    </body>
 </html>

@@ -20,7 +20,8 @@ body {
     margin: 0 auto;
 }
 
-h1, h2 {
+h1,
+h2 {
     margin-bottom: 20px;
     color: #e0e0e0; /* Light text color */
 }
@@ -70,8 +71,8 @@ tr {
     word-break: break-all;
 }
 
-
-th, td {
+th,
+td {
     padding: 8px 16px;
     text-align: left;
 }
@@ -128,7 +129,7 @@ tbody tr:nth-child(odd) {
     margin-bottom: 25px;
 }
 
-.alert {
+.alert td {
     background-color: darkred;
 }
 

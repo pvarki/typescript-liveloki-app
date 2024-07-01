@@ -1,7 +1,7 @@
 const config = require('./config.js');
 const express = require('express');
 const { Pool } = require('pg');
-const { v4: uuidv4 } = require('uuid');
+const { v7: uuidv7 } = require('uuid');
 const path = require('path');
 const app = express();
 const router = express.Router();
@@ -34,7 +34,7 @@ router.post('/events', async (req, res) => {
 
         const eventPromises = events.map(event => {
             const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time } = event;
-            const id = uuidv4();
+            const id = uuidv7();
             const keywordArray = keywords ? keywords.split(',').map(k => k.trim()) : [];
 
             return client.query(

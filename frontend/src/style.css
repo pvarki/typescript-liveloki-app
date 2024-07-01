@@ -110,12 +110,12 @@ tbody tr:nth-child(odd) {
 .search {
     flex: 1 1 20%;
     min-width: 200px;
-    padding: 10px;
-    background-color: #333333;
-    color: #e0e0e0;
-    border: none;
+    padding: 10px !important;
+    background-color: #333333 !important;
+    color: #e0e0e0 !important;
+    border: none !important;
     border-radius: 4px;
-    margin-bottom: 25px;
+    margin-bottom: 25px !important;
 }
 
 .search_alert {
@@ -136,4 +136,18 @@ tbody tr:nth-child(odd) {
 /* Fix hover for dark theme */
 .mdl-data-table tbody tr:hover {
     background-color: #333333 !important;
+}
+
+.mdl-data-table th {
+    position: relative;
+    vertical-align: bottom;
+    text-overflow: ellipsis;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: 0;
+    height: 48px;
+    font-size: 22px !important;
+    color: #FFFFFF !important;
+    padding-bottom: 8px;
+    box-sizing: border-box;
 }

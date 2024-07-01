@@ -36,7 +36,7 @@ export function EventsList() {
           type="text"
           id="alertSearchField"
           placeholder="Alert Keyword"
-          className="mdl-textfield__input search_alert"
+          className="mdl-textfield__input search"
           value={highlight}
           onChange={(e) => setHighlight(e.target.value)}
         />

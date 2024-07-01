@@ -49,7 +49,12 @@ function SingleEventFields() {
         className="mdl-textfield__input"
       />
       <input type="text" name="admiralty_accuracy" placeholder="Accuracy" className="mdl-textfield__input" />
-      <input type="text" name="event_time" placeholder="Event time" className="mdl-textfield__input" />
+      <input
+        name="event_time"
+        placeholder="Event time"
+        className="mdl-textfield__input"
+        type="datetime-local"
+      />
       <input
         type="text"
         name="keywords"

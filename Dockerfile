@@ -1,3 +1,9 @@
+FROM node:20 AS build
+WORKDIR /usr/src/app
+COPY frontend ./
+RUN npm install
+RUN npm run build
+
 # Dockerfile for Node.js server
 FROM node:20
 
@@ -11,6 +17,7 @@ RUN npm install
 
 # Bundle app source
 COPY . .
+COPY --from=build /usr/src/app/dist ./public
 
 # Expose the port the app runs on
 EXPOSE 3000

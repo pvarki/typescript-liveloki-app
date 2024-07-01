@@ -8,6 +8,13 @@
 3. run docker compose up -d
 4. Navigate to localhost:3000
 
+## Frontend development
+
+The frontend is bundled with [Vite](https://vitejs.dev/).
+
+Once the backend is running (on port 3000), you can navigate to `frontend/`,
+run `npm i` and `npm run dev` to run the Vite development server that has
+hot reload and all that jazz.
 
 ## Info
 

@@ -1,3 +1,8 @@
+import "./style.css";
+import "material-design-lite/dist/material.indigo-pink.min.css";
+import "material-design-lite/material";
+import List from "list.js";
+
 const eventForm = document.getElementById('eventForm');
 const eventContainer = document.getElementById('eventContainer');
 const eventsList = document.getElementById('eventsList');
@@ -133,7 +138,7 @@ async function loadEvents() {
 }
 
 // Load events on page load
-window.onload = loadEvents;
+loadEvents();
 
 
 

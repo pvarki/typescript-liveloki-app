@@ -60,7 +60,7 @@ router.post('/events', async (req, res) => {
 router.get('/events', async (req, res) => {
     const client = await pool.connect();
     try {
-        const result = await client.query('SELECT * FROM events');
+        const result = await client.query('SELECT * FROM events ORDER BY creation_time DESC');
         res.json(result.rows);
     } catch (error) {
         res.status(500).json({ error: error.message });

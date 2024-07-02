@@ -23,6 +23,7 @@ router.post('/events', async (req, res) => {
     const { events } = req.body; // Expecting an array of events
 
     if (!events || !Array.isArray(events)) {
+        logger.error('Invalid input format');
         return res.status(400).json({ error: 'Invalid input format' });
     }
 
@@ -45,11 +46,13 @@ router.post('/events', async (req, res) => {
         await Promise.all(eventPromises);
 
         await client.query('COMMIT');
-        res.status(201).json({ message: 'Events added successfully' });
         logger.info('Events added successfully');
+        res.status(201).json({ message: 'Events added successfully' });
+        
 
     } catch (error) {
         await client.query('ROLLBACK');
+        logger.error('ROLLBACK: ' + error.message);
         res.status(500).json({ error: error.message });
     } finally {
         client.release();
@@ -63,6 +66,7 @@ router.get('/events', async (req, res) => {
         const result = await client.query('SELECT * FROM events ORDER BY creation_time DESC');
         res.json(result.rows);
     } catch (error) {
+        logger.error('Error: ' + error.message);
         res.status(500).json({ error: error.message });
     } finally {
         client.release();

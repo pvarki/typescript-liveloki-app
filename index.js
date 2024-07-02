@@ -1,20 +1,22 @@
-const config = require('./config.js');
-const express = require('express');
-const { Pool } = require('pg');
-const { v7: uuidv7 } = require('uuid');
-const path = require('path');
+import config from './config.js';
+import express from 'express';
+import pg from 'pg';
+import { v7 as uuidv7 } from 'uuid';
+import path from 'path';
+import logger from './logger.js';
+
+const dirname = path.dirname(new URL(import.meta.url).pathname);
 const app = express();
 const router = express.Router();
-const logger = require('./logger');
 
 // Middleware
 router.use(express.json());
 
 // Serve static files from the "public" directory
-router.use(express.static(path.join(__dirname, 'public')));
+router.use(express.static(path.join(dirname, 'public')));
 
 // PostgreSQL connection pool
-const pool = new Pool({
+const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL
 });
 

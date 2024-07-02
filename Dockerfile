@@ -11,12 +11,12 @@ FROM node:20
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY package*.json ./
+COPY backend/package*.json ./
 
 RUN npm install
 
 # Bundle app source
-COPY . .
+COPY backend/. .
 COPY --from=build /usr/src/app/dist ./public
 
 # Expose the port the app runs on

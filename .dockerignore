@@ -1,5 +1,8 @@
-*/node_modules
-.*cache
+**/*.log
+**/*.py[cod]
+**/.*cache
+**/__pycache__
+**/node_modules
 .env*
 .git
 .github
@@ -10,5 +13,4 @@ Dockerfile
 Dockerfile.db
 docker-compose.yml
 frontend/dist
-node_modules
 npm-debug.log

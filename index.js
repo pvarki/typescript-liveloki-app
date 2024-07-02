@@ -73,6 +73,21 @@ router.get('/events', async (req, res) => {
     }
 });
 
+// Endpoint to fetch unique keywords
+router.get('/keywords', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query('SELECT DISTINCT UNNEST(keywords) AS keyword FROM events');
+        const keywords = result.rows.map(row => row.keyword);
+        res.json(keywords);
+    } catch (error) {
+        logger.error('Error: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+});
+
 app.use(config.baseUrl, router);
 
 // Start the server

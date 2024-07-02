@@ -4,7 +4,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate:up": "node-pg-migrate up",
+    "migrate:down": "node-pg-migrate down",
+    "migrate:redo": "node-pg-migrate redo",
+    "migrate:create": "node-pg-migrate create"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +16,7 @@
   "description": "",
   "dependencies": {
     "express": "^4.19.2",
+    "node-pg-migrate": "^7.5.2",
     "pg": "^8.12.0",
     "uuid": "^10.0.0"
   },

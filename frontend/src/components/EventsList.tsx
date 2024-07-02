@@ -24,21 +24,19 @@ export function EventsList() {
   }
 
   return (
-    <div id="eventsList" className="table-container">
-      <div style={{ display: "flex", gap: "10px" }}>
+    <div className="overflow-x-auto">
+      <div className="flex gap-2 mb-2">
         <input
           type="text"
-          id="searchField"
           placeholder="Search"
-          className="mdl-textfield__input search"
+          className="ll-input"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <input
           type="text"
-          id="alertSearchField"
           placeholder="Alert Keyword"
-          className="mdl-textfield__input search"
+          className="ll-input"
           value={highlight}
           onChange={(e) => setHighlight(e.target.value)}
         />

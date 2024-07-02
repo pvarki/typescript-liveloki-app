@@ -38,29 +38,14 @@ async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 
 function SingleEventFields() {
   return (
-    <div className="event">
-      <input type="text" name="header" placeholder="Header" required className="mdl-textfield__input" />
-      <input type="text" name="link" placeholder="Link" className="mdl-textfield__input" />
-      <input type="text" name="source" placeholder="Source" className="mdl-textfield__input" />
-      <input
-        type="text"
-        name="admiralty_reliability"
-        placeholder="Reliability"
-        className="mdl-textfield__input"
-      />
-      <input type="text" name="admiralty_accuracy" placeholder="Accuracy" className="mdl-textfield__input" />
-      <input
-        name="event_time"
-        placeholder="Event time"
-        className="mdl-textfield__input"
-        type="datetime-local"
-      />
-      <input
-        type="text"
-        name="keywords"
-        placeholder="Keywords (comma separated)"
-        className="mdl-textfield__input"
-      />
+    <div className="gap-2 flex flex-wrap">
+      <input type="text" name="header" placeholder="Header" required className="ll-input" />
+      <input type="text" name="link" placeholder="Link" className="ll-input" />
+      <input type="text" name="source" placeholder="Source" className="ll-input" />
+      <input type="text" name="admiralty_reliability" placeholder="Reliability" className="ll-input" />
+      <input type="text" name="admiralty_accuracy" placeholder="Accuracy" className="ll-input" />
+      <input type="datetime-local" name="event_time" placeholder="Event time" className="ll-input" />
+      <input type="text" name="keywords" placeholder="Keywords (comma separated)" className="ll-input" />
     </div>
   );
 }
@@ -68,22 +53,20 @@ function SingleEventFields() {
 export default function SubmitForm() {
   const [nEvents, setNEvents] = React.useState(1);
   return (
-    <form id="eventForm" onSubmit={handleSubmit}>
-      <div id="eventContainer">
+    <form className="mb-2" onSubmit={handleSubmit}>
+      <div className="mb-2">
         {Array.from({ length: nEvents }).map((_, i) => (
           <SingleEventFields key={i} />
         ))}
       </div>
-      <button
-        type="button"
-        onClick={() => setNEvents(nEvents + 1)}
-        className="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
-      >
-        Add Another Event
-      </button>
-      <button type="submit" className="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">
-        Submit Events
-      </button>
+      <div className="flex gap-2">
+        <button type="button" onClick={() => setNEvents(nEvents + 1)} className="ll-btn">
+          Add Another Event
+        </button>
+        <button type="submit" className="ll-btn">
+          Submit Events
+        </button>
+      </div>
     </form>
   );
 }

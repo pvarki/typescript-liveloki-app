@@ -4,21 +4,21 @@ import { EventsList } from "./components/EventsList.tsx";
 export default function App() {
   return (
     <>
-      <header className="mdl-layout__header">
-        <div className="mdl-layout__header-row">
-          <span className="mdl-layout-title">LiveLoki</span>
-          <div className="mdl-layout-spacer"></div>
-        </div>
+      <header className="bg-blue-700 p-4 text-xl flex">
+        <div className="container mx-auto">LiveLoki</div>
       </header>
-      <main className="mdl-layout__content">
-        <div className="page-content">
-          <h1>Submit Events</h1>
-          <SubmitForm />
-
-          <h2>Existing Events</h2>
-          <EventsList />
-        </div>
-      </main>
+      <div className="overflow-y-auto inline-block grow">
+        <main className="container mx-auto flex flex-col gap-4 my-2">
+          <div>
+            <h1 className="text-3xl mb-2">Submit Events</h1>
+            <SubmitForm />
+          </div>
+          <div>
+            <h1 className="text-3xl mb-2">Existing Events</h1>
+            <EventsList />
+          </div>
+        </main>
+      </div>
     </>
   );
 }

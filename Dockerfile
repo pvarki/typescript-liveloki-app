@@ -25,9 +25,6 @@ EXPOSE 3000
 COPY ./entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 
-COPY ./wait-for-it.sh /
-RUN chmod +x /wait-for-it.sh
-
 ENTRYPOINT ["/entrypoint.sh"]
 
 # Command to run the app

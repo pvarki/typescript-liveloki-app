@@ -1,11 +1,11 @@
-FROM node:20 AS build
+FROM node:22-slim AS build
 WORKDIR /usr/src/app
 COPY frontend ./
 RUN npm install
 RUN npm run build
 
 # Dockerfile for Node.js server
-FROM node:20
+FROM node:22-slim
 
 # Create app directory
 WORKDIR /usr/src/app

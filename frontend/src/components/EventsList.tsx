@@ -24,7 +24,7 @@ export function EventsList() {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div>
       <div className="flex gap-2 mb-2">
         <input
           type="text"
@@ -43,7 +43,9 @@ export function EventsList() {
       </div>
       {events.length > 0 ? (
         filteredEvents.length > 0 ? (
-          <EventsTable events={filteredEvents} />
+          <div className="overflow-x-auto">
+            <EventsTable events={filteredEvents} />
+          </div>
         ) : (
           <p>No events found matching your filter.</p>
         )

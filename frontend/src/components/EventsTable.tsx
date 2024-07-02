@@ -17,7 +17,6 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
       </thead>
       <tbody>
         {events.map((event) => {
-          const keywordsString = event.keywords.join(", ");
           return (
             <tr key={event.id} className={event.alert ? "bg-red-900" : undefined}>
               <td>{event.header}</td>
@@ -31,7 +30,13 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
               <td>{event.admiralty_accuracy}</td>
               <td>{event.event_time}</td>
               <td>{event.creation_time}</td>
-              <td>{keywordsString}</td>
+              <td>
+                {event.keywords.map((k, i) => (
+                  <span className="rounded-sm bg-gray-800 p-1 m-0.5 inline" key={i}>
+                    {k}
+                  </span>
+                ))}
+              </td>
             </tr>
           );
         })}

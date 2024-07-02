@@ -24,6 +24,8 @@ export function filterEvents(events: Event[], search: string, highlight: string)
   if (!(search || highlight)) {
     return events;
   }
+  highlight = highlight.toLowerCase();
+  search = search.toLowerCase();
   return events
     .map((event): FilteredEvent | null => {
       if (search && !eventMatchesQuery(event, search)) {

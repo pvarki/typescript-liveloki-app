@@ -7,7 +7,9 @@ import { filterEvents } from "../helpers/eventFilter.ts";
 export function EventsList() {
   const [search, setSearch] = React.useState("");
   const [highlight, setHighlight] = React.useState("");
-  const eventsSWR = useSWR<Event[]>("events", () => fetch("events").then((r) => r.json()));
+  const eventsSWR = useSWR<Event[]>("events", () => fetch("events").then((r) => r.json()), {
+    refreshInterval: 10000,
+  });
   const events = eventsSWR.data;
   const filteredEvents = React.useMemo(
     () => filterEvents(events ?? [], search, highlight),

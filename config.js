@@ -1,3 +1,3 @@
 module.exports = {
-    baseUrl: '/',
+    baseUrl: process.env.BASE_URL || "/",
 };

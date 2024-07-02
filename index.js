@@ -5,6 +5,7 @@ const { v7: uuidv7 } = require('uuid');
 const path = require('path');
 const app = express();
 const router = express.Router();
+const logger = require('./logger');
 
 // Middleware
 router.use(express.json());
@@ -24,8 +25,6 @@ router.post('/events', async (req, res) => {
     if (!events || !Array.isArray(events)) {
         return res.status(400).json({ error: 'Invalid input format' });
     }
-
-    console.log(req.body);
 
     const client = await pool.connect();
 
@@ -47,7 +46,8 @@ router.post('/events', async (req, res) => {
 
         await client.query('COMMIT');
         res.status(201).json({ message: 'Events added successfully' });
-        console.log(req.body);
+        logger.info('Events added successfully');
+
     } catch (error) {
         await client.query('ROLLBACK');
         res.status(500).json({ error: error.message });
@@ -74,5 +74,6 @@ app.use(config.baseUrl, router);
 // Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
     console.log(`Server is running on port ${PORT}`);
 });

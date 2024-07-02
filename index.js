@@ -35,13 +35,13 @@ router.post('/events', async (req, res) => {
         await client.query('BEGIN');
 
         const eventPromises = events.map(event => {
-            const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time } = event;
+            const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes } = event;
             const id = uuidv7();
             const keywordArray = keywords ? keywords.split(',').map(k => k.trim()) : [];
 
             return client.query(
-                'INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
-                [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time]
+                'INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+                [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes]
             );
         });
 

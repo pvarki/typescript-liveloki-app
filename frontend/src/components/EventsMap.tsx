@@ -21,7 +21,7 @@ export function EventsMap({ events }: { events: FilteredEvent[] }) {
       <ScaleControl />
       {eventsWithLatLng.map((ev) => (
         <Marker
-          key={ev.id}
+          key={`${ev.id}?${ev.alert}`}
           longitude={ev.location_lng!}
           latitude={ev.location_lat!}
           anchor="bottom"

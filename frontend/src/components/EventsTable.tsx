@@ -18,6 +18,7 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
           <th>Event time</th>
           <th>Creation time</th>
           <th>Keywords</th>
+          <th>Domains</th>
         </tr>
       </thead>
       <tbody>
@@ -48,6 +49,13 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
               <td>{event.creation_time}</td>
               <td className="max-w-30">
                 {event.keywords.map((k, i) => (
+                  <span className="rounded-sm bg-gray-800 p-1 m-0.5 inline whitespace-nowrap" key={i}>
+                    {k}
+                  </span>
+                ))}
+              </td>
+              <td className="max-w-30">
+                {(event.hcoe_domains ?? []).map((k, i) => (
                   <span className="rounded-sm bg-gray-800 p-1 m-0.5 inline whitespace-nowrap" key={i}>
                     {k}
                   </span>

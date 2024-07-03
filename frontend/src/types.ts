@@ -8,6 +8,7 @@ export interface Event {
   event_time: string;
   creation_time: string;
   keywords: string[];
+  hcoe_domains: string[] | null;
 }
 
 export interface FilteredEvent extends Event {

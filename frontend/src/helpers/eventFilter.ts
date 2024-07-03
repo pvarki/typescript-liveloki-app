@@ -1,5 +1,7 @@
 import { Event, FilteredEvent } from "../types.ts";
 
+// TODO: this could be made a Record from event to searcher, to make sure
+//       all of events' fields are covered and TS will complain if a field is added
 const eventFields: (keyof Event)[] = [
   "header",
   "link",
@@ -9,12 +11,13 @@ const eventFields: (keyof Event)[] = [
   "event_time",
   "creation_time",
   "keywords",
+  "hcoe_domains",
 ];
 
 function eventMatchesQuery(event: Event, highlight: string) {
   return eventFields.some((field) => {
-    if (field === "keywords") {
-      return event[field].some((keyword) => keyword.toLowerCase().includes(highlight));
+    if (field === "keywords" || field === "hcoe_domains") {
+      return (event[field] ?? []).some((keyword) => keyword.toLowerCase().includes(highlight));
     }
     return String(event[field]).toLowerCase().includes(highlight);
   });

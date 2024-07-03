@@ -1,11 +1,11 @@
 import useSWR from "swr";
 import React from "react";
-import { Event } from "../types.ts";
 import { EventsTable } from "./EventsTable";
 import { filterEvents } from "../helpers/eventFilter.ts";
 import { MdList, MdMap } from "react-icons/md";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { EventsMap } from "./EventsMap.tsx";
+import { getEvents } from "../helpers/api.ts";
 
 type EventsListMode = "list" | "map";
 
@@ -13,7 +13,7 @@ export function EventsList() {
   const [search, setSearch] = React.useState("");
   const [highlight, setHighlight] = React.useState("");
   const [mode, setMode] = React.useState<EventsListMode>("list");
-  const eventsSWR = useSWR<Event[]>("events", () => fetch("events").then((r) => r.json()), {
+  const eventsSWR = useSWR("events", getEvents, {
     refreshInterval: 10000,
   });
   const events = eventsSWR.data;

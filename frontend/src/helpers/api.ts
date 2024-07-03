@@ -1,7 +1,7 @@
 import { EventPayload, Event } from "../types.ts";
 
 export async function postEvents(states: readonly EventPayload[]) {
-  const response = await fetch("events", {
+  const response = await fetch("api/events", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ events: states }),
@@ -17,7 +17,7 @@ export async function postEvents(states: readonly EventPayload[]) {
 export type KeywordStatistics = Array<{ keyword: string; count: number }>;
 
 export async function getKeywordStatistics(): Promise<KeywordStatistics> {
-  const response = await fetch("keywords");
+  const response = await fetch("api/keywords");
   if (!response.ok) {
     throw new Error(`Failed to fetch keyword statistics: ${response.statusText}`);
   }
@@ -31,9 +31,17 @@ export async function getKeywordStatistics(): Promise<KeywordStatistics> {
 }
 
 export async function getEvent(id: string): Promise<Event> {
-  const response = await fetch(`event/${id}`);
+  const response = await fetch(`api/event/${id}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch event: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function getEvents(): Promise<Event[]> {
+  const response = await fetch("api/events");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch events: ${response.statusText}`);
   }
   return response.json();
 }

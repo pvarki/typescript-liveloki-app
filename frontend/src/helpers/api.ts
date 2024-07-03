@@ -1,4 +1,4 @@
-import { EventPayload } from "../types.ts";
+import { EventPayload, Event } from "../types.ts";
 
 export async function postEvents(states: readonly EventPayload[]) {
   const response = await fetch("events", {
@@ -28,4 +28,12 @@ export async function getKeywordStatistics(): Promise<KeywordStatistics> {
     : Object.entries(stats);
   statList.sort(([ka, ca], [kb, cb]) => cb - ca || ka.localeCompare(kb));
   return statList.map(([keyword, count]) => ({ keyword, count }));
+}
+
+export async function getEvent(id: string): Promise<Event> {
+  const response = await fetch(`event/${id}`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch event: ${response.statusText}`);
+  }
+  return response.json();
 }

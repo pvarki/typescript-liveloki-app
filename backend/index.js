@@ -33,7 +33,7 @@ function convertTagArray(keywords) {
 }
 
 // Endpoint to add events
-router.post('/events', async (req, res) => {
+router.post('/api/events', async (req, res) => {
     const { events } = req.body; // Expecting an array of events
 
     if (!events || !Array.isArray(events)) {
@@ -74,7 +74,7 @@ router.post('/events', async (req, res) => {
 });
 
 // Endpoint to fetch events
-router.get('/events', async (req, res) => {
+router.get('/api/events', async (req, res) => {
     const client = await pool.connect();
     try {
         const result = await client.query('SELECT * FROM events ORDER BY creation_time DESC');
@@ -87,7 +87,7 @@ router.get('/events', async (req, res) => {
     }
 });
 
-router.get('/events/trending/day', async (req, res) => {
+router.get('/api/events/trending/day', async (req, res) => {
     const client = await pool.connect();
     try {
         const result = await client.query(
@@ -105,7 +105,7 @@ router.get('/events/trending/day', async (req, res) => {
 });
 
 // Endpoint for trending events in the last week
-router.get('/events/trending/week', async (req, res) => {
+router.get('/api/events/trending/week', async (req, res) => {
     const client = await pool.connect();
     try {
         const result = await client.query(
@@ -147,7 +147,7 @@ function getTrendingEvents(events) {
     };
 }
 
-router.get('/event/:id', async (req, res) => {
+router.get('/api/event/:id', async (req, res) => {
     const client = await pool.connect();
     const eventId = req.params.id;
 
@@ -168,7 +168,7 @@ router.get('/event/:id', async (req, res) => {
 });
 
 // Endpoint to fetch unique keywords
-router.get('/keywords', async (req, res) => {
+router.get('/api/keywords', async (req, res) => {
     const client = await pool.connect();
     try {
         const result = await client.query(`
@@ -194,7 +194,7 @@ router.get('/keywords', async (req, res) => {
 });
 
 // Endpoint to search events by location and radius
-router.get('/locationsearch', async (req, res) => {
+router.get('/api/locationsearch', async (req, res) => {
     const { longitude, latitude, radius } = req.query;
 
     // Validate input parameters
@@ -226,7 +226,7 @@ router.get('/locationsearch', async (req, res) => {
     }
 });
 
-app.use(`${config.baseUrl}api`, router);
+app.use(config.baseUrl, router);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

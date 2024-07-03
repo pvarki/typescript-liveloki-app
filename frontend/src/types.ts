@@ -24,4 +24,7 @@ export interface EventPayload {
   event_time: string;
   keywords: string[];
   hcoe_domains: string[];
+  location: string;
+  location_lat?: number;
+  location_lng?: number;
 }

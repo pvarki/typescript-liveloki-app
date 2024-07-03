@@ -8,6 +8,8 @@ import CreatableSelect from "react-select/creatable";
 import hcoeDomains from "../data/hcoe-domains.ts";
 import * as reactSelectStyle from "../helpers/react-select-style.ts";
 import toast from "react-hot-toast";
+import { MapPickerWidget } from "./MapPickerWidget.tsx";
+
 const hcoeDomainOptions = hcoeDomains.map((domain) => ({ value: domain, label: domain }));
 
 function SingleEventFields({
@@ -23,6 +25,7 @@ function SingleEventFields({
   onDelete: () => void;
   keywordOptions: ReadonlyArray<{ value: string; label: string; count: number }>;
 }) {
+  const [showLocation, setShowLocation] = React.useState(false);
   const update = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       updateState({ [event.target.name]: event.target.value });
@@ -99,9 +102,55 @@ function SingleEventFields({
       />
     </div>
   );
+  const locationBody = (
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          name="location"
+          placeholder="Location"
+          className="ll-input"
+          onChange={update}
+          value={state.location}
+        />
+        <div className="flex gap-1">
+          <input
+            type="number"
+            name="location_lat"
+            placeholder="Latitude"
+            className="ll-input"
+            onChange={update}
+            value={state.location_lat ?? ""}
+          />
+          <input
+            type="number"
+            name="location"
+            placeholder="Longitude"
+            className="ll-input"
+            onChange={update}
+            value={state.location_lng ?? ""}
+          />
+        </div>
+      </div>
+      <MapPickerWidget
+        selected={
+          state.location_lng !== undefined && state.location_lat !== undefined
+            ? { lat: state.location_lat, lng: state.location_lng }
+            : undefined
+        }
+        onPick={(location) => updateState({ location_lat: location.lat, location_lng: location.lng })}
+      />
+    </div>
+  );
   return (
     <div className="flex gap-2">
-      <div className="grow">{body}</div>
+      <div className="grow">
+        {body}
+        <details open={showLocation} onToggle={(event) => setShowLocation(event.currentTarget.open)}>
+          <summary>Location</summary>
+          {showLocation ? locationBody : null}
+        </details>
+      </div>
       <button type="button" onClick={onDelete} className="ll-btn" disabled={!canDelete} hidden={!canDelete}>
         &times;
       </button>
@@ -119,6 +168,7 @@ function initFormState(): EventPayload {
     event_time: "",
     keywords: [],
     hcoe_domains: [],
+    location: "",
   };
 }
 

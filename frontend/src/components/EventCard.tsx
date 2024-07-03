@@ -3,6 +3,7 @@ import { EventLink } from "./EventLink.tsx";
 import { formatTime } from "../helpers/formatTime.ts";
 import { EventLocationLink } from "./EventLocationLink.tsx";
 import { Keywords } from "./Keywords.tsx";
+import { EventRelAcc } from "./EventRelAcc.tsx";
 
 export function EventCard({ event }: { event: FilteredEvent }) {
   return (
@@ -21,7 +22,7 @@ export function EventCard({ event }: { event: FilteredEvent }) {
           <tr>
             <th>Reliability&#x2009;/&#x2009;Accuracy</th>
             <td>
-              {event.admiralty_reliability || "-"}&#x2009;/&#x2009;{event.admiralty_accuracy || "-"}
+              <EventRelAcc event={event} />
             </td>
           </tr>
           <tr>

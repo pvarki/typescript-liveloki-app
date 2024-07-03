@@ -1,4 +1,5 @@
 import { FilteredEvent } from "../types.ts";
+import { parseISO } from "date-fns";
 
 function shortenUrl(url: string) {
   url = url.replace(/^https?:\/\/(www\.)*/, "");
@@ -18,6 +19,15 @@ function EventLink({ event: { link } }: { event: FilteredEvent }) {
       )}
     </div>
   );
+}
+
+function formatTime(iso8601time: string) {
+  const d = parseISO(iso8601time);
+  const today = new Date();
+  if (d.toDateString() === today.toDateString()) {
+    return d.toLocaleTimeString();
+  }
+  return d.toLocaleString();
 }
 
 export function EventsTable({ events }: { events: FilteredEvent[] }) {
@@ -47,7 +57,7 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
                 {event.admiralty_reliability || "-"}&#x2009;/&#x2009;{event.admiralty_accuracy || "-"}
               </td>
               <td>{event.event_time}</td>
-              <td>{event.creation_time}</td>
+              <td title={event.creation_time}>{formatTime(event.creation_time)}</td>
               <td className="max-w-30">
                 {event.keywords.map((k, i) => (
                   <span className="rounded-sm bg-gray-800 p-1 m-0.5 inline whitespace-nowrap" key={i}>

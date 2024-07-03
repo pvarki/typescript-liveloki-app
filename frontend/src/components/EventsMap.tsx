@@ -25,14 +25,16 @@ export function EventsMap({ events }: { events: FilteredEvent[] }) {
           longitude={ev.location_lng!}
           latitude={ev.location_lat!}
           anchor="bottom"
-          className={cx("h-[3em] cursor-pointer text-center", ev.alert ? "text-red-500" : "text-pink-400")}
+          className={cx("cursor-pointer text-center group", ev.alert ? "text-red-500" : "text-pink-400")}
           onClick={(e) => {
             e.originalEvent.stopPropagation();
             setPopupEvent(ev);
           }}
         >
-          <div className="bg-black/60 p-px rounded-sm">{ev.header}</div>
-          <MdLocationPin size="2em" className="cursor-pointer block mx-auto" />
+          <div className="bg-black/60 p-px max-w-24 break-words rounded-sm group-hover:text-white">
+            {ev.header}
+          </div>
+          <MdLocationPin size="2em" className="block mx-auto group-hover:text-pink-300" />
         </Marker>
       ))}
     </Map>

@@ -1,4 +1,5 @@
-import type { StylesConfig, Theme, InputActionMeta } from "react-select";
+import { createFilter, InputActionMeta, StylesConfig, Theme } from "react-select";
+
 export const theme = (theme: Theme) => ({
   ...theme,
   borderRadius: 2,
@@ -29,7 +30,7 @@ export const theme = (theme: Theme) => ({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const styles: StylesConfig<any, true> = {
+export const styles: StylesConfig<any, any> = {
   option: (styles, { isDisabled }) => {
     return {
       ...styles,
@@ -56,4 +57,22 @@ export function makeCreateElementOnCommaHandler(onAdd: (value: string) => void) 
       }
     }
   };
+}
+
+interface FilterOptionOption<Option> {
+  readonly label: string;
+  readonly value: string;
+  readonly data: Option;
+}
+
+const fallbackFilter = createFilter({ ignoreCase: true, ignoreAccents: true, matchFrom: "any" });
+
+/**
+ * If the input is a single character, match only the first character of the option.
+ */
+export function singleCharacterFallbackFilter<T>(option: FilterOptionOption<T>, rawInput: string) {
+  if (rawInput.length === 1) {
+    return option.value.toLowerCase() === rawInput.toLowerCase();
+  }
+  return fallbackFilter(option, rawInput);
 }

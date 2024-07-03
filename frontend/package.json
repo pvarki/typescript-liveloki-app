@@ -13,6 +13,7 @@
   "description": "",
   "dependencies": {
     "@fontsource/inter": "^5.0.18",
+    "@radix-ui/react-hover-card": "^1.1.1",
     "date-fns": "^3.6.0",
     "geojson": "^0.5.0",
     "maplibre-gl": "^4.5.0",

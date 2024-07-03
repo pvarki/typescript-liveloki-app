@@ -31,3 +31,8 @@ export interface EventPayload {
   location_lat?: number;
   location_lng?: number;
 }
+
+export interface LngLatData {
+  lat: number;
+  lng: number;
+}

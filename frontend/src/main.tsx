@@ -1,5 +1,6 @@
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/700.css";
+import "maplibre-gl/dist/maplibre-gl.css";
 import "./style.css";
 import React from "react";
 import { createRoot } from "react-dom/client";

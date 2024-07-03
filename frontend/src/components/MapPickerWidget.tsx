@@ -1,11 +1,6 @@
 import Map, { Marker, NavigationControl, ScaleControl } from "react-map-gl/maplibre";
-import "maplibre-gl/dist/maplibre-gl.css";
 import mapStyle from "../helpers/map-style.ts";
-
-export interface LngLatData {
-  lat: number;
-  lng: number;
-}
+import { LngLatData } from "../types.ts";
 
 type MapPickerWidgetProps = { onPick: (location: LngLatData) => void; selected?: LngLatData };
 

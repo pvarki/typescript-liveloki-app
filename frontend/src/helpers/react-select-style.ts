@@ -28,6 +28,7 @@ export const theme = (theme: Theme) => ({
   },
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const styles: StylesConfig<any, true> = {
   option: (styles, { isDisabled }) => {
     return {

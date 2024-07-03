@@ -29,8 +29,8 @@ function SingleEventFields({
     },
     [state, updateState],
   );
-  return (
-    <div className="gap-2 flex flex-wrap">
+  const body = (
+    <div className="gap-2 grid grid-cols-1 lg:grid-cols-4">
       <input
         type="text"
         name="header"
@@ -97,7 +97,12 @@ function SingleEventFields({
         value={state.hcoe_domains.map((domain) => ({ value: domain, label: domain }))}
         onChange={(domains) => updateState({ hcoe_domains: domains.map((domain) => domain.value) })}
       />
-      <button type="button" onClick={onDelete} className="ll-btn" disabled={!canDelete}>
+    </div>
+  );
+  return (
+    <div className="flex gap-2">
+      <div className="grow">{body}</div>
+      <button type="button" onClick={onDelete} className="ll-btn" disabled={!canDelete} hidden={!canDelete}>
         &times;
       </button>
     </div>

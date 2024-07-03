@@ -9,7 +9,7 @@ export function EventLocationLink({ event }: { event: FilteredEvent }) {
   const { location_lng: lng, location_lat: lat, location: text } = event;
   const hasLatLng = lat !== null && lng !== null;
   if (!text && !hasLatLng) return null;
-  const content = text ? text : `${lat ? lat.toFixed(2) : "-"}, ${lng ? lng.toFixed(2) : "-"}`;
+  const content = text || (hasLatLng ? `${lat.toFixed(2)},\u00A0${lng.toFixed(2)}` : "");
   if (hasLatLng) {
     return (
       <HoverCard.Root>

@@ -24,7 +24,7 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
       <tbody>
         {events.map((event) => {
           return (
-            <tr key={event.id} className={event.alert ? "bg-red-900" : undefined}>
+            <tr key={event.id} className={event.alert ? "!bg-red-900" : undefined}>
               <td>{event.header}</td>
               <td className="max-w-30">
                 {event.link.startsWith("http") ? (

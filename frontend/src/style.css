@@ -28,10 +28,7 @@
         }
 
         tbody > tr {
-            &:nth-child(even) {
-                @apply bg-neutral-800;
-            }
-            @apply hover:bg-neutral-700;
+            @apply even:bg-neutral-800 hover:bg-neutral-700;
         }
     }
 

@@ -117,7 +117,7 @@ function SingleEventFields({
         <input
           type="text"
           name="location"
-          placeholder="Location"
+          placeholder="Location (free text)"
           className="ll-input"
           onChange={update}
           value={state.location}
@@ -126,16 +126,24 @@ function SingleEventFields({
           <input
             type="number"
             name="location_lat"
+            min={-90}
+            max={90}
+            step={0.1}
+            autoComplete="off"
             placeholder="Latitude"
-            className="ll-input"
+            className="ll-input min-w-32"
             onChange={update}
             value={state.location_lat ?? ""}
           />
           <input
             type="number"
-            name="location"
+            name="location_lng"
+            min={-180}
+            max={180}
+            step={0.1}
+            autoComplete="off"
             placeholder="Longitude"
-            className="ll-input"
+            className="ll-input min-w-32"
             onChange={update}
             value={state.location_lng ?? ""}
           />
@@ -144,7 +152,10 @@ function SingleEventFields({
       <MapPickerWidget
         selected={
           state.location_lng !== undefined && state.location_lat !== undefined
-            ? { lat: state.location_lat, lng: state.location_lng }
+            ? {
+                lat: parseFloat(state.location_lat.toFixed(4)),
+                lng: parseFloat(state.location_lng.toFixed(4)),
+              }
             : undefined
         }
         onPick={(location) => updateState({ location_lat: location.lat, location_lng: location.lng })}
@@ -156,7 +167,7 @@ function SingleEventFields({
       <div className="grow">
         {body}
         <details open={showLocation} onToggle={(event) => setShowLocation(event.currentTarget.open)}>
-          <summary>Location</summary>
+          <summary className="py-2 cursor-pointer">Location</summary>
           {showLocation ? locationBody : null}
         </details>
       </div>

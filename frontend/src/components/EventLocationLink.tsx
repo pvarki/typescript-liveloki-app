@@ -3,6 +3,7 @@ import { MdLocationPin } from "react-icons/md";
 import * as HoverCard from "@radix-ui/react-hover-card";
 import Map from "react-map-gl/maplibre";
 import mapStyle from "../helpers/map-style.ts";
+import { LocationPinMarker } from "./LocationPinMarker.tsx";
 
 export function EventLocationLink({ event }: { event: FilteredEvent }) {
   const { location_lng: lng, location_lat: lat, location: text } = event;
@@ -32,10 +33,12 @@ export function EventLocationLink({ event }: { event: FilteredEvent }) {
                   longitude: lng,
                   zoom: 6,
                 }}
-                style={{ width: "200px", height: "200px" }}
+                style={{ width: "250px", height: "200px" }}
                 mapStyle={mapStyle as never /* TODO: get rid of the never */}
                 attributionControl={false}
-              />
+              >
+                <LocationPinMarker location={{ lat, lng }} />
+              </Map>
             </div>
           </HoverCard.Content>
         </HoverCard.Portal>

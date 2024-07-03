@@ -1,6 +1,7 @@
-import Map, { Marker, NavigationControl, ScaleControl } from "react-map-gl/maplibre";
+import Map, { NavigationControl, ScaleControl } from "react-map-gl/maplibre";
 import mapStyle from "../helpers/map-style.ts";
 import { LngLatData } from "../types.ts";
+import { LocationPinMarker } from "./LocationPinMarker.tsx";
 
 type MapPickerWidgetProps = { onPick: (location: LngLatData) => void; selected?: LngLatData };
 
@@ -18,11 +19,7 @@ export function MapPickerWidget({ onPick, selected }: MapPickerWidgetProps) {
     >
       <NavigationControl />
       <ScaleControl />
-      {selected ? (
-        <Marker longitude={selected.lng} latitude={selected.lat}>
-          <div className="text-3xl text-red-500">&times;</div>
-        </Marker>
-      ) : null}
+      {selected ? <LocationPinMarker location={selected} /> : null}
     </Map>
   );
 }

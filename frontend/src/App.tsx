@@ -7,17 +7,15 @@ export default function App() {
       <header className="bg-blue-700 p-4 text-xl flex">
         <div className="container mx-auto">LiveLoki</div>
       </header>
-      <div className="overflow-y-auto inline-block grow">
-        <main className="container mx-auto flex flex-col gap-4 my-2">
-          <div>
-            <h1 className="text-3xl mb-2">Submit Events</h1>
-            <SubmitForm />
-          </div>
-          <div>
-            <h1 className="text-3xl mb-2">Existing Events</h1>
-            <EventsList />
-          </div>
-        </main>
+      <div className="overflow-y-auto inline-block grow px-2">
+        <div className="container mx-auto mt-6">
+          <h1 className="text-3xl mb-2">Submit Events</h1>
+          <SubmitForm />
+        </div>
+        <div className="mt-6">
+          <h1 className="text-3xl mb-2">Existing Events</h1>
+          <EventsList />
+        </div>
       </div>
     </>
   );

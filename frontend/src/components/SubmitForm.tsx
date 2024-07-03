@@ -7,6 +7,7 @@ import { getKeywordStatistics, postEvents } from "../helpers/api.ts";
 import CreatableSelect from "react-select/creatable";
 import hcoeDomains from "../data/hcoe-domains.ts";
 import * as reactSelectStyle from "../helpers/react-select-style.ts";
+import toast from "react-hot-toast";
 const hcoeDomainOptions = hcoeDomains.map((domain) => ({ value: domain, label: domain }));
 
 function SingleEventFields({
@@ -136,11 +137,11 @@ export default function SubmitForm() {
     try {
       await postEvents(states);
     } catch (err) {
-      alert(String(err));
+      toast.error(String(err));
       return;
     }
     setStates([initFormState()]);
-    alert("Events submitted successfully");
+    toast.success("Events submitted successfully");
     void mutate("events"); // Inform SWR cache that the events have changed
   };
   const keywordOptions = React.useMemo(

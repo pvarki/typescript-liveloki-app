@@ -1,6 +1,6 @@
 // https://en.wikipedia.org/wiki/Admiralty_code
 
-interface CodeDescription {
+export interface CodeDescription {
   title: string;
   description: string;
 }

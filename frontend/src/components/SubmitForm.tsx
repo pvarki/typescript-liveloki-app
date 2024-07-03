@@ -7,12 +7,17 @@ import { getKeywordStatistics, postEvents } from "../helpers/api.ts";
 import CreatableSelect from "react-select/creatable";
 import hcoeDomains from "../data/hcoe-domains.ts";
 import * as reactSelect from "../helpers/react-select.ts";
+import { makeCreateElementOnCommaHandler } from "../helpers/react-select.ts";
 import toast from "react-hot-toast";
 import { MapPickerWidget } from "./MapPickerWidget.tsx";
-import { makeCreateElementOnCommaHandler } from "../helpers/react-select.ts";
+import { credibilityScale, reliabilityScale } from "../data/admiralty-code.ts";
+import { AdmiraltySelect, toAdmiraltyOption } from "./AdmiraltySelect.tsx";
 import { round } from "../helpers/round.ts";
 
 const hcoeDomainOptions = hcoeDomains.map((domain) => ({ value: domain, label: domain }));
+
+const admiraltyReliabilityOptions = Object.entries(reliabilityScale).map(toAdmiraltyOption);
+const admiraltyCredibilityOptions = Object.entries(credibilityScale).map(toAdmiraltyOption);
 
 function SingleEventFields({
   state,
@@ -41,7 +46,7 @@ function SingleEventFields({
     updateState({ hcoe_domains: [...state.hcoe_domains, value] }),
   );
   const body = (
-    <div className="gap-2 grid grid-cols-1 lg:grid-cols-4">
+    <div className="gap-2 grid grid-cols-1 lg:grid-cols-2">
       <input
         type="text"
         name="header"
@@ -67,22 +72,22 @@ function SingleEventFields({
         onChange={update}
         value={state.source}
       />
-      <input
-        type="text"
-        name="admiralty_reliability"
-        placeholder="Reliability"
-        className="ll-input"
-        onChange={update}
-        value={state.admiralty_reliability}
-      />
-      <input
-        type="text"
-        name="admiralty_accuracy"
-        placeholder="Accuracy"
-        className="ll-input"
-        onChange={update}
-        value={state.admiralty_accuracy}
-      />
+      <div className="grid grid-cols-2 gap-2">
+        <AdmiraltySelect
+          name="admiralty_reliability"
+          placeholder="Reliability"
+          onChange={(value) => updateState({ admiralty_reliability: value ?? "" })}
+          value={state.admiralty_reliability}
+          options={admiraltyReliabilityOptions}
+        />
+        <AdmiraltySelect
+          name="admiralty_accuracy"
+          placeholder="Accuracy"
+          onChange={(value) => updateState({ admiralty_accuracy: value ?? "" })}
+          value={state.admiralty_accuracy}
+          options={admiraltyCredibilityOptions}
+        />
+      </div>
       <input
         type="datetime-local"
         name="event_time"

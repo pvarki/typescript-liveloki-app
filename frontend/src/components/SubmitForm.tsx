@@ -6,9 +6,10 @@ import { getKeywordStatistics, postEvents } from "../helpers/api.ts";
 
 import CreatableSelect from "react-select/creatable";
 import hcoeDomains from "../data/hcoe-domains.ts";
-import * as reactSelectStyle from "../helpers/react-select-style.ts";
+import * as reactSelect from "../helpers/react-select.ts";
 import toast from "react-hot-toast";
 import { MapPickerWidget } from "./MapPickerWidget.tsx";
+import { makeCreateElementOnCommaHandler } from "../helpers/react-select.ts";
 
 const hcoeDomainOptions = hcoeDomains.map((domain) => ({ value: domain, label: domain }));
 
@@ -31,6 +32,12 @@ function SingleEventFields({
       updateState({ [event.target.name]: event.target.value });
     },
     [state, updateState],
+  );
+  const onKeywordInputChange = makeCreateElementOnCommaHandler((value) =>
+    updateState({ keywords: [...state.keywords, value] }),
+  );
+  const onDomainInputChange = makeCreateElementOnCommaHandler((value) =>
+    updateState({ hcoe_domains: [...state.hcoe_domains, value] }),
   );
   const body = (
     <div className="gap-2 grid grid-cols-1 lg:grid-cols-4">
@@ -88,17 +95,19 @@ function SingleEventFields({
         placeholder="Keywords"
         options={keywordOptions}
         noOptionsMessage={() => "Type to create a new keyword"}
-        {...reactSelectStyle.props}
+        {...reactSelect.commonProps}
         value={state.keywords.map((keyword) => ({ value: keyword, label: keyword }))}
         onChange={(keywords) => updateState({ keywords: keywords.map((k) => k.value) })}
+        onInputChange={onKeywordInputChange}
       />
       <CreatableSelect
         isMulti
         placeholder="HCOE Domains"
         options={hcoeDomainOptions}
-        {...reactSelectStyle.props}
+        {...reactSelect.commonProps}
         value={state.hcoe_domains.map((domain) => ({ value: domain, label: domain }))}
         onChange={(domains) => updateState({ hcoe_domains: domains.map((domain) => domain.value) })}
+        onInputChange={onDomainInputChange}
       />
     </div>
   );

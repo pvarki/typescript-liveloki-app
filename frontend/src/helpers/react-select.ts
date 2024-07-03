@@ -1,4 +1,5 @@
 import type { StylesConfig, Theme } from "react-select";
+import { InputActionMeta } from "react-select/dist/declarations/src/types";
 export const theme = (theme: Theme) => ({
   ...theme,
   borderRadius: 2,
@@ -38,9 +39,22 @@ export const styles: StylesConfig<any, true> = {
   },
 };
 
-export const props = {
+export const commonProps = {
   theme,
   styles,
   className: "ll-react-select-container",
   classNamePrefix: "ll-react-select",
 } as const;
+
+// H/T https://stackoverflow.com/a/78131035/51685
+export function makeCreateElementOnCommaHandler(onAdd: (value: string) => void) {
+  return (value: string, { action }: InputActionMeta) => {
+    if (action === "input-change") {
+      if (value.endsWith(",")) {
+        const valueToAdd = value.slice(0, -1).trim();
+        if (valueToAdd) onAdd(valueToAdd);
+        return "";
+      }
+    }
+  };
+}

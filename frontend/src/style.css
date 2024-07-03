@@ -9,6 +9,7 @@
 
     .ll-btn {
         @apply bg-blue-800 text-gray-200 border-none rounded-md p-2 hover:bg-blue-700;
+        @apply disabled:opacity-50;
     }
 
     .ll-events-table {

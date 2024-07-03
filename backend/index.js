@@ -226,7 +226,7 @@ router.get('/locationsearch', async (req, res) => {
     }
 });
 
-app.use(config.baseUrl, router);
+app.use(`${config.baseUrl}api`, router);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

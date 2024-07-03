@@ -6,11 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      // TODO: would probably be a good idea to have all of the
-      //       backend routes under a common prefix, like /api/
-      "/events": "http://localhost:3000",
-      "^/event/.*": "http://localhost:3000",
-      "/keywords": "http://localhost:3000",
+      "/api": "http://localhost:3000",
     },
   },
 });

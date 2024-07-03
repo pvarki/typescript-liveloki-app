@@ -5,6 +5,7 @@ import { formatTime } from "../helpers/formatTime.ts";
 import { Keywords } from "./Keywords.tsx";
 import { EventRelAcc } from "./EventRelAcc.tsx";
 import { Link } from "react-router-dom";
+import { MdLink } from "react-icons/md";
 
 export function EventsTable({ events }: { events: FilteredEvent[] }) {
   return (
@@ -26,7 +27,12 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
           return (
             <tr key={event.id} className={event.alert ? "!bg-red-900" : undefined}>
               <td className="max-w-50">
-                <Link to={`/event/${event.id}`}> {event.header}</Link>
+                <div>
+                  {event.header}
+                  <Link to={`/event/${event.id}`} className="ps-2">
+                    <MdLink className="inline" />
+                  </Link>
+                </div>
                 {event.link ? <EventLink event={event} /> : null}
               </td>
               <td>{event.source}</td>

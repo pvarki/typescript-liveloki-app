@@ -4,11 +4,18 @@ import { formatTime } from "../helpers/formatTime.ts";
 import { EventLocationLink } from "./EventLocationLink.tsx";
 import { Keywords } from "./Keywords.tsx";
 import { EventRelAcc } from "./EventRelAcc.tsx";
+import { MdLink } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 export function EventCard({ event }: { event: FilteredEvent }) {
   return (
     <div className="p-2 rounded-sm">
-      <h3 className="text-lg font-bold">{event.header}</h3>
+      <h3 className="text-lg font-bold">
+        {event.header}
+        <Link to={`/event/${event.id}`} className="ps-2 text-pink-400">
+          <MdLink className="inline" />
+        </Link>
+      </h3>
       <table className="ll-event-card-table">
         <tbody>
           <tr>

@@ -20,7 +20,7 @@ function SingleEventFields({
   updateState: (state: Partial<EventPayload>) => void;
   canDelete: boolean;
   onDelete: () => void;
-  keywordOptions: ReadonlyArray<{ value: string; label: string }>;
+  keywordOptions: ReadonlyArray<{ value: string; label: string; count: number }>;
 }) {
   const update = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,9 +145,10 @@ export default function SubmitForm() {
   };
   const keywordOptions = React.useMemo(
     () =>
-      Object.entries(keywordsSWR.data ?? {}).map(([keyword, _count]) => ({
-        value: keyword,
+      (keywordsSWR.data ?? []).map(({ keyword, count }) => ({
+        count,
         label: keyword,
+        value: keyword,
       })),
     [keywordsSWR.data],
   );

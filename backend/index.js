@@ -113,6 +113,39 @@ router.get('/keywords', async (req, res) => {
     }
 });
 
+// Endpoint to search events by location and radius
+router.get('/locationsearch', async (req, res) => {
+    const { longitude, latitude, radius } = req.query;
+
+    // Validate input parameters
+    if (!longitude || !latitude || !radius) {
+        return res.status(400).json({ error: 'Longitude, latitude, and radius are required' });
+    }
+
+    const client = await pool.connect();
+    try {
+        const query = `
+            SELECT *
+            FROM events
+            WHERE ST_DWithin(
+                ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography,
+                ST_SetSRID(ST_MakePoint(location_lng, location_lat), 4326)::geography,
+                $3 * 1000
+            )
+            ORDER BY creation_time DESC
+        `;
+        const values = [longitude, latitude, radius];
+
+        const result = await client.query(query, values);
+        res.json(result.rows);
+    } catch (error) {
+        logger.error('Error: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+});
+
 app.use(config.baseUrl, router);
 
 // Start the server

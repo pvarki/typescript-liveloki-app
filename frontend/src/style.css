@@ -34,4 +34,8 @@
             @apply hover:bg-neutral-700;
         }
     }
+
+    .ll-react-select-container .ll-react-select__control {
+        @apply bg-gray-800 border-0 grow min-w-40 p-2 rounded-md;
+    }
 }

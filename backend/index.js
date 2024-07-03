@@ -94,8 +94,8 @@ router.get('/events/trending/day', async (req, res) => {
             `SELECT * FROM events WHERE creation_time >= NOW() - INTERVAL '24 hours'`
         );
 
-        const trendingEvents = getTrendingEvents(result.rows);
-        res.json(trendingEvents);
+        const { trendingEvents, trendingTag } = getTrendingEvents(result.rows);
+        res.json({ trending_tag: trendingTag, events: trendingEvents });
     } catch (error) {
         logger.error('Error: ' + error.message);
         res.status(500).json({ error: error.message });
@@ -112,8 +112,8 @@ router.get('/events/trending/week', async (req, res) => {
             `SELECT * FROM events WHERE creation_time >= NOW() - INTERVAL '1 week'`
         );
 
-        const trendingEvents = getTrendingEvents(result.rows);
-        res.json(trendingEvents);
+        const { trendingEvents, trendingTag } = getTrendingEvents(result.rows);
+        res.json({ trending_tag: trendingTag, events: trendingEvents });
     } catch (error) {
         logger.error('Error: ' + error.message);
         res.status(500).json({ error: error.message });
@@ -141,7 +141,10 @@ function getTrendingEvents(events) {
         keywordCounts[a] > keywordCounts[b] ? a : b
     );
 
-    return eventsByKeyword[trendingKeyword] || [];
+    return {
+        trendingEvents: eventsByKeyword[trendingKeyword] || [],
+        trendingTag: trendingKeyword
+    };
 }
 
 router.get('/event/:id', async (req, res) => {

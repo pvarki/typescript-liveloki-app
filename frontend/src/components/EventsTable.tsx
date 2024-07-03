@@ -6,13 +6,26 @@ function shortenUrl(url: string) {
   return url;
 }
 
+function EventLink({ event: { link } }: { event: FilteredEvent }) {
+  return (
+    <div>
+      {link.startsWith("http") ? (
+        <a href={link} title={link} target="_blank" rel="noreferrer" referrerPolicy="no-referrer">
+          {shortenUrl(link)}
+        </a>
+      ) : (
+        link
+      )}
+    </div>
+  );
+}
+
 export function EventsTable({ events }: { events: FilteredEvent[] }) {
   return (
     <table className="ll-events-table">
       <thead>
         <tr>
-          <th>Header</th>
-          <th>Link</th>
+          <th>Header&#x2009;/&#x2009;Link</th>
           <th>Source</th>
           <th>Reliability&#x2009;/&#x2009;Accuracy</th>
           <th>Event time</th>
@@ -25,21 +38,9 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
         {events.map((event) => {
           return (
             <tr key={event.id} className={event.alert ? "!bg-red-900" : undefined}>
-              <td>{event.header}</td>
-              <td className="max-w-30">
-                {event.link.startsWith("http") ? (
-                  <a
-                    href={event.link}
-                    title={event.link}
-                    target="_blank"
-                    rel="noreferrer"
-                    referrerPolicy="no-referrer"
-                  >
-                    {shortenUrl(event.link)}
-                  </a>
-                ) : (
-                  event.link
-                )}
+              <td className="max-w-50">
+                {event.header}
+                {event.link ? <EventLink event={event} /> : null}
               </td>
               <td>{event.source}</td>
               <td>

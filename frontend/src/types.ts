@@ -9,6 +9,9 @@ export interface Event {
   creation_time: string;
   keywords: string[];
   hcoe_domains: string[] | null;
+  location: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
 }
 
 export interface FilteredEvent extends Event {

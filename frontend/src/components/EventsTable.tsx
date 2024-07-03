@@ -1,34 +1,7 @@
 import { FilteredEvent } from "../types.ts";
-import { parseISO } from "date-fns";
-
-function shortenUrl(url: string) {
-  url = url.replace(/^https?:\/\/(www\.)*/, "");
-  if (url.length > 50) url = url.slice(0, 50) + "…";
-  return url;
-}
-
-function EventLink({ event: { link } }: { event: FilteredEvent }) {
-  return (
-    <div>
-      {link.startsWith("http") ? (
-        <a href={link} title={link} target="_blank" rel="noreferrer" referrerPolicy="no-referrer">
-          {shortenUrl(link)}
-        </a>
-      ) : (
-        link
-      )}
-    </div>
-  );
-}
-
-function formatTime(iso8601time: string) {
-  const d = parseISO(iso8601time);
-  const today = new Date();
-  if (d.toDateString() === today.toDateString()) {
-    return d.toLocaleTimeString();
-  }
-  return d.toLocaleString();
-}
+import { EventLocationLink } from "./EventLocationLink.tsx";
+import { EventLink } from "./EventLink.tsx";
+import { formatTime } from "../helpers/formatTime.ts";
 
 export function EventsTable({ events }: { events: FilteredEvent[] }) {
   return (
@@ -40,6 +13,7 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
           <th>Reliability&#x2009;/&#x2009;Accuracy</th>
           <th>Event time</th>
           <th>Creation time</th>
+          <th>Location</th>
           <th>Keywords</th>
           <th>Domains</th>
         </tr>
@@ -58,6 +32,9 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
               </td>
               <td>{event.event_time}</td>
               <td title={event.creation_time}>{formatTime(event.creation_time)}</td>
+              <td>
+                <EventLocationLink event={event} />
+              </td>
               <td className="max-w-30">
                 {event.keywords.map((k, i) => (
                   <span className="rounded-sm bg-gray-800 p-1 m-0.5 inline whitespace-nowrap" key={i}>

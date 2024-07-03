@@ -1,0 +1,15 @@
+export default [
+  "Administration",
+  "Culture",
+  "Cyber",
+  "Diplomacy",
+  "Economy",
+  "Information",
+  "Infrastructure",
+  "Intelligence",
+  "Legal",
+  "Military/Defence",
+  "Political",
+  "Social/Societal",
+  "Space",
+] as const;

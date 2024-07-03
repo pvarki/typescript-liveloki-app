@@ -20,6 +20,18 @@ const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL
 });
 
+/**
+ * Convert keywords, given as a string or an array, to an array of strings.
+ */
+function convertTagArray(keywords) {
+  let keywordArray = [];
+  if (keywords) {
+    if (typeof keywords === 'string') keywordArray = keywords.split(',');
+    else if (Array.isArray(keywords)) keywordArray = keywords.map(keyword => String(keyword));
+  }
+  return keywordArray.map(keyword => keyword.trim()).filter(Boolean);
+}
+
 // Endpoint to add events
 router.post('/events', async (req, res) => {
     const { events } = req.body; // Expecting an array of events
@@ -37,7 +49,7 @@ router.post('/events', async (req, res) => {
         const eventPromises = events.map(event => {
             const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains } = event;
             const id = uuidv7();
-            const keywordArray = keywords ? keywords.split(',').map(k => k.trim()) : [];
+            const keywordArray = convertTagArray(keywords);
 
             return client.query(
                 'INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',

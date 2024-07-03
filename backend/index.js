@@ -87,6 +87,63 @@ router.get('/events', async (req, res) => {
     }
 });
 
+router.get('/events/trending/day', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query(
+            `SELECT * FROM events WHERE creation_time >= NOW() - INTERVAL '24 hours'`
+        );
+
+        const trendingEvents = getTrendingEvents(result.rows);
+        res.json(trendingEvents);
+    } catch (error) {
+        logger.error('Error: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+});
+
+// Endpoint for trending events in the last week
+router.get('/events/trending/week', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query(
+            `SELECT * FROM events WHERE creation_time >= NOW() - INTERVAL '1 week'`
+        );
+
+        const trendingEvents = getTrendingEvents(result.rows);
+        res.json(trendingEvents);
+    } catch (error) {
+        logger.error('Error: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+});
+
+// Function to get trending events based on keywords
+function getTrendingEvents(events) {
+    const keywordCounts = {};
+    const eventsByKeyword = {};
+
+    events.forEach(event => {
+        event.keywords.forEach(keyword => {
+            keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
+            if (!eventsByKeyword[keyword]) {
+                eventsByKeyword[keyword] = [];
+            }
+            eventsByKeyword[keyword].push(event);
+        });
+    });
+
+    const trendingKeyword = Object.keys(keywordCounts).reduce((a, b) => 
+        keywordCounts[a] > keywordCounts[b] ? a : b
+    );
+
+    return eventsByKeyword[trendingKeyword] || [];
+}
+
 router.get('/event/:id', async (req, res) => {
     const client = await pool.connect();
     const eventId = req.params.id;

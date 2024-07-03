@@ -10,6 +10,7 @@ import * as reactSelect from "../helpers/react-select.ts";
 import toast from "react-hot-toast";
 import { MapPickerWidget } from "./MapPickerWidget.tsx";
 import { makeCreateElementOnCommaHandler } from "../helpers/react-select.ts";
+import { round } from "../helpers/round.ts";
 
 const hcoeDomainOptions = hcoeDomains.map((domain) => ({ value: domain, label: domain }));
 
@@ -128,24 +129,24 @@ function SingleEventFields({
             name="location_lat"
             min={-90}
             max={90}
-            step={0.1}
+            step="any"
             autoComplete="off"
             placeholder="Latitude"
             className="ll-input min-w-32"
             onChange={update}
-            value={state.location_lat ?? ""}
+            value={state.location_lat ? round(state.location_lat, 4) : ""}
           />
           <input
             type="number"
             name="location_lng"
             min={-180}
             max={180}
-            step={0.1}
+            step="any"
             autoComplete="off"
             placeholder="Longitude"
             className="ll-input min-w-32"
             onChange={update}
-            value={state.location_lng ?? ""}
+            value={state.location_lng ? round(state.location_lng, 4) : ""}
           />
         </div>
       </div>
@@ -153,8 +154,8 @@ function SingleEventFields({
         selected={
           state.location_lng !== undefined && state.location_lat !== undefined
             ? {
-                lat: parseFloat(state.location_lat.toFixed(4)),
-                lng: parseFloat(state.location_lng.toFixed(4)),
+                lat: state.location_lat,
+                lng: state.location_lng,
               }
             : undefined
         }

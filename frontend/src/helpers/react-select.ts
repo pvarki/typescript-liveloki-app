@@ -1,5 +1,4 @@
-import type { StylesConfig, Theme } from "react-select";
-import { InputActionMeta } from "react-select/dist/declarations/src/types";
+import type { StylesConfig, Theme, InputActionMeta } from "react-select";
 export const theme = (theme: Theme) => ({
   ...theme,
   borderRadius: 2,

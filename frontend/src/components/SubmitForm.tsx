@@ -1,8 +1,8 @@
 import React from "react";
-import { mutate } from "swr";
+import useSWR, { mutate } from "swr";
 import { create } from "mutative";
 import { EventPayload } from "../types.ts";
-import { postEvents } from "../helpers/api.ts";
+import { getKeywordStatistics, postEvents } from "../helpers/api.ts";
 
 import CreatableSelect from "react-select/creatable";
 import hcoeDomains from "../data/hcoe-domains.ts";
@@ -14,11 +14,13 @@ function SingleEventFields({
   updateState,
   canDelete,
   onDelete,
+  keywordOptions,
 }: {
   state: EventPayload;
   updateState: (state: Partial<EventPayload>) => void;
   canDelete: boolean;
   onDelete: () => void;
+  keywordOptions: ReadonlyArray<{ value: string; label: string }>;
 }) {
   const update = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,13 +79,14 @@ function SingleEventFields({
         onChange={update}
         value={state.event_time}
       />
-      <input
-        type="text"
-        name="keywords"
-        placeholder="Keywords (comma separated)"
-        className="ll-input"
-        onChange={update}
-        value={state.keywords}
+      <CreatableSelect
+        isMulti
+        placeholder="Keywords"
+        options={keywordOptions}
+        noOptionsMessage={() => "Type to create a new keyword"}
+        {...reactSelectStyle.props}
+        value={state.keywords.map((keyword) => ({ value: keyword, label: keyword }))}
+        onChange={(keywords) => updateState({ keywords: keywords.map((k) => k.value) })}
       />
       <CreatableSelect
         isMulti
@@ -108,12 +111,15 @@ function initFormState(): EventPayload {
     admiralty_reliability: "",
     admiralty_accuracy: "",
     event_time: "",
-    keywords: "",
+    keywords: [],
     hcoe_domains: [],
   };
 }
 
 export default function SubmitForm() {
+  const keywordsSWR = useSWR("keywords", getKeywordStatistics, {
+    revalidateOnFocus: false,
+  });
   const [states, setStates] = React.useState<EventPayload[]>([initFormState()]);
   const updateState = (i: number, newState: Partial<EventPayload>) => {
     setStates((states) =>
@@ -137,6 +143,14 @@ export default function SubmitForm() {
     alert("Events submitted successfully");
     void mutate("events"); // Inform SWR cache that the events have changed
   };
+  const keywordOptions = React.useMemo(
+    () =>
+      Object.entries(keywordsSWR.data ?? {}).map(([keyword, _count]) => ({
+        value: keyword,
+        label: keyword,
+      })),
+    [keywordsSWR.data],
+  );
   return (
     <form className="mb-2" onSubmit={onSubmit}>
       <div className="mb-2 flex flex-col gap-2">
@@ -147,6 +161,7 @@ export default function SubmitForm() {
             updateState={updateState.bind(null, i)}
             canDelete={i > 0}
             onDelete={() => deleteState(i)}
+            keywordOptions={keywordOptions}
           />
         ))}
       </div>

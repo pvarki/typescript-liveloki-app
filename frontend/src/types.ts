@@ -22,6 +22,6 @@ export interface EventPayload {
   admiralty_reliability: string;
   admiralty_accuracy: string;
   event_time: string;
-  keywords: string;
+  keywords: string[];
   hcoe_domains: string[];
 }

@@ -4,6 +4,11 @@ import { create } from "mutative";
 import { EventPayload } from "../types.ts";
 import { postEvents } from "../helpers/api.ts";
 
+import CreatableSelect from "react-select/creatable";
+import hcoeDomains from "../data/hcoe-domains.ts";
+import * as reactSelectStyle from "../helpers/react-select-style.ts";
+const hcoeDomainOptions = hcoeDomains.map((domain) => ({ value: domain, label: domain }));
+
 function SingleEventFields({
   state,
   updateState,
@@ -80,6 +85,14 @@ function SingleEventFields({
         onChange={update}
         value={state.keywords}
       />
+      <CreatableSelect
+        isMulti
+        placeholder="HCOE Domains"
+        options={hcoeDomainOptions}
+        {...reactSelectStyle.props}
+        value={state.hcoe_domains.map((domain) => ({ value: domain, label: domain }))}
+        onChange={(domains) => updateState({ hcoe_domains: domains.map((domain) => domain.value) })}
+      />
       <button type="button" onClick={onDelete} className="ll-btn" disabled={!canDelete}>
         &times;
       </button>
@@ -96,6 +109,7 @@ function initFormState(): EventPayload {
     admiralty_accuracy: "",
     event_time: "",
     keywords: "",
+    hcoe_domains: [],
   };
 }
 

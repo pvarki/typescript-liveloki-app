@@ -4,8 +4,9 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./style.css";
 import React from "react";
 import { createRoot } from "react-dom/client";
-import App from "./App";
 import { Toaster } from "react-hot-toast";
+import { router } from "./router.tsx";
+import { RouterProvider } from "react-router-dom";
 
 const toastOptions = {
   style: {
@@ -18,6 +19,6 @@ const toastOptions = {
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <Toaster toastOptions={toastOptions} />
-    <App />
+    <RouterProvider router={router} />
   </React.StrictMode>,
 );

@@ -91,9 +91,20 @@ router.get('/events', async (req, res) => {
 router.get('/keywords', async (req, res) => {
     const client = await pool.connect();
     try {
-        const result = await client.query('SELECT DISTINCT UNNEST(keywords) AS keyword FROM events');
-        const keywords = result.rows.map(row => row.keyword);
-        res.json(keywords);
+        const result = await client.query(`
+            SELECT UNNEST(keywords) AS keyword, COUNT(*) AS count
+            FROM events
+            GROUP BY keyword
+            ORDER BY count DESC
+        `);
+
+        // Create an object with keywords as keys and counts as values
+        const keywordsWithCount = {};
+        result.rows.forEach(row => {
+            keywordsWithCount[row.keyword] = parseInt(row.count, 10);
+        });
+
+        res.json(keywordsWithCount);
     } catch (error) {
         logger.error('Error: ' + error.message);
         res.status(500).json({ error: error.message });

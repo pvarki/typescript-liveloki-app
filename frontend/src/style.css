@@ -32,7 +32,45 @@
         }
     }
 
+
+    .ll-event-card-table {
+        @apply w-full border-collapse text-sm;
+
+        tbody > tr > th {
+            @apply px-2 py-1 border-b border-gray-500 text-left font-bold overflow-ellipsis;
+        }
+
+        tbody > tr > td {
+            @apply px-2 py-1 border-b border-gray-500 break-words;
+
+            a {
+                @apply text-pink-500 underline;
+            }
+        }
+
+        tbody > tr {
+            @apply even:bg-neutral-800 hover:bg-neutral-700;
+        }
+    }
+
     .ll-react-select-container .ll-react-select__control {
         @apply bg-gray-800 border-0 grow min-w-40 p-2 rounded-md;
     }
+
+    .ll-toggles {
+        display: inline-flex;
+    }
+
+    .ll-toggles > button {
+        @apply bg-blue-800 text-gray-200 border-none rounded-md p-2 hover:bg-blue-700;
+        @apply disabled:opacity-50 flex items-center justify-center ml-px;
+        @apply first-of-type:ml-0;
+        @apply data-[state='on']:bg-blue-700 data-[state='on']:text-gray-100;
+    }
+
+}
+
+.maplibregl-popup-content {
+    /* hack hack hack */
+    @apply bg-gray-500;
 }

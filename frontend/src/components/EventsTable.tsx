@@ -2,6 +2,7 @@ import { FilteredEvent } from "../types.ts";
 import { EventLocationLink } from "./EventLocationLink.tsx";
 import { EventLink } from "./EventLink.tsx";
 import { formatTime } from "../helpers/formatTime.ts";
+import { Keywords } from "./Keywords.tsx";
 
 export function EventsTable({ events }: { events: FilteredEvent[] }) {
   return (
@@ -36,18 +37,10 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
                 <EventLocationLink event={event} />
               </td>
               <td className="max-w-30">
-                {event.keywords.map((k, i) => (
-                  <span className="rounded-sm bg-gray-800 p-1 m-0.5 inline whitespace-nowrap" key={i}>
-                    {k}
-                  </span>
-                ))}
+                <Keywords keywords={event.keywords} />
               </td>
               <td className="max-w-30">
-                {(event.hcoe_domains ?? []).map((k, i) => (
-                  <span className="rounded-sm bg-gray-800 p-1 m-0.5 inline whitespace-nowrap" key={i}>
-                    {k}
-                  </span>
-                ))}
+                <Keywords keywords={event.hcoe_domains ?? []} />
               </td>
             </tr>
           );

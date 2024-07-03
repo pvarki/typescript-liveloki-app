@@ -3,11 +3,10 @@ module.exports = {
   darkMode: "selector",
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    fontFamily: {
-      sans: ["Inter", "Arial", "sans-serif"],
-    },
-
     extend: {
+      fontFamily: {
+        sans: ["Inter", "Arial", "sans-serif"],
+      },
       colors: {
         blue: {
           50: "#f2f5fc",

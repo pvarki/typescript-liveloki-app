@@ -184,17 +184,40 @@ function SingleEventFields({
   );
 }
 
-function initFormState(): EventPayload {
+/**
+ * Splits a string by commas and trims whitespace from each part,
+ * then filters out empty strings.
+ */
+function splitStringToArray(x: string) {
+  return x
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+}
+
+function initFormState(fromQuery: boolean = false): EventPayload {
+  let getValue = (_key: string) => "";
+  const query = fromQuery ? new URLSearchParams(window.location.search) : null;
+  if (query) {
+    getValue = (key: string) => {
+      const value = query.get(key);
+      if (value) {
+        query.delete(key);
+        return decodeURIComponent(value);
+      }
+      return "";
+    };
+  }
   return {
-    header: "",
-    link: "",
-    source: "",
-    admiralty_reliability: "",
-    admiralty_accuracy: "",
-    event_time: "",
-    keywords: [],
-    hcoe_domains: [],
-    location: "",
+    header: getValue("header"),
+    link: getValue("link"),
+    source: getValue("source"),
+    admiralty_reliability: getValue("admiralty_reliability"),
+    admiralty_accuracy: getValue("admiralty_accuracy"),
+    event_time: getValue("event_time"),
+    keywords: splitStringToArray(getValue("keywords")),
+    hcoe_domains: splitStringToArray(getValue("hcoe_domains")),
+    location: getValue("location"),
   };
 }
 
@@ -202,7 +225,7 @@ export default function SubmitForm() {
   const keywordsSWR = useSWR("keywords", getKeywordStatistics, {
     revalidateOnFocus: false,
   });
-  const [states, setStates] = React.useState<EventPayload[]>([initFormState()]);
+  const [states, setStates] = React.useState<EventPayload[]>([initFormState(true)]);
   const updateState = (i: number, newState: Partial<EventPayload>) => {
     setStates((states) =>
       create(states, (draft) => {

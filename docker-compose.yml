@@ -31,13 +31,5 @@ services:
       db:
         condition: service_healthy
 
-# mock server to test jwt functionality
-  jwks:
-    build:
-      context: ./backend/jwttest/
-      dockerfile: Dockerfile.jwt
-    ports:
-      - "4000:4000"
-
 volumes:
   db-data:

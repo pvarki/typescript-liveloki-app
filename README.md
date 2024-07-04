@@ -24,3 +24,9 @@ Database is currently preseeded with test data from preseed/preseed.csv
 
 To add new migration, locally run: `./node_modules/.bin/node-pg-migrate create <MIGARTION_NAME>` and modify created file in `/migrations` directory.
 Migrations are run (if needed) when docker container starts. `wait-for-it.sh` will ensure that psql container is up and accepting connections before running migrations.
+
+## JWT testing
+
+run node generateToken.js
+copy generated token and add it to testApi.js
+run node testApi.js

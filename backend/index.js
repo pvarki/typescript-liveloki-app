@@ -7,6 +7,7 @@ import logger from './logger.js';
 import jwt from 'jsonwebtoken';
 import jwksRsa from 'jwks-rsa';
 import { expressjwt } from 'express-jwt';
+import multer from 'multer';
 
 const dirname = path.dirname(new URL(import.meta.url).pathname);
 const app = express();
@@ -37,6 +38,18 @@ const jwtMiddleware = expressjwt({
 });
 
 logger.info("KEYCLOAK_URL: " + process.env.KEYCLOAK_URL);
+
+// Storage for uploads
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(dirname, 'uploads'));
+    },
+    filename: (req, file, cb) => {
+        cb(null, uuidv7() + path.extname(file.originalname)); // Appending extension
+    }
+});
+const upload = multer({ storage: storage });
 
 /**
  * Convert keywords, given as a string or an array, to an array of strings.
@@ -176,13 +189,20 @@ router.get('/api/event/:id', async (req, res) => {
     const eventId = req.params.id;
 
     try {
-        const result = await client.query('SELECT * FROM events WHERE id = $1', [eventId]);
-
-        if (result.rows.length === 0) {
-            res.status(404).json({ error: 'Event not found' });
-        } else {
-            res.json(result.rows[0]);
+        // Fetch the event details
+        const eventResult = await client.query('SELECT * FROM events WHERE id = $1', [eventId]);
+        if (eventResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Event not found' });
         }
+
+        const event = eventResult.rows[0];
+
+        // Fetch the related images
+        const imagesResult = await client.query('SELECT url FROM event_media WHERE event_id = $1', [eventId]);
+        const images = imagesResult.rows.map(row => row.url);
+
+        // Include the image paths in the response
+        res.json({ ...event, images });
     } catch (error) {
         logger.error('Error: ' + error.message);
         res.status(500).json({ error: error.message });
@@ -190,6 +210,7 @@ router.get('/api/event/:id', async (req, res) => {
         client.release();
     }
 });
+
 
 // Endpoint to fetch unique keywords
 router.get('/api/keywords', async (req, res) => {
@@ -259,6 +280,42 @@ router.get('/api/test', jwtMiddleware, (req, res) => {
     } catch (error) {
         logger.error(error.message);
         logger.error(error.errors);
+    }
+});
+
+
+// Image upload
+router.post('/api/upload', upload.any(), async (req, res) => {
+    const { eventId } = req.body;
+    const files = req.files;
+
+    if (!eventId || !files || files.length === 0) {
+        return res.status(400).json({ error: 'Event ID and image files are required' });
+    }
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        const uploadPromises = files.map(file => {
+            const id = uuidv7();
+            const url = path.join('uploads', file.filename);
+            return client.query(
+                'INSERT INTO event_media (id, event_id, url) VALUES ($1, $2, $3)',
+                [id, eventId, url]
+            );
+        });
+
+        await Promise.all(uploadPromises);
+
+        await client.query('COMMIT');
+        res.status(201).json({ message: 'Images uploaded successfully', files: files.map(file => file.filename) });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        logger.error('Error: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
     }
 });
 

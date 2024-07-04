@@ -32,6 +32,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - uploads:/usr/src/app/uploads
     #networks: Enable for local jwt test
     #  - jwt-test-network
 
@@ -41,3 +43,4 @@ services:
 
 volumes:
   db-data:
+  uploads:

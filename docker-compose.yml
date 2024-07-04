@@ -21,7 +21,6 @@ services:
       context: .
       dockerfile: Dockerfile
     init: true
-    #network_mode: "host"
     env_file:
       - .env
     environment:
@@ -31,6 +30,14 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+# mock server to test jwt functionality
+  jwks:
+    build:
+      context: ./backend/jwttest/
+      dockerfile: Dockerfile.jwt
+    ports:
+      - "4000:4000"
 
 volumes:
   db-data:

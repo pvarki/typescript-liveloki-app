@@ -4,6 +4,9 @@ import pg from 'pg';
 import { v7 as uuidv7 } from 'uuid';
 import path from 'path';
 import logger from './logger.js';
+import jwt from 'jsonwebtoken';
+import jwksRsa from 'jwks-rsa';
+import { expressjwt } from 'express-jwt';
 
 const dirname = path.dirname(new URL(import.meta.url).pathname);
 const app = express();
@@ -19,6 +22,21 @@ router.use(express.static(path.join(dirname, 'public')));
 const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL
 });
+
+// JWT Middleware
+const jwtMiddleware = expressjwt({
+    secret: jwksRsa.expressJwtSecret({
+        cache: true,
+        rateLimit: true,
+        jwksRequestsPerMinute: 5,
+        jwksUri: `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/certs`
+    }),
+    audience: `${process.env.KEYCLOAK_CLIENT_ID}`,
+    issuer: `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}`,
+    algorithms: ['RS256']
+});
+
+logger.info("KEYCLOAK_URL: " + process.env.KEYCLOAK_URL);
 
 /**
  * Convert keywords, given as a string or an array, to an array of strings.
@@ -223,6 +241,18 @@ router.get('/api/locationsearch', async (req, res) => {
         res.status(500).json({ error: error.message });
     } finally {
         client.release();
+    }
+});
+
+
+// Protected test endpoint
+router.get('/api/test', jwtMiddleware, (req, res) => {
+    try {
+        logger.info("Ping from TEST");
+        res.send('Hello world');
+    } catch (error) {
+        logger.error(error.message);
+        logger.error(error.errors);
     }
 });
 

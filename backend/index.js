@@ -112,8 +112,8 @@ router.get('/api/events/trending/day', async (req, res) => {
             `SELECT * FROM events WHERE creation_time >= NOW() - INTERVAL '24 hours'`
         );
 
-        const { trendingEvents, trendingTag } = getTrendingEvents(result.rows);
-        res.json({ trending_tag: trendingTag, events: trendingEvents });
+        const { trendingEvents, trendingTag, percentageOfTotalTags, numberOfTags } = getTrendingEvents(result.rows);
+        res.json({ trending_tag: trendingTag, precentage_of_tags: percentageOfTotalTags, number_of_tags: numberOfTags, events: trendingEvents });
     } catch (error) {
         logger.error('Error: ' + error.message);
         res.status(500).json({ error: error.message });
@@ -130,8 +130,8 @@ router.get('/api/events/trending/week', async (req, res) => {
             `SELECT * FROM events WHERE creation_time >= NOW() - INTERVAL '1 week'`
         );
 
-        const { trendingEvents, trendingTag } = getTrendingEvents(result.rows);
-        res.json({ trending_tag: trendingTag, events: trendingEvents });
+        const { trendingEvents, trendingTag, percentageOfTotalTags, numberOfTags } = getTrendingEvents(result.rows);
+        res.json({ trending_tag: trendingTag, precentage_of_tags: percentageOfTotalTags, number_of_tags: numberOfTags, events: trendingEvents  });
     } catch (error) {
         logger.error('Error: ' + error.message);
         res.status(500).json({ error: error.message });
@@ -159,9 +159,15 @@ function getTrendingEvents(events) {
         keywordCounts[a] > keywordCounts[b] ? a : b
     );
 
+    const totalTags = Object.values(keywordCounts).reduce((sum, count) => sum + count, 0);
+    const numberOfTags = keywordCounts[trendingKeyword];
+    const percentageOfTotalTags = (numberOfTags / totalTags) * 100;
+
     return {
         trendingEvents: eventsByKeyword[trendingKeyword] || [],
-        trendingTag: trendingKeyword
+        trendingTag: trendingKeyword,
+        percentageOfTotalTags: percentageOfTotalTags.toFixed(2),  // rounded to 2 decimal places
+        numberOfTags: numberOfTags
     };
 }
 

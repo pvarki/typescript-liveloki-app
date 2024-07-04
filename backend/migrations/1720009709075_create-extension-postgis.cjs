@@ -10,7 +10,7 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
     pgm.sql(`
-        CREATE EXTENSION postgis;
+        CREATE EXTENSION IF NOT EXISTS postgis;
     `);
 };
 

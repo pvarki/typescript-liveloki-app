@@ -10,6 +10,8 @@ import logger from './logger.js';
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
+routes.use('/uploads/', express.static('/usr/src/app/uploads/'))
+
 // Middleware
 routes.use(sessionMiddleware);
 routes.use(keycloak.middleware());

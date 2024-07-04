@@ -8,6 +8,7 @@ export interface Event {
   event_time: string;
   creation_time: string;
   keywords: string[];
+  images: string[] | null;
   hcoe_domains: string[] | null;
   location: string | null;
   location_lat: number | null;

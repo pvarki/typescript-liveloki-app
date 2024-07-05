@@ -4,16 +4,34 @@ import pg from 'pg';
 import { v7 as uuidv7 } from 'uuid';
 import path from 'path';
 import logger from './logger.js';
-import jwt from 'jsonwebtoken';
-import jwksRsa from 'jwks-rsa';
-import { expressjwt } from 'express-jwt';
 import multer from 'multer';
+import session from 'express-session';
+import Keycloak from 'keycloak-connect';
 
 const dirname = path.dirname(new URL(import.meta.url).pathname);
 const app = express();
 const router = express.Router();
 
+const keycloak = new Keycloak({});
+
+const memoryStore = new session.MemoryStore();
+
+    // Configure session
+    app.use(
+        session({
+          secret: process.env.SESSION_SECRET,
+          resave: false,
+          saveUninitialized: true,
+          store: memoryStore,
+        })
+      );
+
+
+// const keycloak = new Keycloak({ store: memoryStore }, kcConfig);
+
 // Middleware
+app.use( keycloak.middleware() );
+
 router.use(express.json());
 
 // Serve static files from the "public" directory
@@ -22,19 +40,6 @@ router.use(express.static(path.join(dirname, 'public')));
 // PostgreSQL connection pool
 const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL
-});
-
-// JWT Middleware
-const jwtMiddleware = expressjwt({
-    secret: jwksRsa.expressJwtSecret({
-        cache: true,
-        rateLimit: true,
-        jwksRequestsPerMinute: 5,
-        jwksUri: `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}/protocol/openid-connect/certs`
-    }),
-    audience: `${process.env.KEYCLOAK_CLIENT_ID}`,
-    issuer: `${process.env.KEYCLOAK_URL}/realms/${process.env.KEYCLOAK_REALM}`,
-    algorithms: ['RS256']
 });
 
 logger.info("KEYCLOAK_URL: " + process.env.KEYCLOAK_URL);
@@ -273,7 +278,7 @@ router.get('/api/locationsearch', async (req, res) => {
 
 
 // Protected test endpoint
-router.get('/api/test', jwtMiddleware, (req, res) => {
+router.get('/api/test', keycloak.protect(), (req, res) => {
     try {
         logger.info("Ping from TEST");
         res.send('Hello world');

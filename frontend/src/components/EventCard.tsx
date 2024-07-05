@@ -8,45 +8,25 @@ import { MdLink } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
-export async function uploadMedia(eventId: number, media: File | null) {
+export function uploadMedia(eventId: number, media: File) {
   const formData = new FormData();
-  if (media) {
-    formData.append("files", media, media?.name);
-    formData.append("eventId", eventId.toString());
-    await fetch("api/upload", { method: "POST", body: formData });
-  }
+  formData.append("files", media, media?.name);
+  formData.append("eventId", eventId.toString());
+  return fetch("api/upload", { method: "POST", body: formData });
 }
 
 export function EventCard({ event }: { event: FilteredEvent }) {
   const [media, setMedia] = useState<File | null>(null);
 
-  const imageGrid = [];
-  const elements = (event.images ?? []).map((path, index) => {
-    return (
-      <a href={path} key={index} title="raw image">
-        <img
-          style={{ maxHeight: "300px", maxWidth: "300px" }}
-          className="rounded"
-          alt="ze picture"
-          src={path}
-        />
-      </a>
-    );
-  });
-  const rowLength = 3;
-  for (let ii = 0; ii < elements.length; ii += rowLength) {
-    imageGrid.push(
-      <div className="flex mb-4" key={ii}>
-        {elements.slice(ii, ii + rowLength).map((el, index) => {
-          return (
-            <div className={`w-1/${rowLength} rounded m-4`} key={index}>
-              {el}
-            </div>
-          );
-        })}
-      </div>,
-    );
-  }
+    const imageGrid = (
+    <div className="grid grid-cols-3 gap-4">
+      {(event.images ?? []).map((path, index) => (
+        <a href={path} key={index} title="raw image">
+          <img className="rounded max-w-72 max-h-72" alt="ze picture" src={path} />
+        </a>
+      ))}
+    </div>
+  );
 
   return (
     <div className="p-2 rounded-sm">
@@ -106,16 +86,14 @@ export function EventCard({ event }: { event: FilteredEvent }) {
         type="file"
         className="ll-input rounded"
         onChange={(e) => {
-          if (e.target.files) {
-            setMedia(e.target.files[0]);
-          }
+          setMedia(e.target.files?.[0] ?? null);
         }}
       />
       <button
         type="button"
         disabled={!media}
-        onClick={async () => {
-          await uploadMedia(event.id, media);
+        onClick={() => {
+          if (media) void uploadMedia(event.id, media);
         }}
         className="ll-btn"
       >

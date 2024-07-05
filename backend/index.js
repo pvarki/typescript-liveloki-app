@@ -15,10 +15,10 @@ routes.use('/uploads/', express.static('/usr/src/app/uploads/'))
 // Middleware
 routes.use(sessionMiddleware);
 routes.use(keycloak.middleware());
-routes.use(express.json());
 routes.use(express.static(path.join(dirname, 'public')));
 
 // Routes
+app.use(express.json());
 app.use(config.baseUrl, routes);
 
 // Start the server

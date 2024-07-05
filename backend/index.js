@@ -11,10 +11,10 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 // Middleware
-app.use(sessionMiddleware);
-app.use(keycloak.middleware());
-app.use(express.json());
-app.use(express.static(path.join(dirname, 'public')));
+routes.use(sessionMiddleware);
+routes.use(keycloak.middleware());
+routes.use(express.json());
+routes.use(express.static(path.join(dirname, 'public')));
 
 // Routes
 app.use(config.baseUrl, routes);

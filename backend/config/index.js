@@ -12,14 +12,7 @@ const config = {
     port: process.env.PORT || 3000,
     databaseUrl: process.env.DATABASE_URL,
     sessionSecret: process.env.SESSION_SECRET,
-    keycloak: {
-        realm: keycloakConfig.realm,
-        serverUrl: keycloakConfig['auth-server-url'],
-        sslRequired: keycloakConfig['ssl-required'],
-        resource: keycloakConfig.resource,
-        publicClient: keycloakConfig['public-client'],
-        confidentialPort: keycloakConfig['confidential-port']
-    },
+    keycloak: keycloakConfig
 };
 
 export default config;

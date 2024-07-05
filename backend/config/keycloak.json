@@ -4,5 +4,8 @@
     "ssl-required": "external",
     "resource": "liveloki-app",
     "public-client": true,
-    "confidential-port": 0
+    "confidential-port": 0,
+    "redirect_uris": [
+      "https://juodaan.kaljaa.fi/ll/*"
+  ]
   }

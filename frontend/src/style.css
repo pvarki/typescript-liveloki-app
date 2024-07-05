@@ -32,7 +32,6 @@
         }
     }
 
-
     .ll-event-card-table {
         @apply w-full border-collapse text-sm;
 
@@ -67,7 +66,6 @@
         @apply first-of-type:ml-0;
         @apply data-[state='on']:bg-blue-700 data-[state='on']:text-gray-100;
     }
-
 }
 
 .maplibregl-popup-content {

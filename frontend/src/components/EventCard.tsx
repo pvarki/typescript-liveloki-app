@@ -6,33 +6,46 @@ import { Keywords } from "./Keywords.tsx";
 import { EventRelAcc } from "./EventRelAcc.tsx";
 import { MdLink } from "react-icons/md";
 import { Link } from "react-router-dom";
-import {useState} from "react";
+import { useState } from "react";
 
-export async function uploadMedia(eventId: number, media: File|null) {
-  const formData = new FormData()
+export async function uploadMedia(eventId: number, media: File | null) {
+  const formData = new FormData();
   if (media) {
-    formData.append("files", media, media?.name)
-    formData.append("eventId", eventId.toString())
-    await fetch("api/upload", {method: "POST",
-      body: formData })
+    formData.append("files", media, media?.name);
+    formData.append("eventId", eventId.toString());
+    await fetch("api/upload", { method: "POST", body: formData });
   }
 }
 
 export function EventCard({ event }: { event: FilteredEvent }) {
-  const [media, setMedia] = useState<File|null>(null);
+  const [media, setMedia] = useState<File | null>(null);
 
   const imageGrid = [];
   const elements = (event.images ?? []).map((path, index) => {
-          return <a href={path} key={index} title="raw image">
-            <img style={{maxHeight: "300px", maxWidth: "300px"}}  className="rounded" alt="ze picture" src={path}/></a>
-        })
-  const rowLength = 3
+    return (
+      <a href={path} key={index} title="raw image">
+        <img
+          style={{ maxHeight: "300px", maxWidth: "300px" }}
+          className="rounded"
+          alt="ze picture"
+          src={path}
+        />
+      </a>
+    );
+  });
+  const rowLength = 3;
   for (let ii = 0; ii < elements.length; ii += rowLength) {
-        imageGrid.push(<div className="flex mb-4" key={ii}>{
-            elements.slice(ii, ii + rowLength).map((el, index) => {
-              return <div className={`w-1/${rowLength} rounded m-4`} key={index}>{el}</div>
-            })}
-            </div>)
+    imageGrid.push(
+      <div className="flex mb-4" key={ii}>
+        {elements.slice(ii, ii + rowLength).map((el, index) => {
+          return (
+            <div className={`w-1/${rowLength} rounded m-4`} key={index}>
+              {el}
+            </div>
+          );
+        })}
+      </div>,
+    );
   }
 
   return (
@@ -87,18 +100,28 @@ export function EventCard({ event }: { event: FilteredEvent }) {
           </tr>
         </tbody>
       </table>
-      <label htmlFor="media-input">Upload media (image) to attach to the event</label>{' '}
-      <input id="media-input" type="file" className="ll-input rounded" onChange={
-        (e) => {
+      <label htmlFor="media-input">Upload media (image) to attach to the event</label>{" "}
+      <input
+        id="media-input"
+        type="file"
+        className="ll-input rounded"
+        onChange={(e) => {
           if (e.target.files) {
-            setMedia(e.target.files[0])
+            setMedia(e.target.files[0]);
           }
-        }}/>
-      <button type="button" disabled={!media} onClick={async () => {await uploadMedia(event.id, media)}}
-              className="ll-btn">Upload</button>
-      <div>
-        {imageGrid}
-      </div>
+        }}
+      />
+      <button
+        type="button"
+        disabled={!media}
+        onClick={async () => {
+          await uploadMedia(event.id, media);
+        }}
+        className="ll-btn"
+      >
+        Upload
+      </button>
+      <div>{imageGrid}</div>
     </div>
   );
 }

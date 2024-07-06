@@ -1,5 +1,15 @@
 import express from 'express';
-import { addEvents, fetchEvents, fetchEventById, fetchTrendingEventsDay, fetchTrendingEventsWeek, fetchKeywords, searchEventsByLocation, uploadImages } from '../controllers/eventController.js';
+import { 
+    addEvents, 
+    fetchEvents, 
+    fetchEventById, 
+    fetchTrendingEventsDay, 
+    fetchTrendingEventsWeek, 
+    fetchKeywords, 
+    searchEventsByLocation, 
+    uploadImages,
+    fetchMetrics
+} from '../controllers/eventController.js';
 import { keycloak } from '../middlewares/keycloak.js';
 import multer from 'multer';
 import path from 'path';
@@ -27,6 +37,7 @@ router.get('/event/:id', fetchEventById);
 router.get('/keywords', fetchKeywords);
 router.get('/locationsearch', searchEventsByLocation);
 router.post('/upload', upload.any(), uploadImages);
+router.get('/metrics', fetchMetrics);
 router.get('/test', keycloak.protect(), (req, res) => {
     res.send('Hello world');
 });

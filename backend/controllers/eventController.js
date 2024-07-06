@@ -201,3 +201,44 @@ export const uploadImages = async (req, res) => {
         client.release();
     }
 };
+
+export const fetchMetrics = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        // Number of events
+        const eventsCountResult = await client.query('SELECT COUNT(*) FROM events');
+        const eventsCount = parseInt(eventsCountResult.rows[0].count, 10);
+
+        // Number of unique keywords
+        const uniqueKeywordsResult = await client.query('SELECT COUNT(DISTINCT keyword) FROM (SELECT UNNEST(keywords) AS keyword FROM events) AS unique_keywords');
+        const uniqueKeywordsCount = parseInt(uniqueKeywordsResult.rows[0].count, 10);
+
+        // Total number of keywords
+        const totalKeywordsResult = await client.query('SELECT COUNT(keyword) FROM (SELECT UNNEST(keywords) AS keyword FROM events) AS total_keywords');
+        const totalKeywordsCount = parseInt(totalKeywordsResult.rows[0].count, 10);
+
+        // Count of every keyword
+        const keywordsCountResult = await client.query(`
+            SELECT keyword, COUNT(*) AS count
+            FROM (SELECT UNNEST(keywords) AS keyword FROM events) AS keyword_counts
+            GROUP BY keyword
+            ORDER BY count DESC
+        `);
+        const keywordsCount = keywordsCountResult.rows.reduce((acc, row) => {
+            acc[row.keyword] = parseInt(row.count, 10);
+            return acc;
+        }, {});
+
+        res.json({
+            eventsCount,
+            uniqueKeywordsCount,
+            totalKeywordsCount,
+            keywordsCount
+        });
+    } catch (error) {
+        logger.error('Error: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+};

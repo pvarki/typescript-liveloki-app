@@ -20,6 +20,7 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
           <th>Location</th>
           <th>Keywords</th>
           <th>Domains</th>
+          <th>Author</th>
         </tr>
       </thead>
       <tbody>

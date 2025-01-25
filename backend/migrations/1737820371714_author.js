@@ -8,7 +8,11 @@ exports.shorthands = undefined;
  * @param run {() => void | undefined}
  * @returns {Promise<void> | void}
  */
-exports.up = (pgm) => {};
+exports.up = (pgm) => {
+    pgm.addColumns('author', {
+        notes: { type: 'text'}
+      });
+};
 
 /**
  * @param pgm {import('node-pg-migrate').MigrationBuilder}

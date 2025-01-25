@@ -9,8 +9,8 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.addColumns('author', {
-        notes: { type: 'text'}
+    pgm.addColumns('events', {
+        author: { type: 'text' }
       });
 };
 

@@ -51,6 +51,9 @@ export function EventsTable({ events }: { events: FilteredEvent[] }) {
               <td className="max-w-30">
                 <Keywords keywords={event.hcoe_domains ?? []} />
               </td>
+              <td className="max-w-30">
+                {event.author}
+              </td>
             </tr>
           );
         })}

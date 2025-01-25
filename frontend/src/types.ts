@@ -13,6 +13,7 @@ export interface Event {
   location: string | null;
   location_lat: number | null;
   location_lng: number | null;
+  author: string;
 }
 
 export interface FilteredEvent extends Event {
@@ -31,6 +32,7 @@ export interface EventPayload {
   location: string;
   location_lat?: number;
   location_lng?: number;
+  author: string;
 }
 
 export interface LngLatData {

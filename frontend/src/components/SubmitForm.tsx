@@ -218,6 +218,7 @@ function initFormState(fromQuery: boolean = false): EventPayload {
     keywords: splitStringToArray(getValue("keywords")),
     hcoe_domains: splitStringToArray(getValue("hcoe_domains")),
     location: getValue("location"),
+    author: getValue("author"),
   };
 }
 

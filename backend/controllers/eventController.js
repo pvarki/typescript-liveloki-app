@@ -39,13 +39,45 @@ export const addEvents = async (req, res) => {
         res.status(500).json({ error: error.message });
     } finally {
         client.release();
-    }
+    }  
 };
 
 export const fetchEvents = async (req, res) => {
+    const { search } = req.query;
+
     const client = await pool.connect();
     try {
-        const result = await client.query('SELECT * FROM events ORDER BY creation_time DESC');
+        let query = 'SELECT * FROM events';
+        const values = [];
+
+        if (search) {
+            const searchWords = search.split(' ').map(word => word.trim()).filter(word => word);
+
+            if (searchWords.length > 0) {
+                const conditions = searchWords.map((_, index) => `
+                    (
+                        EXISTS (SELECT 1 FROM unnest(keywords) AS keyword WHERE keyword ILIKE $${index + 1}) OR
+                        header ILIKE $${index + 1} OR
+                        notes ILIKE $${index + 1} OR
+                        EXISTS (SELECT 1 FROM unnest(hcoe_domains) AS domain WHERE domain ILIKE $${index + 1}) OR
+                        link ILIKE $${index + 1} OR
+                        source ILIKE $${index + 1}
+                    )
+                `);
+
+                query += ` WHERE ${conditions.join(' AND ')}`;
+                values.push(...searchWords.map(word => `%${word}%`));
+            }
+        }
+
+        query += ' ORDER BY creation_time DESC';
+
+        const result = await client.query(query, values);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'No events found matching the search criteria' });
+        }
+
         res.json(result.rows);
     } catch (error) {
         logger.error('Error: ' + error.message);
@@ -54,6 +86,7 @@ export const fetchEvents = async (req, res) => {
         client.release();
     }
 };
+
 
 export const fetchEventById = async (req, res) => {
     const client = await pool.connect();

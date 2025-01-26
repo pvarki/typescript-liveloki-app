@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import React from "react";
+import { useState, useMemo } from "react";
 import { EventsTable } from "./EventsTable";
 import { filterEvents } from "../helpers/eventFilter.ts";
 import { MdList, MdMap } from "react-icons/md";
@@ -10,17 +10,33 @@ import { getEvents } from "../helpers/api.ts";
 type EventsListMode = "list" | "map";
 
 export function EventsList() {
-  const [search, setSearch] = React.useState("");
-  const [highlight, setHighlight] = React.useState("");
-  const [mode, setMode] = React.useState<EventsListMode>("list");
+  const [search, setSearch] = useState(""); // Use this to capture the search field input
+  const [highlight, setHighlight] = useState(""); // For alert keywords
+  const [mode, setMode] = useState<EventsListMode>("list"); // For list/map toggle
+
+  // Fetch all events from the backend
   const eventsSWR = useSWR("events", getEvents, {
     refreshInterval: 10000,
   });
-  const events = eventsSWR.data;
-  const filteredEvents = React.useMemo(
-    () => filterEvents(events ?? [], search, highlight),
-    [events, search, highlight],
+
+  // Fetch filtered events from the backend when search is active
+  const { data: backendFilteredEvents } = useSWR(
+    search.trim() ? `/ll/api/events?search=${encodeURIComponent(search.trim())}` : null,
+    (url) => fetch(url).then((res) => res.json())
   );
+
+  const events = eventsSWR.data;
+
+  // Determine the events to display (backend results or client-side filtered)
+  const filteredEvents = useMemo(() => {
+    if (search.trim() && backendFilteredEvents) {
+      // Use backend search results if search is active
+      return backendFilteredEvents;
+    } else {
+      // Use client-side filtering if no search or backend results
+      return filterEvents(events ?? [], "", highlight);
+    }
+  }, [events, search, highlight, backendFilteredEvents]);
 
   if (eventsSWR.error) {
     return <div>Error loading events: {eventsSWR.error.message}</div>;
@@ -28,6 +44,7 @@ export function EventsList() {
   if (events === undefined) {
     return <div>Loading...</div>;
   }
+
   let component;
   switch (mode) {
     case "list":
@@ -41,6 +58,7 @@ export function EventsList() {
   return (
     <div>
       <div className="flex gap-2 mb-2">
+        {/* Search Field */}
         <input
           type="text"
           placeholder="Search"
@@ -48,6 +66,7 @@ export function EventsList() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        {/* Highlight Field */}
         <input
           type="text"
           placeholder="Alert Keyword"
@@ -55,6 +74,7 @@ export function EventsList() {
           value={highlight}
           onChange={(e) => setHighlight(e.target.value)}
         />
+        {/* Toggle Group */}
         <ToggleGroup.Root
           className="ll-toggles"
           type="single"
@@ -69,12 +89,8 @@ export function EventsList() {
           </ToggleGroup.Item>
         </ToggleGroup.Root>
       </div>
-      {events.length > 0 ? (
-        filteredEvents.length > 0 ? (
-          <div className="overflow-x-auto">{component}</div>
-        ) : (
-          <p>No events found matching your filter.</p>
-        )
+      {filteredEvents.length > 0 ? (
+        <div className="overflow-x-auto">{component}</div>
       ) : (
         <p>No events found.</p>
       )}

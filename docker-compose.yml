@@ -15,8 +15,6 @@ services:
       retries: 5
     volumes:
       - db-data:/var/lib/postgresql/data
-    #networks: Enable for local jwt test
-    #  - jwt-test-network
 
   app:
     build:
@@ -34,13 +32,23 @@ services:
         condition: service_healthy
     volumes:
       - uploads:/usr/src/app/uploads
-    #networks: Enable for local jwt test
-    #  - jwt-test-network
 
-#networks: Enable for local jwt test
-#  jwt-test-network:
-#    driver: bridge
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app:
+        condition: service_started
 
 volumes:
   db-data:
   uploads:
+  caddy-data:
+  caddy-config:

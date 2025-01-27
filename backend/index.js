@@ -2,7 +2,6 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { sessionMiddleware } from './middlewares/session.js';
-import { keycloak } from './middlewares/keycloak.js';
 import config from './config/index.js';
 import routes from './routes/index.js';
 import logger from './logger.js';
@@ -14,7 +13,6 @@ routes.use('/uploads/', express.static('/usr/src/app/uploads/'))
 
 // Middleware
 routes.use(sessionMiddleware);
-routes.use(keycloak.middleware());
 routes.use(express.static(path.join(dirname, 'public')));
 
 // Routes

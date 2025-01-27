@@ -10,7 +10,6 @@ import {
     uploadImages,
     fetchMetrics
 } from '../controllers/eventController.js';
-import { keycloak } from '../middlewares/keycloak.js';
 import multer from 'multer';
 import path from 'path';
 import { v7 as uuidv7 } from 'uuid';
@@ -38,9 +37,6 @@ router.get('/keywords', fetchKeywords);
 router.get('/locationsearch', searchEventsByLocation);
 router.post('/upload', upload.any(), uploadImages);
 router.get('/metrics', fetchMetrics);
-router.get('/test', keycloak.protect(), (req, res) => {
-    res.send('Hello world');
-});
 
 
 export default router;

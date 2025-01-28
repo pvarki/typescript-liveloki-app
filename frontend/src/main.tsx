@@ -16,7 +16,7 @@ const toastOptions = {
   },
 } as const;
 
-createRoot(document.getElementById("root")!).render(
+createRoot(document.querySelector("#root")!).render(
   <React.StrictMode>
     <Toaster toastOptions={toastOptions} />
     <RouterProvider router={router} />

@@ -49,12 +49,10 @@ export const commonProps = {
 // H/T https://stackoverflow.com/a/78131035/51685
 export function makeCreateElementOnCommaHandler(onAdd: (value: string) => void) {
   return (value: string, { action }: InputActionMeta) => {
-    if (action === "input-change") {
-      if (value.endsWith(",")) {
-        const valueToAdd = value.slice(0, -1).trim();
-        if (valueToAdd) onAdd(valueToAdd);
-        return "";
-      }
+    if (action === "input-change" && value.endsWith(",")) {
+      const valueToAdd = value.slice(0, -1).trim();
+      if (valueToAdd) onAdd(valueToAdd);
+      return "";
     }
   };
 }

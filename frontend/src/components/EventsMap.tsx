@@ -9,7 +9,7 @@ import { EventCard } from "./EventCard.tsx";
 export function EventsMap({ events }: { events: FilteredEvent[] }) {
   const [popupEvent, setPopupEvent] = useState<FilteredEvent | null>(null);
   const eventsWithLatLng = events.filter((e) => e.location_lat !== null && e.location_lng !== null);
-  if (!eventsWithLatLng.length) {
+  if (eventsWithLatLng.length === 0) {
     return <div className="text-center">No events with location data</div>;
   }
   const map = (

@@ -15,7 +15,7 @@ export const columns: Array<ColumnSpec> = [
     id: "header",
     title: "Header\u2009/\u2009Link",
     render: (event) => (
-      <td className="max-w-50">
+      <td className="max-w-1/2">
         <div>
           {event.header}
           <Link to={`/event/${event.id}`} className="ps-2">
@@ -63,7 +63,7 @@ export const columns: Array<ColumnSpec> = [
     id: "keywords",
     title: "Keywords",
     render: (event) => (
-      <td className="max-w-30">
+      <td className="max-w-32">
         <Keywords keywords={event.keywords} />
       </td>
     ),
@@ -72,7 +72,7 @@ export const columns: Array<ColumnSpec> = [
     id: "domains",
     title: "Domains",
     render: (event) => (
-      <td className="max-w-30">
+      <td className="max-w-32">
         <Keywords keywords={event.hcoe_domains ?? []} />
       </td>
     ),
@@ -80,7 +80,7 @@ export const columns: Array<ColumnSpec> = [
   {
     id: "author",
     title: "Author",
-    render: (event) => <td className="max-w-30">{event.author}</td>,
+    render: (event) => <td className="max-w-32">{event.author}</td>,
   },
 ];
 

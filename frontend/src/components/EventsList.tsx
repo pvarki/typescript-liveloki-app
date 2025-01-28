@@ -1,11 +1,14 @@
 import useSWR from "swr";
 import { useState, useMemo } from "react";
-import { EventsTable } from "./EventsTable";
+import { columns, EventsTable } from "./EventsTable";
 import { filterEvents } from "../helpers/eventFilter.ts";
-import { MdList, MdMap } from "react-icons/md";
+import { MdList, MdMap, MdViewColumn } from "react-icons/md";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
+import * as Popover from "@radix-ui/react-popover";
+
 import { EventsMap } from "./EventsMap.tsx";
 import { getEvents } from "../helpers/api.ts";
+import { toggleInSet } from "../helpers/immutability.ts";
 
 type EventsListMode = "list" | "map";
 
@@ -13,6 +16,7 @@ export function EventsList() {
   const [search, setSearch] = useState(""); // Use this to capture the search field input
   const [highlight, setHighlight] = useState(""); // For alert keywords
   const [mode, setMode] = useState<EventsListMode>("list"); // For list/map toggle
+  const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => new Set(columns.map((c) => c.id)));
 
   // Fetch all events from the backend
   const eventsSWR = useSWR("events", getEvents, {
@@ -47,7 +51,7 @@ export function EventsList() {
   let component;
   switch (mode) {
     case "list": {
-      component = <EventsTable events={filteredEvents} />;
+      component = <EventsTable events={filteredEvents} visibleColumns={visibleColumns} />;
       break;
     }
     case "map": {
@@ -75,6 +79,44 @@ export function EventsList() {
           value={highlight}
           onChange={(e) => setHighlight(e.target.value)}
         />
+        {mode === "list" ? (
+          <Popover.Root>
+            <Popover.Trigger asChild>
+              <button className="ll-btn">
+                <MdViewColumn />
+              </button>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Content className="bg-slate-800/80 p-2 text-sm">
+                {columns.map(({ id, title }) => (
+                  <label key={id} className="flex items-center gap-1 select-none">
+                    <input
+                      type="checkbox"
+                      checked={visibleColumns.has(id)}
+                      onChange={(e) => {
+                        setVisibleColumns((visibleColumns) =>
+                          toggleInSet(visibleColumns, id, e.target.checked),
+                        );
+                      }}
+                    />
+                    {title}
+                  </label>
+                ))}
+                <div className="flex gap-1 pt-1">
+                  <button
+                    className="ll-btn grow"
+                    onClick={() => setVisibleColumns(new Set(columns.map((c) => c.id)))}
+                  >
+                    All
+                  </button>
+                  <button className="ll-btn grow" onClick={() => setVisibleColumns(new Set())}>
+                    None
+                  </button>
+                </div>
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
+        ) : null}
         {/* Toggle Group */}
         <ToggleGroup.Root
           className="ll-toggles"

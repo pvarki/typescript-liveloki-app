@@ -1,8 +1,7 @@
 import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
-import pluginReactConfig from "eslint-plugin-react/configs/recommended.js";
-import pluginReactJSXConfig from "eslint-plugin-react/configs/jsx-runtime.js";
+import reactPlugin from "eslint-plugin-react";
 
 export default [
   { files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"] },
@@ -11,8 +10,13 @@ export default [
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
-  pluginReactConfig,
-  pluginReactJSXConfig,
+  reactPlugin.configs.flat.recommended,
+  reactPlugin.configs.flat["jsx-runtime"],
+  {
+    languageOptions: {
+      ...reactPlugin.configs.flat.recommended.languageOptions,
+    },
+  },
   { settings: { react: { version: "18.3" } } },
   {
     rules: {

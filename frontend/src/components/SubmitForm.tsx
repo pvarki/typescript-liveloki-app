@@ -196,18 +196,16 @@ function splitStringToArray(x: string) {
 }
 
 function initFormState(fromQuery: boolean = false): EventPayload {
-  let getValue = (_key: string) => "";
-  const query = fromQuery ? new URLSearchParams(window.location.search) : null;
-  if (query) {
-    getValue = (key: string) => {
-      const value = query.get(key);
-      if (value) {
-        query.delete(key);
-        return decodeURIComponent(value);
-      }
-      return "";
-    };
-  }
+  const query = fromQuery ? new URLSearchParams(globalThis.location.search) : null;
+  const getValue = (key: string) => {
+    if (!query) return "";
+    const value = query.get(key);
+    if (value) {
+      query.delete(key);
+      return decodeURIComponent(value);
+    }
+    return "";
+  };
   return {
     header: getValue("header"),
     link: getValue("link"),
@@ -241,8 +239,8 @@ export default function SubmitForm() {
     event.preventDefault();
     try {
       await postEvents(states);
-    } catch (err) {
-      toast.error(String(err));
+    } catch (error) {
+      toast.error(String(error));
       return;
     }
     setStates([initFormState()]);

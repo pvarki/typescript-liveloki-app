@@ -27,7 +27,7 @@ function getRelAccTooltipContent(admiralty_reliability: string, admiralty_accura
       </div>,
     );
   }
-  if (!tooltipContent.length) return null;
+  if (tooltipContent.length === 0) return null;
   return React.createElement("div", {}, tooltipContent);
 }
 

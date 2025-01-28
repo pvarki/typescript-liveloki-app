@@ -16,27 +16,26 @@ export function EventsList() {
 
   // Fetch all events from the backend
   const eventsSWR = useSWR("events", getEvents, {
-    refreshInterval: 10000,
+    refreshInterval: 10_000,
   });
 
   // Fetch filtered events from the backend when search is active
   const { data: backendFilteredEvents } = useSWR(
     search.trim() ? `/ll/api/events?search=${encodeURIComponent(search.trim())}` : null,
-    (url) => fetch(url).then((res) => res.json())
+    (url) => fetch(url).then((res) => res.json()),
   );
 
   const events = eventsSWR.data;
 
-  // Determine the events to display (backend results or client-side filtered)
-  const filteredEvents = useMemo(() => {
-    if (search.trim() && backendFilteredEvents) {
-      // Use backend search results if search is active
-      return backendFilteredEvents;
-    } else {
-      // Use client-side filtering if no search or backend results
-      return filterEvents(events ?? [], "", highlight);
-    }
-  }, [events, search, highlight, backendFilteredEvents]);
+  // Use backend search results if search is active;
+  // use client-side filtering if no search or backend results
+  const filteredEvents = useMemo(
+    () =>
+      search.trim() && backendFilteredEvents
+        ? backendFilteredEvents
+        : filterEvents(events ?? [], "", highlight),
+    [events, search, highlight, backendFilteredEvents],
+  );
 
   if (eventsSWR.error) {
     return <div>Error loading events: {eventsSWR.error.message}</div>;
@@ -47,12 +46,14 @@ export function EventsList() {
 
   let component;
   switch (mode) {
-    case "list":
+    case "list": {
       component = <EventsTable events={filteredEvents} />;
       break;
-    case "map":
+    }
+    case "map": {
       component = <EventsMap events={filteredEvents} />;
       break;
+    }
   }
 
   return (

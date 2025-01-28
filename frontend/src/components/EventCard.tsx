@@ -18,7 +18,7 @@ export function uploadMedia(eventId: number, media: File) {
 export function EventCard({ event }: { event: FilteredEvent }) {
   const [media, setMedia] = useState<File | null>(null);
 
-    const imageGrid = (
+  const imageGrid = (
     <div className="grid grid-cols-3 gap-4">
       {(event.images ?? []).map((path, index) => (
         <a href={path} key={index} title="raw image">

@@ -1,0 +1,4 @@
+# TODO: remove the below lines if prettier is to be used for all of the backend too
+*.js
+migrations
+!eslint.config.js

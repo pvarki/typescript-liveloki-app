@@ -1,8 +1,9 @@
+/* eslint-disable unicorn/no-array-reduce */
 export const convertTagArray = (keywords) => {
     let keywordArray = [];
     if (keywords) {
         if (typeof keywords === 'string') keywordArray = keywords.split(',');
-        else if (Array.isArray(keywords)) keywordArray = keywords.map(keyword => String(keyword));
+        else if (Array.isArray(keywords)) keywordArray = keywords.map(String);
     }
     return keywordArray.map(keyword => keyword.trim()).filter(Boolean);
 };
@@ -11,15 +12,15 @@ export const getTrendingEvents = (events) => {
     const keywordCounts = {};
     const eventsByKeyword = {};
 
-    events.forEach(event => {
-        event.keywords.forEach(keyword => {
+    for (const event of events) {
+        for (const keyword of event.keywords) {
             keywordCounts[keyword] = (keywordCounts[keyword] || 0) + 1;
             if (!eventsByKeyword[keyword]) {
                 eventsByKeyword[keyword] = [];
             }
             eventsByKeyword[keyword].push(event);
-        });
-    });
+        }
+    }
 
     const trendingKeyword = Object.keys(keywordCounts).reduce((a, b) => 
         keywordCounts[a] > keywordCounts[b] ? a : b

@@ -51,7 +51,7 @@ export const fetchEvents = async (req, res) => {
         const values = [];
 
         if (search) {
-            const searchWords = search.split(' ').map(word => word.trim()).filter(word => word);
+            const searchWords = search.split(' ').map(word => word.trim()).filter(Boolean);
 
             if (searchWords.length > 0) {
                 const conditions = searchWords.map((_, index) => `
@@ -157,9 +157,9 @@ export const fetchKeywords = async (req, res) => {
         `);
 
         const keywordsWithCount = {};
-        result.rows.forEach(row => {
+        for (const row of result.rows) {
             keywordsWithCount[row.keyword] = parseInt(row.count, 10);
-        });
+        }
 
         res.json(keywordsWithCount);
     } catch (error) {
@@ -257,6 +257,7 @@ export const fetchMetrics = async (req, res) => {
             GROUP BY keyword
             ORDER BY count DESC
         `);
+        // eslint-disable-next-line unicorn/no-array-reduce
         const keywordsCount = keywordsCountResult.rows.reduce((acc, row) => {
             acc[row.keyword] = parseInt(row.count, 10);
             return acc;

@@ -1,4 +1,4 @@
-import Select, { components,GroupBase, OptionProps, Props as SelectProps } from "react-select";
+import Select, { components, GroupBase, OptionProps, Props as SelectProps } from "react-select";
 
 import { CodeDescription } from "../data/admiralty-code.ts";
 import * as reactSelect from "../helpers/react-select.ts";

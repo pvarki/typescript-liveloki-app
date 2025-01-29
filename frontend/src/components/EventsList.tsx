@@ -8,7 +8,7 @@ import { getEvents } from "../helpers/api.ts";
 import { filterEvents } from "../helpers/eventFilter.ts";
 import { toggleInSet } from "../helpers/immutability.ts";
 import { EventsMap } from "./EventsMap.tsx";
-import { columns,EventsTable } from "./EventsTable";
+import { columns, EventsTable } from "./EventsTable";
 
 type EventsListMode = "list" | "map";
 

@@ -1,7 +1,8 @@
 import { useParams } from "react-router-dom";
 import useSWR from "swr";
-import { getEvent } from "../helpers/api.ts";
+
 import { EventCard } from "../components/EventCard.tsx";
+import { getEvent } from "../helpers/api.ts";
 
 export function EventView() {
   const { id } = useParams();

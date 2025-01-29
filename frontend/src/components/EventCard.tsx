@@ -1,12 +1,13 @@
-import { FilteredEvent } from "../types.ts";
-import { EventLink } from "./EventLink.tsx";
-import { formatTime } from "../helpers/formatTime.ts";
-import { EventLocationLink } from "./EventLocationLink.tsx";
-import { Keywords } from "./Keywords.tsx";
-import { EventRelAcc } from "./EventRelAcc.tsx";
+import { useState } from "react";
 import { MdLink } from "react-icons/md";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+
+import { formatTime } from "../helpers/formatTime.ts";
+import { FilteredEvent } from "../types.ts";
+import { EventLink } from "./EventLink.tsx";
+import { EventLocationLink } from "./EventLocationLink.tsx";
+import { EventRelAcc } from "./EventRelAcc.tsx";
+import { Keywords } from "./Keywords.tsx";
 
 export function uploadMedia(eventId: number, media: File) {
   const formData = new FormData();

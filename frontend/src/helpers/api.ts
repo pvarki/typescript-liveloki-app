@@ -1,4 +1,4 @@
-import { EventPayload, Event } from "../types.ts";
+import { Event, EventPayload } from "../types.ts";
 
 export async function postEvents(states: readonly EventPayload[]) {
   const response = await fetch("api/events", {

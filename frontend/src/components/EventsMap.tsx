@@ -1,9 +1,10 @@
-import { FilteredEvent } from "../types.ts";
-import Map, { Marker, NavigationControl, ScaleControl } from "react-map-gl/maplibre";
-import mapStyle from "../helpers/map-style.ts";
 import cx from "classnames";
-import { MdLocationPin } from "react-icons/md";
 import { useState } from "react";
+import { MdLocationPin } from "react-icons/md";
+import Map, { Marker, NavigationControl, ScaleControl } from "react-map-gl/maplibre";
+
+import mapStyle from "../helpers/map-style.ts";
+import { FilteredEvent } from "../types.ts";
 import { EventCard } from "./EventCard.tsx";
 
 export function EventsMap({ events }: { events: FilteredEvent[] }) {

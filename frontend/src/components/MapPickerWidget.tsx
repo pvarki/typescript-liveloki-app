@@ -1,4 +1,5 @@
 import Map, { NavigationControl, ScaleControl } from "react-map-gl/maplibre";
+
 import mapStyle from "../helpers/map-style.ts";
 import { LngLatData } from "../types.ts";
 import { LocationPinMarker } from "./LocationPinMarker.tsx";

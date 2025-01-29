@@ -1,25 +1,25 @@
-import React from "react";
-import useSWR, { mutate } from "swr";
 import { create } from "mutative";
-import { EventPayload } from "../types.ts";
-import { getKeywordStatistics, postEvents } from "../helpers/api.ts";
-
+import React from "react";
+import toast from "react-hot-toast";
+import { MdAdd, MdDelete, MdMap, MdSend } from "react-icons/md";
 import CreatableSelect from "react-select/creatable";
+import useSWR, { mutate } from "swr";
+
+import { credibilityScale, reliabilityScale } from "../data/admiralty-code.ts";
 import hcoeDomains from "../data/hcoe-domains.ts";
+import { getKeywordStatistics, postEvents } from "../helpers/api.ts";
 import * as reactSelect from "../helpers/react-select.ts";
 import { makeCreateElementOnCommaHandler } from "../helpers/react-select.ts";
-import toast from "react-hot-toast";
-import { MapPickerWidget } from "./MapPickerWidget.tsx";
-import { credibilityScale, reliabilityScale } from "../data/admiralty-code.ts";
-import { AdmiraltySelect, toAdmiraltyOption } from "./AdmiraltySelect.tsx";
 import { round } from "../helpers/round.ts";
+import { EventPayload } from "../types.ts";
+import { AdmiraltySelect, toAdmiraltyOption } from "./AdmiraltySelect.tsx";
+import { MapPickerWidget } from "./MapPickerWidget.tsx";
 
 const hcoeDomainOptions = hcoeDomains.map((domain) => ({ value: domain, label: domain }));
-
 const admiraltyReliabilityOptions = Object.entries(reliabilityScale).map(toAdmiraltyOption);
 const admiraltyCredibilityOptions = Object.entries(credibilityScale).map(toAdmiraltyOption);
 
-function SingleEventFields({
+export function SingleEventFields({
   state,
   updateState,
   canDelete,
@@ -45,6 +45,7 @@ function SingleEventFields({
   const onDomainInputChange = makeCreateElementOnCommaHandler((value) =>
     updateState({ hcoe_domains: [...state.hcoe_domains, value] }),
   );
+  const hasPreciseLocation = state.location_lat !== undefined || state.location_lng !== undefined;
   const body = (
     <div className="gap-2 grid grid-cols-1 lg:grid-cols-2">
       <input
@@ -115,70 +116,90 @@ function SingleEventFields({
         onChange={(domains) => updateState({ hcoe_domains: domains.map((domain) => domain.value) })}
         onInputChange={onDomainInputChange}
       />
-    </div>
-  );
-  const locationBody = (
-    <div className="flex flex-col gap-2">
       <div className="flex gap-2">
         <input
           type="text"
           name="location"
           placeholder="Location (free text)"
-          className="ll-input"
+          className="ll-input basis-1/2"
           onChange={update}
           value={state.location}
         />
-        <div className="flex gap-1">
-          <input
-            type="number"
-            name="location_lat"
-            min={-90}
-            max={90}
-            step="any"
-            autoComplete="off"
-            placeholder="Latitude"
-            className="ll-input min-w-32"
-            onChange={update}
-            value={state.location_lat ? round(state.location_lat, 4) : ""}
-          />
-          <input
-            type="number"
-            name="location_lng"
-            min={-180}
-            max={180}
-            step="any"
-            autoComplete="off"
-            placeholder="Longitude"
-            className="ll-input min-w-32"
-            onChange={update}
-            value={state.location_lng ? round(state.location_lng, 4) : ""}
-          />
-        </div>
-      </div>
-      <MapPickerWidget
-        selected={
-          state.location_lng !== undefined && state.location_lat !== undefined
-            ? {
-                lat: state.location_lat,
-                lng: state.location_lng,
-              }
-            : undefined
+        {/* TODO: would be nice to center the map on the entered coordinates */}
+        <input
+          type="number"
+          name="location_lat"
+          min={-90}
+          max={90}
+          step="any"
+          autoComplete="off"
+          placeholder="Latitude"
+          className="ll-input basis-12 max-w-40"
+          onChange={update}
+          value={state.location_lat ? round(state.location_lat, 4) : ""}
+        />
+        <input
+          type="number"
+          name="location_lng"
+          min={-180}
+          max={180}
+          step="any"
+          autoComplete="off"
+          placeholder="Longitude"
+          className="ll-input basis-12 max-w-40"
+          onChange={update}
+          value={state.location_lng ? round(state.location_lng, 4) : ""}
+        />
+        <button
+          type="button"
+          className="ll-btn text-xs text-nowrap"
+          onClick={() => {
+            updateState({ location_lat: undefined, location_lng: undefined });
+            setShowLocation(false);
+          }}
+        >
+          Clear coords
+        </button>
+        {
+          <button
+            className="ll-btn text-xs text-nowrap"
+            onClick={() => setShowLocation((l) => !l)}
+            type="button"
+          >
+            <MdMap className="inline mr-2" />
+            {showLocation ? "Hide" : "Show"} map
+          </button>
         }
-        onPick={(location) => updateState({ location_lat: location.lat, location_lng: location.lng })}
-      />
+      </div>
     </div>
   );
+  const mapBody = (
+    <MapPickerWidget
+      selected={
+        state.location_lng !== undefined && state.location_lat !== undefined
+          ? {
+              lat: state.location_lat,
+              lng: state.location_lng,
+            }
+          : undefined
+      }
+      onPick={(location) => updateState({ location_lat: location.lat, location_lng: location.lng })}
+    />
+  );
   return (
-    <div className="flex gap-2">
-      <div className="grow">
+    <div className="flex gap-2 items-start">
+      <div className="grow flex flex-col gap-2">
         {body}
-        <details open={showLocation} onToggle={(event) => setShowLocation(event.currentTarget.open)}>
-          <summary className="py-2 cursor-pointer">Location</summary>
-          {showLocation ? locationBody : null}
-        </details>
+        {showLocation || hasPreciseLocation ? mapBody : null}
       </div>
-      <button type="button" onClick={onDelete} className="ll-btn" disabled={!canDelete} hidden={!canDelete}>
-        &times;
+      <button
+        type="button"
+        onClick={onDelete}
+        className="ll-btn bg-red-700"
+        disabled={!canDelete}
+        hidden={!canDelete}
+      >
+        <MdDelete />
       </button>
     </div>
   );
@@ -256,30 +277,37 @@ export default function SubmitForm() {
       })),
     [keywordsSWR.data],
   );
+  const [isValid, setIsValid] = React.useState(false);
   return (
-    <form className="mb-2" onSubmit={onSubmit}>
+    <form
+      className="mb-2"
+      onSubmit={onSubmit}
+      onChange={(event) => setIsValid(event.currentTarget.checkValidity())}
+    >
       <div className="mb-2 flex flex-col gap-2">
         {states.map((state, i) => (
           <SingleEventFields
             key={i}
             state={state}
             updateState={updateState.bind(null, i)}
-            canDelete={i > 0}
+            canDelete={states.length > 1}
             onDelete={() => deleteState(i)}
             keywordOptions={keywordOptions}
           />
         ))}
       </div>
-      <div className="flex gap-2">
+      <div className="flex justify-between gap-2">
+        <button type="submit" className="ll-btn" disabled={!isValid}>
+          <MdSend className="mr-1 inline" />
+          Submit Events
+        </button>
         <button
           type="button"
           onClick={() => setStates((states) => [...states, initFormState()])}
-          className="ll-btn"
+          className="ll-btn-secondary"
         >
-          Add Another Event
-        </button>
-        <button type="submit" className="ll-btn">
-          Submit Events
+          <MdAdd className="mr-1 inline" />
+          Add Another Event to Batch
         </button>
       </div>
     </form>

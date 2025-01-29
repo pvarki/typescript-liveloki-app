@@ -1,8 +1,9 @@
-import { FilteredEvent } from "../types.ts";
-import { MdLocationPin } from "react-icons/md";
 import * as HoverCard from "@radix-ui/react-hover-card";
+import { MdLocationPin } from "react-icons/md";
 import Map from "react-map-gl/maplibre";
+
 import mapStyle from "../helpers/map-style.ts";
+import { FilteredEvent } from "../types.ts";
 import { LocationPinMarker } from "./LocationPinMarker.tsx";
 
 export function EventLocationLink({ event }: { event: FilteredEvent }) {

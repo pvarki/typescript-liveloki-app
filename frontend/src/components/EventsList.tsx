@@ -1,14 +1,14 @@
-import useSWR from "swr";
-import { useState, useMemo } from "react";
-import { columns, EventsTable } from "./EventsTable";
-import { filterEvents } from "../helpers/eventFilter.ts";
-import { MdList, MdMap, MdViewColumn } from "react-icons/md";
-import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import * as Popover from "@radix-ui/react-popover";
+import * as ToggleGroup from "@radix-ui/react-toggle-group";
+import { useMemo, useState } from "react";
+import { MdList, MdMap, MdViewColumn } from "react-icons/md";
+import useSWR from "swr";
 
-import { EventsMap } from "./EventsMap.tsx";
 import { getEvents } from "../helpers/api.ts";
+import { filterEvents } from "../helpers/eventFilter.ts";
 import { toggleInSet } from "../helpers/immutability.ts";
+import { EventsMap } from "./EventsMap.tsx";
+import { columns, EventsTable } from "./EventsTable";
 
 type EventsListMode = "list" | "map";
 

@@ -1,5 +1,5 @@
-import SubmitForm from "../components/SubmitForm.tsx";
 import { EventsList } from "../components/EventsList.tsx";
+import SubmitForm from "../components/SubmitForm.tsx";
 
 export function DefaultView() {
   return (

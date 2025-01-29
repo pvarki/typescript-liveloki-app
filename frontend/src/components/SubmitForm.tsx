@@ -1,17 +1,18 @@
-import React from "react";
-import useSWR, { mutate } from "swr";
 import { create } from "mutative";
-import { EventPayload } from "../types.ts";
-import { getKeywordStatistics, postEvents } from "../helpers/api.ts";
+import React from "react";
 import toast from "react-hot-toast";
 import { MdAdd, MdDelete, MdMap, MdSend } from "react-icons/md";
-import hcoeDomains from "../data/hcoe-domains.ts";
+import CreatableSelect from "react-select/creatable";
+import useSWR, { mutate } from "swr";
+
 import { credibilityScale, reliabilityScale } from "../data/admiralty-code.ts";
-import { AdmiraltySelect, toAdmiraltyOption } from "./AdmiraltySelect.tsx";
+import hcoeDomains from "../data/hcoe-domains.ts";
+import { getKeywordStatistics, postEvents } from "../helpers/api.ts";
 import * as reactSelect from "../helpers/react-select.ts";
 import { makeCreateElementOnCommaHandler } from "../helpers/react-select.ts";
-import CreatableSelect from "react-select/creatable";
 import { round } from "../helpers/round.ts";
+import { EventPayload } from "../types.ts";
+import { AdmiraltySelect, toAdmiraltyOption } from "./AdmiraltySelect.tsx";
 import { MapPickerWidget } from "./MapPickerWidget.tsx";
 
 const hcoeDomainOptions = hcoeDomains.map((domain) => ({ value: domain, label: domain }));

@@ -1,7 +1,8 @@
 import { createHashRouter } from "react-router-dom";
-import { Root } from "./routes/Root.tsx";
+
 import { DefaultView } from "./routes/DefaultView.tsx";
 import { EventView } from "./routes/EventView.tsx";
+import { Root } from "./routes/Root.tsx";
 
 export const router = createHashRouter([
   {

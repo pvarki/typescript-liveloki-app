@@ -1,4 +1,4 @@
-import { createFilter, InputActionMeta, StylesConfig, Theme } from "react-select";
+import { createFilter,InputActionMeta, StylesConfig, Theme } from "react-select";
 
 export const theme = (theme: Theme) => ({
   ...theme,

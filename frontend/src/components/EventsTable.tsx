@@ -1,12 +1,13 @@
-import { FilteredEvent } from "../types.ts";
-import { EventLocationLink } from "./EventLocationLink.tsx";
-import { EventLink } from "./EventLink.tsx";
-import { formatTime } from "../helpers/formatTime.ts";
-import { Keywords } from "./Keywords.tsx";
-import { EventRelAcc } from "./EventRelAcc.tsx";
-import { Link } from "react-router-dom";
-import { MdLink } from "react-icons/md";
 import React from "react";
+import { MdLink } from "react-icons/md";
+import { Link } from "react-router-dom";
+
+import { formatTime } from "../helpers/formatTime.ts";
+import { FilteredEvent } from "../types.ts";
+import { EventLink } from "./EventLink.tsx";
+import { EventLocationLink } from "./EventLocationLink.tsx";
+import { EventRelAcc } from "./EventRelAcc.tsx";
+import { Keywords } from "./Keywords.tsx";
 
 type ColumnSpec = { id: string; title: string; render: (event: FilteredEvent) => React.ReactElement };
 

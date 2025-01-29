@@ -1,7 +1,8 @@
-import { FilteredEvent } from "../types.ts";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { reliabilityScale, credibilityScale } from "../data/admiralty-code.ts";
 import React from "react";
+
+import { credibilityScale, reliabilityScale } from "../data/admiralty-code.ts";
+import { FilteredEvent } from "../types.ts";
 
 function getRelAccTooltipContent(admiralty_reliability: string, admiralty_accuracy: string) {
   const tooltipContent = [];

@@ -1,5 +1,6 @@
 import { MdLocationPin } from "react-icons/md";
 import { Marker } from "react-map-gl/maplibre";
+
 import { LngLatData } from "../types.ts";
 
 export function LocationPinMarker({ location }: { location: LngLatData }) {

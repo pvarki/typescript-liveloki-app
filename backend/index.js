@@ -1,7 +1,6 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { sessionMiddleware } from './middlewares/session.js';
 import config from './config/index.js';
 import routes from './routes/index.js';
 import logger from './logger.js';
@@ -12,7 +11,6 @@ const app = express();
 routes.use('/uploads/', express.static('/usr/src/app/uploads/'))
 
 // Middleware
-routes.use(sessionMiddleware);
 routes.use(express.static(path.join(dirname, 'public')));
 
 // Routes

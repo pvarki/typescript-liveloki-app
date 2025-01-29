@@ -25,7 +25,7 @@ export function EventsList() {
 
   // Fetch filtered events from the backend when search is active
   const { data: backendFilteredEvents } = useSWR(
-    search.trim() ? `/ll/api/events?search=${encodeURIComponent(search.trim())}` : null,
+    search.trim() ? `/api/events?search=${encodeURIComponent(search.trim())}` : null,
     (url) => fetch(url).then((res) => res.json()),
   );
 

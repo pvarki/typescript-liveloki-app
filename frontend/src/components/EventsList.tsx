@@ -8,7 +8,7 @@ import { getEvents } from "../helpers/api.ts";
 import { filterEvents } from "../helpers/eventFilter.ts";
 import { toggleInSet } from "../helpers/immutability.ts";
 import { EventsMap } from "./EventsMap.tsx";
-import { columns, EventsTable } from "./EventsTable";
+import { columns, EventsTable, EventsTableOptions } from "./EventsTable";
 
 type EventsListMode = "list" | "map";
 
@@ -16,6 +16,7 @@ export function EventsList() {
   const [search, setSearch] = useState(""); // Use this to capture the search field input
   const [highlight, setHighlight] = useState(""); // For alert keywords
   const [mode, setMode] = useState<EventsListMode>("list"); // For list/map toggle
+  const [showKeywordsAndDomainsInHeaderColumn, setShowKeywordsAndDomainsInHeaderColumn] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => new Set(columns.map((c) => c.id)));
 
   // Fetch all events from the backend
@@ -48,10 +49,15 @@ export function EventsList() {
     return <div>Loading...</div>;
   }
 
+  const options: EventsTableOptions = {
+    visibleColumns,
+    showKeywordsAndDomainsInHeaderColumn,
+  };
+
   let component;
   switch (mode) {
     case "list": {
-      component = <EventsTable events={filteredEvents} visibleColumns={visibleColumns} />;
+      component = <EventsTable events={filteredEvents} options={options} />;
       break;
     }
     case "map": {
@@ -63,7 +69,6 @@ export function EventsList() {
   return (
     <div>
       <div className="flex gap-2 mb-2">
-        {/* Search Field */}
         <input
           type="text"
           placeholder="Search"
@@ -71,7 +76,6 @@ export function EventsList() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        {/* Highlight Field */}
         <input
           type="text"
           placeholder="Alert Keyword"
@@ -87,12 +91,13 @@ export function EventsList() {
               </button>
             </Popover.Trigger>
             <Popover.Portal>
-              <Popover.Content className="bg-slate-800/80 p-2 text-sm">
+              <Popover.Content className="bg-slate-800/80 p-2 text-sm max-w-48">
                 {columns.map(({ id, title }) => (
                   <label key={id} className="flex items-center gap-1 select-none">
                     <input
                       type="checkbox"
                       checked={visibleColumns.has(id)}
+                      disabled={showKeywordsAndDomainsInHeaderColumn && (id == "keywords" || id == "domains")}
                       onChange={(e) => {
                         setVisibleColumns((visibleColumns) =>
                           toggleInSet(visibleColumns, id, e.target.checked),
@@ -102,7 +107,7 @@ export function EventsList() {
                     {title}
                   </label>
                 ))}
-                <div className="flex gap-1 pt-1">
+                <div className="flex gap-1 py-1">
                   <button
                     className="ll-btn grow"
                     onClick={() => setVisibleColumns(new Set(columns.map((c) => c.id)))}
@@ -113,16 +118,29 @@ export function EventsList() {
                     None
                   </button>
                 </div>
+                <label className="flex items-center gap-1 select-none">
+                  <input
+                    type="checkbox"
+                    checked={showKeywordsAndDomainsInHeaderColumn}
+                    onChange={(e) => setShowKeywordsAndDomainsInHeaderColumn(e.target.checked)}
+                  />
+                  Show Keywords and Domains in Header Column
+                </label>
               </Popover.Content>
             </Popover.Portal>
           </Popover.Root>
         ) : null}
-        {/* Toggle Group */}
         <ToggleGroup.Root
           className="ll-toggles"
           type="single"
           value={mode}
-          onValueChange={(value) => setMode(value as EventsListMode)}
+          onValueChange={(value) => {
+            // `ToggleGroup`s allow "un-clicking" an option,
+            // so default to "list" if the incoming value
+            // would be the empty string, so we always
+            // render _something_.
+            setMode((value || "list") as EventsListMode);
+          }}
         >
           <ToggleGroup.Item value="map" aria-label="Map">
             <MdMap />

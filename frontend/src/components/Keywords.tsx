@@ -1,4 +1,5 @@
 export function Keywords({ keywords }: { keywords: string[] }) {
+  if (keywords.length === 0) return null;
   return (
     <div className="flex flex-wrap gap-0.5">
       {keywords.map((k, i) => (

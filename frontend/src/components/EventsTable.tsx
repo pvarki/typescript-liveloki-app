@@ -9,13 +9,22 @@ import { EventLocationLink } from "./EventLocationLink.tsx";
 import { EventRelAcc } from "./EventRelAcc.tsx";
 import { Keywords } from "./Keywords.tsx";
 
-type ColumnSpec = { id: string; title: string; render: (event: FilteredEvent) => React.ReactElement };
+export interface EventsTableOptions {
+  visibleColumns: ReadonlySet<string>;
+  showKeywordsAndDomainsInHeaderColumn: boolean;
+}
+
+interface ColumnSpec {
+  id: string;
+  title: string;
+  render: (event: FilteredEvent, options: EventsTableOptions) => React.ReactElement;
+}
 
 export const columns: Array<ColumnSpec> = [
   {
     id: "header",
     title: "Header\u2009/\u2009Link",
-    render: (event) => (
+    render: (event, { showKeywordsAndDomainsInHeaderColumn }) => (
       <td className="max-w-1/2" key="header">
         <div>
           {event.header}
@@ -24,6 +33,12 @@ export const columns: Array<ColumnSpec> = [
           </Link>
         </div>
         {event.link ? <EventLink event={event} /> : null}
+        {showKeywordsAndDomainsInHeaderColumn ? (
+          <>
+            <Keywords keywords={event.keywords} />
+            <Keywords keywords={event.hcoe_domains ?? []} />
+          </>
+        ) : null}
       </td>
     ),
   },
@@ -95,10 +110,18 @@ export const columns: Array<ColumnSpec> = [
 
 interface EventsTableProps {
   events: FilteredEvent[];
-  visibleColumns: ReadonlySet<string>;
+  options: EventsTableOptions;
 }
 
-export function EventsTable({ events, visibleColumns }: EventsTableProps) {
+function shouldShowColumn(id: string, options: EventsTableOptions) {
+  return (
+    options.visibleColumns.has(id) &&
+    !(options.showKeywordsAndDomainsInHeaderColumn && (id == "keywords" || id == "domains"))
+  );
+}
+
+export function EventsTable({ events, options }: EventsTableProps) {
+  const { visibleColumns } = options;
   if (visibleColumns.size === 0) {
     return <div className="p-2 text-center">No columns selected to view.</div>;
   }
@@ -107,7 +130,7 @@ export function EventsTable({ events, visibleColumns }: EventsTableProps) {
       <thead>
         <tr>
           {columns
-            .filter(({ id }) => visibleColumns.has(id))
+            .filter(({ id }) => shouldShowColumn(id, options))
             .map(({ id, title }) => (
               <th key={id}>{title}</th>
             ))}
@@ -116,7 +139,9 @@ export function EventsTable({ events, visibleColumns }: EventsTableProps) {
       <tbody>
         {events.map((event) => (
           <tr key={event.id} className={event.alert ? "!bg-red-900" : undefined}>
-            {columns.filter(({ id }) => visibleColumns.has(id)).map(({ render }) => render(event))}
+            {columns
+              .filter(({ id }) => shouldShowColumn(id, options))
+              .map(({ render }) => render(event, options))}
           </tr>
         ))}
       </tbody>

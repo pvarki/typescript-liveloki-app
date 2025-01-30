@@ -63,7 +63,6 @@ export function EventsList() {
   return (
     <div>
       <div className="flex gap-2 mb-2">
-        {/* Search Field */}
         <input
           type="text"
           placeholder="Search"
@@ -71,7 +70,6 @@ export function EventsList() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        {/* Highlight Field */}
         <input
           type="text"
           placeholder="Alert Keyword"
@@ -117,7 +115,6 @@ export function EventsList() {
             </Popover.Portal>
           </Popover.Root>
         ) : null}
-        {/* Toggle Group */}
         <ToggleGroup.Root
           className="ll-toggles"
           type="single"

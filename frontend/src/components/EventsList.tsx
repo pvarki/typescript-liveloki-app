@@ -72,14 +72,14 @@ export function EventsList() {
         <input
           type="text"
           placeholder="Search"
-          className="ll-input"
+          className="ll-input grow"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <input
           type="text"
           placeholder="Alert Keyword"
-          className="ll-input"
+          className="ll-input grow"
           value={highlight}
           onChange={(e) => setHighlight(e.target.value)}
         />

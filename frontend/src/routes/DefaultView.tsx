@@ -4,7 +4,7 @@ import SubmitForm from "../components/SubmitForm.tsx";
 export function DefaultView() {
   return (
     <>
-      <div className="container mx-auto mt-2">
+      <div className="lg:container mx-auto mt-2">
         <h1 className="text-xl mb-2">Submit Events</h1>
         <SubmitForm />
       </div>

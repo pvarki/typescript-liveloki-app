@@ -4,7 +4,7 @@
 
 @layer components {
     .ll-input {
-        @apply bg-gray-800 text-gray-200 border-none rounded-md p-2 grow;
+        @apply bg-gray-800 text-gray-200 border-none rounded-md p-2;
     }
 
     .ll-btn {

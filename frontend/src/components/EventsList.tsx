@@ -119,7 +119,13 @@ export function EventsList() {
           className="ll-toggles"
           type="single"
           value={mode}
-          onValueChange={(value) => setMode(value as EventsListMode)}
+          onValueChange={(value) => {
+            // `ToggleGroup`s allow "un-clicking" an option,
+            // so default to "list" if the incoming value
+            // would be the empty string, so we always
+            // render _something_.
+            setMode((value || "list") as EventsListMode);
+          }}
         >
           <ToggleGroup.Item value="map" aria-label="Map">
             <MdMap />

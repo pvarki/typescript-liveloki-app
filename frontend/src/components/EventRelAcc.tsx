@@ -29,7 +29,7 @@ function getRelAccTooltipContent(admiralty_reliability: string, admiralty_accura
     );
   }
   if (tooltipContent.length === 0) return null;
-  return React.createElement("div", {}, tooltipContent);
+  return React.createElement("div", {}, ...tooltipContent);
 }
 
 export function EventRelAcc({ event }: { event: FilteredEvent }) {

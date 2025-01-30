@@ -1,7 +1,7 @@
 import { create } from "mutative";
 import React from "react";
 import toast from "react-hot-toast";
-import { MdAdd, MdDelete, MdMap, MdSend } from "react-icons/md";
+import { MdAdd, MdDelete, MdMap, MdPunchClock, MdSend } from "react-icons/md";
 import CreatableSelect from "react-select/creatable";
 import useSWR, { mutate } from "swr";
 
@@ -89,14 +89,24 @@ export function SingleEventFields({
           options={admiraltyCredibilityOptions}
         />
       </div>
-      <input
-        type="datetime-local"
-        name="event_time"
-        placeholder="Event time"
-        className="ll-input"
-        onChange={update}
-        value={state.event_time}
-      />
+      <div className="flex gap-2">
+        <input
+          type="datetime-local"
+          name="event_time"
+          placeholder="Event time"
+          className="ll-input grow"
+          onChange={update}
+          value={state.event_time}
+        />
+        <button
+          className="ll-btn text-xs"
+          onClick={() => updateState({ event_time: new Date().toISOString().replace(/\.\d+Z?$/, "") })}
+          type="button"
+        >
+          <MdPunchClock className="inline mr-2" />
+          Now
+        </button>
+      </div>
       <CreatableSelect
         isMulti
         placeholder="Keywords"
@@ -116,43 +126,46 @@ export function SingleEventFields({
         onChange={(domains) => updateState({ hcoe_domains: domains.map((domain) => domain.value) })}
         onInputChange={onDomainInputChange}
       />
-      <div className="flex gap-2">
+      <div className="flex flex-row flex-wrap md:flex-nowrap gap-2">
         <input
           type="text"
           name="location"
           placeholder="Location (free text)"
-          className="ll-input basis-1/2"
+          className="ll-input col-span-2 md:basis-1/2"
           onChange={update}
           value={state.location}
         />
-        {/* TODO: would be nice to center the map on the entered coordinates */}
-        <input
-          type="number"
-          name="location_lat"
-          min={-90}
-          max={90}
-          step="any"
-          autoComplete="off"
-          placeholder="Latitude"
-          className="ll-input basis-12 max-w-40"
-          onChange={update}
-          value={state.location_lat ? round(state.location_lat, 4) : ""}
-        />
-        <input
-          type="number"
-          name="location_lng"
-          min={-180}
-          max={180}
-          step="any"
-          autoComplete="off"
-          placeholder="Longitude"
-          className="ll-input basis-12 max-w-40"
-          onChange={update}
-          value={state.location_lng ? round(state.location_lng, 4) : ""}
-        />
+        <div className="flex gap-2 md:contents">
+          {/* TODO: would be nice to center the map on the entered coordinates */}
+          <input
+            type="number"
+            name="location_lat"
+            min={-90}
+            max={90}
+            step="any"
+            autoComplete="off"
+            placeholder="Latitude"
+            className="ll-input shrink min-w-12"
+            onChange={update}
+            value={state.location_lat ? round(state.location_lat, 4) : ""}
+          />
+
+          <input
+            type="number"
+            name="location_lng"
+            min={-180}
+            max={180}
+            step="any"
+            autoComplete="off"
+            placeholder="Longitude"
+            className="ll-input shrink min-w-12"
+            onChange={update}
+            value={state.location_lng ? round(state.location_lng, 4) : ""}
+          />
+        </div>
         <button
           type="button"
-          className="ll-btn text-xs text-nowrap"
+          className="ll-btn text-xs"
           onClick={() => {
             updateState({ location_lat: undefined, location_lng: undefined });
             setShowLocation(false);
@@ -160,16 +173,10 @@ export function SingleEventFields({
         >
           Clear coords
         </button>
-        {
-          <button
-            className="ll-btn text-xs text-nowrap"
-            onClick={() => setShowLocation((l) => !l)}
-            type="button"
-          >
-            <MdMap className="inline mr-2" />
-            {showLocation ? "Hide" : "Show"} map
-          </button>
-        }
+        <button className="ll-btn text-xs" onClick={() => setShowLocation((l) => !l)} type="button">
+          <MdMap className="inline mr-2" />
+          <span className="text-nowrap">{showLocation ? "Hide" : "Show"} map</span>
+        </button>
       </div>
     </div>
   );

@@ -28,3 +28,7 @@ Migrations are run (if needed) when docker container starts. `wait-for-it.sh` wi
 ## JWT testing
 
 Remove comments from "jwt-test-network" for local jwt testing, to allow joining containers from 2 different compose runs to same docker network.
+
+## OpenAPI Spesification
+
+https://pvarki.github.io/typescript-liveloki-app/

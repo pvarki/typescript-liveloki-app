@@ -1,25 +1,48 @@
-use rocket::State;
 use crate::db::DbPool;
 use crate::models::event::Event;
 use diesel::prelude::*;
+use rocket::State;
 use serde_json::{json, Value};
 
 pub async fn fetch_events(db: &State<DbPool>) -> Value {
-    let conn = db.get().expect("Failed to get DB connection");
-    
-    // Implement your database query here
-    // This is a placeholder implementation
-    json!({
-        "status": "success",
-        "events": []
-    })
+    use crate::schema::events::dsl::*;
+
+    let mut conn = db.get().expect("Failed to get DB connection");
+
+    match events
+        .order_by(creation_time.desc())
+        .select(Event::as_select())
+        .get_results(&mut conn)
+    {
+        Ok(results) => {
+            if results.is_empty() {
+                json!({
+                    "status": "success",
+                    "message": "No events found",
+                    "events": []
+                })
+            } else {
+                json!({
+                    "status": "success",
+                    "events": results
+                })
+            }
+        }
+        Err(e) => {
+            eprintln!("Database error: {}", e);
+            json!({
+                "status": "error",
+                "message": "Failed to fetch events from database"
+            })
+        }
+    }
 }
 
 pub async fn add_events(event_data: Value, db: &State<DbPool>) -> Value {
     // Implement event creation logic here
     json!({
         "status": "success",
-        "message": "Event added successfully"
+        "message": "Event not added successfully"
     })
 }
 

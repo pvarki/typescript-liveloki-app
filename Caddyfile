@@ -1,3 +1,5 @@
-CHANGE_ME {
+
+bl.localmaeher.dev.pvarki.fi {
+    tls /etc/ssl/cf/mikaelpeltomaa.fi.pem /etc/ssl/cf/mikaelpeltomaa.fi.key
     reverse_proxy app:3000
 }

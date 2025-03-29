@@ -28,6 +28,12 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+/*
+router.get('/', (req, res) => {
+    res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out')
+});
+*/
+
 router.post('/events', addEvents);
 router.get('/events', fetchEvents);
 router.get('/events/trending/day', fetchTrendingEventsDay);

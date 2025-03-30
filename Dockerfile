@@ -5,7 +5,7 @@ RUN npm install
 RUN npm run build
 
 # Dockerfile for Node.js server
-FROM node:22-slim
+FROM node:22-slim AS production
 
 # Create app directory
 WORKDIR /usr/src/app

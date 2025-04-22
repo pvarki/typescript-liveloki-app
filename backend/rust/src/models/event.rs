@@ -52,7 +52,7 @@ impl From<TextTimestamp> for Option<NaiveDateTime> {
     }
 }
 
-#[derive(Debug, Queryable, Serialize, Deserialize, Selectable)]
+#[derive(Debug, Queryable, QueryableByName, Serialize, Deserialize, Selectable)]
 #[diesel(table_name = crate::schema::events)]
 #[diesel(check_for_backend(diesel::pg::Pg))]
 pub struct Event {

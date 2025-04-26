@@ -6,6 +6,11 @@ RUN npm run build
 
 # Dockerfile for Node.js server
 FROM node:22-slim AS production
+RUN apt-get update && apt-get install -y \
+        curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && true
+
 
 # Create app directory
 WORKDIR /usr/src/app

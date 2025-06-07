@@ -7,7 +7,11 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" ]
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -31,22 +35,6 @@ services:
     volumes:
       - uploads:/usr/src/app/uploads
 
-  caddy:
-    image: caddy:latest
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    depends_on:
-      app:
-        condition: service_started
-
 volumes:
   db-data:
   uploads:
-  caddy-data:
-  caddy-config:

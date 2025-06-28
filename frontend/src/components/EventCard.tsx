@@ -68,6 +68,21 @@ export function EventCard({ event }: { event: FilteredEvent }) {
             </td>
           </tr>
           <tr>
+            <th>Group</th>
+            <td>
+              {event.group ? (
+                <Link 
+                  to={`/group/${encodeURIComponent(event.group)}`}
+                  className="text-green-400 font-medium hover:text-green-300 hover:underline cursor-pointer"
+                >
+                  {event.group}
+                </Link>
+              ) : (
+                <span className="text-slate-500">-</span>
+              )}
+            </td>
+          </tr>
+          <tr>
             <th>Keywords</th>
             <td>
               <Keywords keywords={event.keywords} />

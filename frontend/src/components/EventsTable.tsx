@@ -130,6 +130,21 @@ export const columns: Array<ColumnSpec> = [
       </td>
     ),
   },
+  {
+    id: "notes",
+    title: "Notes",
+    render: (event) => (
+      <td key="notes" className="max-w-48">
+        {event.notes ? (
+          <div className="text-sm text-slate-300 max-h-20 overflow-y-auto">
+            {event.notes}
+          </div>
+        ) : (
+          <span className="text-slate-500">-</span>
+        )}
+      </td>
+    ),
+  },
 ];
 
 interface EventsTableProps {

@@ -15,6 +15,7 @@ export interface Event {
   location_lng: number | null;
   author: string;
   groups?: string[];
+  notes?: string;
 }
 
 export interface FilteredEvent extends Event {
@@ -34,6 +35,7 @@ export interface EventPayload {
   location_lat?: number;
   location_lng?: number;
   author: string;
+  notes?: string;
 }
 
 export interface Group {

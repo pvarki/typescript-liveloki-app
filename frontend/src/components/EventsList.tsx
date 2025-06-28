@@ -7,9 +7,9 @@ import useSWR from "swr";
 import { getEvents } from "../helpers/api.ts";
 import { filterEvents } from "../helpers/eventFilter.ts";
 import { toggleInSet } from "../helpers/immutability.ts";
+import type { Event } from "../types.ts";
 import { EventsMap } from "./EventsMap.tsx";
 import { columns, EventsTable, EventsTableOptions } from "./EventsTable";
-import type { Event } from "../types.ts";
 
 type EventsListMode = "list" | "map";
 

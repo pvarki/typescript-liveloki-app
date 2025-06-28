@@ -33,21 +33,24 @@ export function GroupManager() {
 
     const filteredEvents = events.filter((event: Event) => {
       switch (filterType) {
-        case "keywords":
+        case "keywords": {
           return event.keywords?.some((keyword) =>
             keyword.toLowerCase().includes(filterValue.toLowerCase())
           );
-        case "domains":
+        }
+        case "domains": {
           return event.hcoe_domains?.some((domain) =>
             domain.toLowerCase().includes(filterValue.toLowerCase())
           );
-        default:
+        }
+        default: {
           return false;
+        }
       }
     });
 
     const eventIds = filteredEvents.map((event: Event) => event.id.toString());
-    setSelectedEvents(new Set(eventIds));
+    setSelectedEvents(new Set([...eventIds]));
   };
 
   const handleCreateGroup = async () => {
@@ -60,7 +63,7 @@ export function GroupManager() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          eventIds: Array.from(selectedEvents),
+          eventIds: [...selectedEvents],
           groupName: groupName.trim(),
         }),
       });
@@ -70,7 +73,7 @@ export function GroupManager() {
         setSelectedEvents(new Set());
         mutateGroups();
         // Refresh events to show updated group assignments
-        window.location.reload();
+        globalThis.location.reload();
       } else {
         const error = await response.json();
         alert(`Error creating group: ${error.error}`);
@@ -93,7 +96,7 @@ export function GroupManager() {
       if (response.ok) {
         mutateGroups();
         // Refresh events to show updated group assignments
-        window.location.reload();
+        globalThis.location.reload();
       } else {
         const error = await response.json();
         alert(`Error removing from group: ${error.error}`);
@@ -137,7 +140,7 @@ export function GroupManager() {
             <div className="flex gap-2 mb-2">
               <select
                 value={filterType}
-                onChange={(e) => setFilterType(e.target.value as any)}
+                onChange={(e) => setFilterType(e.target.value as "manual" | "keywords" | "domains")}
                 className="ll-input"
               >
                 <option value="manual">Manual Selection</option>

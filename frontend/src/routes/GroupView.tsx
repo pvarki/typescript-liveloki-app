@@ -15,7 +15,7 @@ export function GroupView() {
     return (
       <div className="p-4 text-center">
         <h1 className="text-xl mb-2">Error Loading Group</h1>
-        <p className="text-red-400">Failed to load events for group "{groupName}"</p>
+        <p className="text-red-400">Failed to load events for group &quot;{groupName}&quot;</p>
       </div>
     );
   }

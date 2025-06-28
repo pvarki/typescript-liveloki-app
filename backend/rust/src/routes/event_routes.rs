@@ -16,13 +16,13 @@ pub struct Upload<'r> {
     file: TempFile<'r>,
 }
 
-#[get("/api/events")]
+#[get("/api/v1/events")]
 async fn fetch_events(db: &State<DbPool>) -> Json<serde_json::Value> {
     let events = event_controller::fetch_events(db).await;
     Json(events)
 }
 
-#[post("/api/events", format = "json", data = "<event_data>")]
+#[post("/api/v1/events", format = "json", data = "<event_data>")]
 async fn add_events(
     event_data: Json<serde_json::Value>,
     db: &State<DbPool>,
@@ -31,25 +31,25 @@ async fn add_events(
     Json(result)
 }
 
-#[get("/api/events/trending/day")]
+#[get("/api/v1/events/trending/day")]
 async fn fetch_trending_events_day(db: &State<DbPool>) -> Json<serde_json::Value> {
     let events = event_controller::fetch_trending_events_day(db).await;
     Json(events)
 }
 
-#[get("/api/events/trending/week")]
+#[get("/api/v1/events/trending/week")]
 async fn fetch_trending_events_week(db: &State<DbPool>) -> Json<serde_json::Value> {
     let events = event_controller::fetch_trending_events_week(db).await;
     Json(events)
 }
 
-#[get("/api/event/<id>")]
+#[get("/api/v1/event/<id>")]
 async fn fetch_event_by_id(id: String, db: &State<DbPool>) -> Json<serde_json::Value> {
     let event = event_controller::fetch_event_by_id(id, db).await;
     Json(event)
 }
 
-#[get("/api/keywords")]
+#[get("/api/v1/keywords")]
 async fn fetch_keywords(db: &State<DbPool>) -> Json<serde_json::Value> {
     let keywords = event_controller::fetch_keywords(db).await;
     Json(keywords)
@@ -63,7 +63,7 @@ pub struct LocationSearch {
     // Add other parameters as needed
 }
 
-#[get("/api/locationsearch?<query..>")]
+#[get("/api/v1/locationsearch?<query..>")]
 async fn search_events_by_location(
     query: LocationSearch,
     db: &State<DbPool>,
@@ -79,7 +79,7 @@ async fn search_events_by_location(
     Json(events)
 }
 
-#[post("/api/upload", data = "<form>")]
+#[post("/api/v1/upload", data = "<form>")]
 async fn upload_images(mut form: Form<Upload<'_>>) -> Result<Json<serde_json::Value>, Status> {
     // Ensure uploads directory exists
     let upload_dir = "uploads";
@@ -112,7 +112,7 @@ async fn upload_images(mut form: Form<Upload<'_>>) -> Result<Json<serde_json::Va
     Ok(Json(response))
 }
 
-#[get("/api/metrics")]
+#[get("/api/v1/metrics")]
 async fn fetch_metrics(db: &State<DbPool>) -> Json<serde_json::Value> {
     let metrics = event_controller::fetch_metrics(db).await;
     Json(metrics)

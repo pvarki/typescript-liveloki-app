@@ -2,12 +2,8 @@ import axios from "axios";
 import { describe, it, expect } from "vitest";
 import type { AxiosResponse } from "axios";
 
-// // Configure chai
-// chai.use(chaiAsPromised);
-// const expect = chai.expect;
-
 // API base URL
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000/ll";
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000/";
 
 // Type definitions based on the OpenAPI schema
 interface Event {
@@ -97,9 +93,9 @@ describe("Event API Integration Tests", () => {
     });
   });
 
-  describe("POST /api/events", () => {
+  describe("POST /api/v1/events", () => {
     it("should create a new event", async () => {
-      const response = await axios.post(`${API_BASE_URL}/api/events`, {
+      const response = await axios.post(`${API_BASE_URL}/api/v1/events`, {
         events: [sampleEvent],
       });
 
@@ -118,7 +114,7 @@ describe("Event API Integration Tests", () => {
 
       // Expect the request to be rejected
       try {
-        await axios.post(`${API_BASE_URL}/api/events`, invalidEvent);
+        await axios.post(`${API_BASE_URL}/api/v1/events`, invalidEvent);
         // If we reach here, the request didn't fail as expected
         throw new Error("Expected request to fail with 400 status");
       } catch (error: any) {
@@ -131,10 +127,10 @@ describe("Event API Integration Tests", () => {
     });
   });
 
-  describe("GET /api/keywords", () => {
+  describe("GET /api/v1/keywords", () => {
     it("should return a dictionary of keywords with counts", async () => {
       const response: AxiosResponse<KeywordCount> = await axios.get(
-        `${API_BASE_URL}/api/keywords`,
+        `${API_BASE_URL}/api/v1/keywords`,
       );
 
       // Status code should be 200
@@ -171,14 +167,14 @@ describe("Event API Integration Tests", () => {
       };
 
       // Create the event
-      const createResponse = await axios.post(`${API_BASE_URL}/api/events`, {
+      const createResponse = await axios.post(`${API_BASE_URL}/api/v1/events`, {
         events: [uniqueEvent],
       });
       expect(createResponse.status).to.equal(201);
 
       // Get all events
       const getAllResponse: AxiosResponse<Event[]> = await axios.get(
-        `${API_BASE_URL}/api/events`,
+        `${API_BASE_URL}/api/v1/events`,
       );
       expect(getAllResponse.status).to.equal(200);
 
@@ -215,7 +211,7 @@ describe("Keywords API Integration Tests", () => {
     };
 
     // Create the event
-    await axios.post(`${API_BASE_URL}/api/events`, {
+    await axios.post(`${API_BASE_URL}/api/v1/events`, {
       events: [eventWithUniqueKeyword],
     });
 
@@ -224,7 +220,7 @@ describe("Keywords API Integration Tests", () => {
 
     // Get keywords
     const keywordsResponse: AxiosResponse<KeywordCount> = await axios.get(
-      `${API_BASE_URL}/api/keywords`,
+      `${API_BASE_URL}/api/v1/keywords`,
     );
 
     // The unique keyword should be in the response

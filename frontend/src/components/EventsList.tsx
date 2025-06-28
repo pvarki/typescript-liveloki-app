@@ -9,18 +9,23 @@ import { filterEvents } from "../helpers/eventFilter.ts";
 import { toggleInSet } from "../helpers/immutability.ts";
 import { EventsMap } from "./EventsMap.tsx";
 import { columns, EventsTable, EventsTableOptions } from "./EventsTable";
+import type { Event } from "../types.ts";
 
 type EventsListMode = "list" | "map";
 
-export function EventsList() {
+interface EventsListProps {
+  initialEvents?: Event[];
+}
+
+export function EventsList({ initialEvents }: EventsListProps = {}) {
   const [search, setSearch] = useState(""); // Use this to capture the search field input
   const [highlight, setHighlight] = useState(""); // For alert keywords
   const [mode, setMode] = useState<EventsListMode>("list"); // For list/map toggle
   const [showKeywordsAndDomainsInHeaderColumn, setShowKeywordsAndDomainsInHeaderColumn] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => new Set(columns.map((c) => c.id)));
 
-  // Fetch all events from the backend
-  const eventsSWR = useSWR("events", getEvents, {
+  // Fetch all events from the backend (only if no initialEvents provided)
+  const eventsSWR = useSWR(initialEvents ? null : "events", getEvents, {
     refreshInterval: 10_000,
   });
 
@@ -30,7 +35,7 @@ export function EventsList() {
     (url) => fetch(url).then((res) => res.json()),
   );
 
-  const events = eventsSWR.data;
+  const events = initialEvents || eventsSWR.data;
 
   // Use backend search results if search is active;
   // use client-side filtering if no search or backend results
@@ -42,10 +47,10 @@ export function EventsList() {
     [events, search, highlight, backendFilteredEvents],
   );
 
-  if (eventsSWR.error) {
+  if (!initialEvents && eventsSWR.error) {
     return <div>Error loading events: {eventsSWR.error.message}</div>;
   }
-  if (events === undefined) {
+  if (!initialEvents && events === undefined) {
     return <div>Loading...</div>;
   }
 

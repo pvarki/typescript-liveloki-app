@@ -85,7 +85,12 @@ export const columns: Array<ColumnSpec> = [
     render: (event) => (
       <td key="group" className="max-w-32">
         {event.group ? (
-          <span className="text-green-400 font-medium">{event.group}</span>
+          <Link 
+            to={`/group/${encodeURIComponent(event.group)}`}
+            className="text-green-400 font-medium hover:text-green-300 hover:underline cursor-pointer"
+          >
+            {event.group}
+          </Link>
         ) : (
           <span className="text-slate-500">-</span>
         )}

@@ -34,7 +34,7 @@ export function SingleEventFields({
 }) {
   const [showLocation, setShowLocation] = React.useState(false);
   const update = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       updateState({ [event.target.name]: event.target.value });
     },
     [state, updateState],
@@ -125,6 +125,22 @@ export function SingleEventFields({
         value={state.hcoe_domains.map((domain) => ({ value: domain, label: domain }))}
         onChange={(domains) => updateState({ hcoe_domains: domains.map((domain) => domain.value) })}
         onInputChange={onDomainInputChange}
+      />
+      <input
+        type="text"
+        name="author"
+        placeholder="Author"
+        className="ll-input"
+        onChange={update}
+        value={state.author}
+      />
+      <textarea
+        name="notes"
+        placeholder="Notes (free text)"
+        className="ll-input"
+        rows={3}
+        onChange={update}
+        value={state.notes || ""}
       />
       <div className="flex flex-row flex-wrap md:flex-nowrap gap-2">
         <input
@@ -245,6 +261,7 @@ function initFormState(fromQuery: boolean = false): EventPayload {
     hcoe_domains: splitStringToArray(getValue("hcoe_domains")),
     location: getValue("location"),
     author: getValue("author"),
+    notes: getValue("notes"),
   };
 }
 

@@ -68,6 +68,39 @@ export function EventCard({ event }: { event: FilteredEvent }) {
             </td>
           </tr>
           <tr>
+            <th>Groups</th>
+            <td>
+              {event.groups && event.groups.length > 0 ? (
+                <div className="space-y-1">
+                  {event.groups.map((group, index) => (
+                    <div key={index}>
+                      <Link 
+                        to={`/group/${encodeURIComponent(group)}`}
+                        className="text-green-400 font-medium hover:text-green-300 hover:underline cursor-pointer"
+                      >
+                        {group}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <span className="text-slate-500">-</span>
+              )}
+            </td>
+          </tr>
+          <tr>
+            <th>Notes</th>
+            <td>
+              {event.notes ? (
+                <div className="text-sm text-slate-300 whitespace-pre-wrap">
+                  {event.notes}
+                </div>
+              ) : (
+                <span className="text-slate-500">-</span>
+              )}
+            </td>
+          </tr>
+          <tr>
             <th>Keywords</th>
             <td>
               <Keywords keywords={event.keywords} />

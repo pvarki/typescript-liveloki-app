@@ -2,6 +2,7 @@ import { createHashRouter } from "react-router-dom";
 
 import { DefaultView } from "./routes/DefaultView.tsx";
 import { EventView } from "./routes/EventView.tsx";
+import { GroupView } from "./routes/GroupView.tsx";
 import { Root } from "./routes/Root.tsx";
 
 export const router = createHashRouter([
@@ -11,6 +12,7 @@ export const router = createHashRouter([
     children: [
       { index: true, element: <DefaultView /> },
       { path: "event/:id", element: <EventView /> },
+      { path: "group/:groupName", element: <GroupView /> },
     ],
   },
 ]);

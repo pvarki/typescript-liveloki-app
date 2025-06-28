@@ -80,6 +80,30 @@ export const columns: Array<ColumnSpec> = [
     ),
   },
   {
+    id: "group",
+    title: "Groups",
+    render: (event) => (
+      <td key="group" className="max-w-32">
+        {event.groups && event.groups.length > 0 ? (
+          <div className="space-y-1">
+            {event.groups.map((group, index) => (
+              <div key={index}>
+                <Link 
+                  to={`/group/${encodeURIComponent(group)}`}
+                  className="text-green-400 font-medium hover:text-green-300 hover:underline cursor-pointer text-sm"
+                >
+                  {group}
+                </Link>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <span className="text-slate-500">-</span>
+        )}
+      </td>
+    ),
+  },
+  {
     id: "keywords",
     title: "Keywords",
     render: (event) => (
@@ -103,6 +127,21 @@ export const columns: Array<ColumnSpec> = [
     render: (event) => (
       <td key="author" className="max-w-32">
         {event.author}
+      </td>
+    ),
+  },
+  {
+    id: "notes",
+    title: "Notes",
+    render: (event) => (
+      <td key="notes" className="max-w-48">
+        {event.notes ? (
+          <div className="text-sm text-slate-300 max-h-20 overflow-y-auto">
+            {event.notes}
+          </div>
+        ) : (
+          <span className="text-slate-500">-</span>
+        )}
       </td>
     ),
   },

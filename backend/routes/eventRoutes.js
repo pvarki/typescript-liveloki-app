@@ -8,7 +8,12 @@ import {
     fetchKeywords, 
     searchEventsByLocation, 
     uploadImages,
-    fetchMetrics
+    fetchMetrics,
+    createGroup,
+    updateEventGroup,
+    fetchGroups,
+    fetchEventsByGroup,
+    removeFromGroup
 } from '../controllers/eventController.js';
 import multer from 'multer';
 import path from 'path';
@@ -38,5 +43,11 @@ router.get('/locationsearch', searchEventsByLocation);
 router.post('/upload', upload.any(), uploadImages);
 router.get('/metrics', fetchMetrics);
 
+// Group management routes
+router.post('/groups', createGroup);
+router.get('/groups', fetchGroups);
+router.get('/groups/:groupName', fetchEventsByGroup);
+router.put('/events/:eventId/group', updateEventGroup);
+router.delete('/events/:eventId/group', removeFromGroup);
 
 export default router;

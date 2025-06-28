@@ -231,9 +231,10 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties":{
+                  "additionalProperties": {
                     "type": "string"
                   }
+                }
               }
             },
             "description": "",

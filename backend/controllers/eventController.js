@@ -18,13 +18,13 @@ export const addEvents = async (req, res) => {
         await client.query('BEGIN');
 
         const eventPromises = events.map(event => {
-            const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author } = event;
+            const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, group } = event;
             const id = uuidv7();
             const keywordArray = convertTagArray(keywords);
 
             return client.query(
-                'INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)',
-                [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author]
+                'INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, "group") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+                [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, group]
             );
         });
 
@@ -271,6 +271,121 @@ export const fetchMetrics = async (req, res) => {
         });
     } catch (error) {
         logger.error('Error: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+};
+
+// Group management functions
+export const createGroup = async (req, res) => {
+    const { eventIds, groupName } = req.body;
+
+    if (!eventIds || !Array.isArray(eventIds) || eventIds.length === 0 || !groupName) {
+        return res.status(400).json({ error: 'Event IDs array and group name are required' });
+    }
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+
+        // Update all specified events with the group name
+        const updateQuery = 'UPDATE events SET "group" = $1 WHERE id = ANY($2)';
+        await client.query(updateQuery, [groupName, eventIds]);
+
+        await client.query('COMMIT');
+        logger.info(`Group "${groupName}" created with ${eventIds.length} events`);
+        res.status(201).json({ message: `Group "${groupName}" created successfully`, groupName, eventCount: eventIds.length });
+    } catch (error) {
+        await client.query('ROLLBACK');
+        logger.error('Error creating group: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+};
+
+export const updateEventGroup = async (req, res) => {
+    const { eventId } = req.params;
+    const { groupName } = req.body;
+
+    if (!groupName) {
+        return res.status(400).json({ error: 'Group name is required' });
+    }
+
+    const client = await pool.connect();
+    try {
+        const result = await client.query('UPDATE events SET "group" = $1 WHERE id = $2 RETURNING *', [groupName, eventId]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        logger.info(`Event ${eventId} added to group "${groupName}"`);
+        res.json({ message: 'Event group updated successfully', event: result.rows[0] });
+    } catch (error) {
+        logger.error('Error updating event group: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+};
+
+export const fetchGroups = async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query(`
+            SELECT "group", COUNT(*) as event_count
+            FROM events 
+            WHERE "group" IS NOT NULL AND "group" != ''
+            GROUP BY "group"
+            ORDER BY "group"
+        `);
+
+        res.json(result.rows);
+    } catch (error) {
+        logger.error('Error fetching groups: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+};
+
+export const fetchEventsByGroup = async (req, res) => {
+    const { groupName } = req.params;
+
+    const client = await pool.connect();
+    try {
+        const result = await client.query('SELECT * FROM events WHERE "group" = $1 ORDER BY creation_time DESC', [groupName]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: `No events found in group "${groupName}"` });
+        }
+
+        res.json(result.rows);
+    } catch (error) {
+        logger.error('Error fetching events by group: ' + error.message);
+        res.status(500).json({ error: error.message });
+    } finally {
+        client.release();
+    }
+};
+
+export const removeFromGroup = async (req, res) => {
+    const { eventId } = req.params;
+
+    const client = await pool.connect();
+    try {
+        const result = await client.query('UPDATE events SET "group" = NULL WHERE id = $1 RETURNING *', [eventId]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        logger.info(`Event ${eventId} removed from group`);
+        res.json({ message: 'Event removed from group successfully', event: result.rows[0] });
+    } catch (error) {
+        logger.error('Error removing event from group: ' + error.message);
         res.status(500).json({ error: error.message });
     } finally {
         client.release();

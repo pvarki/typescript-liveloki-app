@@ -80,6 +80,19 @@ export const columns: Array<ColumnSpec> = [
     ),
   },
   {
+    id: "group",
+    title: "Group",
+    render: (event) => (
+      <td key="group" className="max-w-32">
+        {event.group ? (
+          <span className="text-green-400 font-medium">{event.group}</span>
+        ) : (
+          <span className="text-slate-500">-</span>
+        )}
+      </td>
+    ),
+  },
+  {
     id: "keywords",
     title: "Keywords",
     render: (event) => (

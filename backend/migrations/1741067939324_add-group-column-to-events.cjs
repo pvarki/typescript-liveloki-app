@@ -9,12 +9,9 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.sql(`
-        COPY events (id,header,link,source,admiralty_reliability,admiralty_accuracy,keywords,event_time,notes,hcoe_domains,author,location,location_lng,location_lat,creation_time,"group")
-        FROM '/tmp/preseed.csv'
-        DELIMITER ','
-        CSV HEADER;
-    `);
+    pgm.addColumns('events', {
+        "group": { type: 'text' }
+    });
 };
 
 /**
@@ -23,5 +20,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.sql(`DELETE FROM events WHERE id IN (SELECT id FROM events LIMIT 100)`);
+    pgm.dropColumns('events', ['group']);
 };

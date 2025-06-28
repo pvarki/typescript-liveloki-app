@@ -1,5 +1,6 @@
 import { EventsList } from "../components/EventsList.tsx";
 import SubmitForm from "../components/SubmitForm.tsx";
+import { GroupManager } from "../components/GroupManager.tsx";
 
 export function DefaultView() {
   return (
@@ -7,6 +8,11 @@ export function DefaultView() {
       <div className="lg:container mx-auto mt-2">
         <h1 className="text-xl mb-2">Submit Events</h1>
         <SubmitForm />
+      </div>
+      <div className="mt-4">
+        <hr className="mb-4" />
+        <h1 className="text-xl mb-2">Event Groups</h1>
+        <GroupManager />
       </div>
       <div className="mt-4">
         <hr className="mb-4" />

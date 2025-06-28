@@ -50,7 +50,7 @@ export function GroupManager() {
     });
 
     const eventIds = filteredEvents.map((event: Event) => event.id.toString());
-    setSelectedEvents(new Set([...eventIds]));
+    setSelectedEvents(new Set(eventIds));
   };
 
   const handleCreateGroup = async () => {
@@ -133,7 +133,7 @@ export function GroupManager() {
 
       {/* Expandable Content */}
       {isExpanded && (
-        <>
+        <div>
           {/* Filter Section */}
           <div className="bg-slate-800 p-4 rounded">
             <h3 className="text-md font-medium mb-2">Select Events by Filter</h3>
@@ -254,7 +254,7 @@ export function GroupManager() {
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

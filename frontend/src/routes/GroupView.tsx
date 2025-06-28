@@ -1,5 +1,6 @@
-import useSWR from "swr";
 import { useParams } from "react-router-dom";
+import useSWR from "swr";
+
 import { EventsList } from "../components/EventsList.tsx";
 
 export function GroupView() {
@@ -7,8 +8,10 @@ export function GroupView() {
 
   // Fetch events for this specific group
   const { data: events, error } = useSWR(
-    groupName ? `/api/groups/${encodeURIComponent(groupName)}` : null,
-    (url: string) => fetch(url).then((res) => res.json())
+    groupName ? `api/v1/groups/${encodeURIComponent(groupName)}` : null,
+    (url: string) => {
+      return fetch(url).then((res) => res.json());
+    },
   );
 
   if (error) {
@@ -39,4 +42,4 @@ export function GroupView() {
       <EventsList initialEvents={events} />
     </>
   );
-} 
+}

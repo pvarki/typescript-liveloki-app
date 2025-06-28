@@ -37,3 +37,5 @@ jobs:
         working-directory: backend
       - run: npm run prettier -- --check
         working-directory: backend
+      - run: npm exec redocly lint ../dist/openapi.json
+        working-directory: backend

@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Specification",
+    "title": "Battle Log OpenAPI Specification",
     "version": "1.0.0",
     "description": "The public API of the Battle Log backend",
     "license": {
@@ -791,7 +791,37 @@
     "/api/groups" : {
       "post": {
         "summary": "Create a new group",
-
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "groupName": {
+                    "type": "string"
+                  },
+                  "eventIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 100,
+                    "uniqueItems": true,
+                    "description": "Array of PostgreSQL-compatible UUID identifiers",
+                    "example": [
+                      "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
+                      "550e8400-e29b-41d4-a716-446655440000"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
         "security": []
       },
       "get": {
@@ -811,6 +841,30 @@
             "type": "string"
           }
         }],
+        "responses": {
+          "201": {
+            "description": "Create a new group with a set of events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "eventCount": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "message",
+                    "eventCount"
+                  ]
+                }
+              }
+            }
+          }
+        },
         "security": []
       }
     },
@@ -824,11 +878,11 @@
         }
       }],
       "put": {
-        "summary": "Update a group",
+        "summary": "Update a group, add a group entry to event",
         "security": []
       },
       "delete": {
-        "summary": "Delete a group",
+        "summary": "Delete a group from event",
 
         "security": []
       }

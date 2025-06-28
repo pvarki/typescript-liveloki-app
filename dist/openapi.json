@@ -9,7 +9,7 @@
     "/api/events": {
       "get": {
         "summary": "/api/events",
-        "description": "**Host**: http://relieved-leech.solution.dev.pvarki.fi",
+        "description": "",
         "responses": {
           "200": {
             "content": {
@@ -118,7 +118,7 @@
       },
       "post": {
         "summary": "/api/events",
-        "description": "**Host**: http://relieved-leech.solution.dev.pvarki.fi",
+        "description": "",
         "responses": {
           "201": {
             "content": {
@@ -224,7 +224,7 @@
     "/api/keywords": {
       "get": {
         "summary": "/api/keywords",
-        "description": "**Host**: http://relieved-leech.solution.dev.pvarki.fi",
+        "description": "",
         "responses": {
           "200": {
             "content": {
@@ -246,7 +246,7 @@
     "/api/locationsearch": {
       "get": {
         "summary": "/api/locationsearch",
-        "description": "**Host**: http://relieved-leech.solution.dev.pvarki.fi",
+        "description": "",
         "responses": {
           "200": {
             "content": {
@@ -367,7 +367,7 @@
     "/api/events/trending/week": {
       "get": {
         "summary": "/api/events/trending/week",
-        "description": "**Host**: http://relieved-leech.solution.dev.pvarki.fi",
+        "description": "",
         "responses": {
           "200": {
             "content": {
@@ -480,7 +480,7 @@
     "/api/events/trending/day": {
       "get": {
         "summary": "/api/events/trending/day",
-        "description": "**Host**: http://relieved-leech.solution.dev.pvarki.fi",
+        "description": "",
         "responses": {
           "200": {
             "content": {
@@ -593,7 +593,7 @@
     "/api/metrics": {
       "get": {
         "summary": "/api/metrics",
-        "description": "**Host**: http://relieved-leech.solution.dev.pvarki.fi",
+        "description": "",
         "responses": {
           "200": {
             "content": {
@@ -636,7 +636,7 @@
     "/api/event/:param2": {
       "get": {
         "summary": "/api/event/:param2",
-        "description": "**Host**: http://relieved-leech.solution.dev.pvarki.fi",
+        "description": "",
         "responses": {
           "200": {
             "content": {
@@ -740,7 +740,7 @@
     "/api/upload": {
       "post": {
         "summary": "/api/upload",
-        "description": "**Host**: http://relieved-leech.solution.dev.pvarki.fi",
+        "description": "",
         "responses": {
           "201": {
             "content": {

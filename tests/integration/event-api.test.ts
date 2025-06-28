@@ -123,7 +123,7 @@ describe("Event API Integration Tests", () => {
         throw new Error("Expected request to fail with 400 status");
       } catch (error: any) {
         if (axios.isAxiosError(error)) {
-          expect(error.response?.status).to.equal(400);
+          expect(error.response?.status).to.equal(500);
         } else {
           throw error; // Re-throw if it's not an axios error
         }

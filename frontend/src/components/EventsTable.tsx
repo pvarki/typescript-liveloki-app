@@ -81,16 +81,22 @@ export const columns: Array<ColumnSpec> = [
   },
   {
     id: "group",
-    title: "Group",
+    title: "Groups",
     render: (event) => (
       <td key="group" className="max-w-32">
-        {event.group ? (
-          <Link 
-            to={`/group/${encodeURIComponent(event.group)}`}
-            className="text-green-400 font-medium hover:text-green-300 hover:underline cursor-pointer"
-          >
-            {event.group}
-          </Link>
+        {event.groups && event.groups.length > 0 ? (
+          <div className="space-y-1">
+            {event.groups.map((group, index) => (
+              <div key={index}>
+                <Link 
+                  to={`/group/${encodeURIComponent(group)}`}
+                  className="text-green-400 font-medium hover:text-green-300 hover:underline cursor-pointer text-sm"
+                >
+                  {group}
+                </Link>
+              </div>
+            ))}
+          </div>
         ) : (
           <span className="text-slate-500">-</span>
         )}

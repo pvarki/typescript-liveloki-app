@@ -10,7 +10,7 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
     pgm.sql(`
-        COPY events (id,header,link,source,admiralty_reliability,admiralty_accuracy,keywords,event_time,notes,hcoe_domains,author,location,location_lng,location_lat,creation_time,"group")
+        COPY events (id,header,link,source,admiralty_reliability,admiralty_accuracy,keywords,event_time,notes,hcoe_domains,author,location,location_lng,location_lat,creation_time,groups)
         FROM '/tmp/preseed.csv'
         DELIMITER ','
         CSV HEADER;

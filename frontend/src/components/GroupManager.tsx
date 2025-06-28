@@ -80,10 +80,14 @@ export function GroupManager() {
     }
   };
 
-  const handleRemoveFromGroup = async (eventId: string) => {
+  const handleRemoveFromGroup = async (eventId: string, groupName: string) => {
     try {
       const response = await fetch(`/api/events/${eventId}/group`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ groupName }),
       });
 
       if (response.ok) {
@@ -159,7 +163,7 @@ export function GroupManager() {
 
           {/* Group Creation */}
           <div className="bg-slate-800 p-4 rounded">
-            <h3 className="text-md font-medium mb-2">Create Group</h3>
+            <h3 className="text-md font-medium mb-2">Add to Group</h3>
             <div className="flex gap-2">
               <input
                 type="text"
@@ -173,7 +177,7 @@ export function GroupManager() {
                 className="ll-btn"
                 disabled={!groupName.trim() || selectedEvents.size === 0}
               >
-                Create Group ({selectedEvents.size} events)
+                Add to Group ({selectedEvents.size} events)
               </button>
             </div>
           </div>
@@ -201,19 +205,32 @@ export function GroupManager() {
                   <div className="flex-1">
                     <div className="font-medium">{event.header}</div>
                     <div className="text-sm text-slate-400">
-                      {event.group && <span className="text-green-400">Group: {event.group}</span>}
+                      {event.groups && event.groups.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {event.groups.map((group, index) => (
+                            <span key={index} className="text-green-400">
+                              {group}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {event.group && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveFromGroup(event.id.toString());
-                      }}
-                      className="ll-btn text-sm"
-                    >
-                      Remove from Group
-                    </button>
+                  {event.groups && event.groups.length > 0 && (
+                    <div className="flex flex-col gap-1">
+                      {event.groups.map((group, index) => (
+                        <button
+                          key={index}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFromGroup(event.id.toString(), group);
+                          }}
+                          className="ll-btn text-xs"
+                        >
+                          Remove from {group}
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
               ))}
@@ -226,8 +243,8 @@ export function GroupManager() {
               <h3 className="text-md font-medium mb-4">Existing Groups</h3>
               <div className="space-y-2">
                 {groups.map((group: Group) => (
-                  <div key={group.group} className="flex justify-between items-center p-2 bg-slate-700 rounded">
-                    <span className="font-medium">{group.group}</span>
+                  <div key={group.group_name} className="flex justify-between items-center p-2 bg-slate-700 rounded">
+                    <span className="font-medium">{group.group_name}</span>
                     <span className="text-sm text-slate-400">{group.event_count} events</span>
                   </div>
                 ))}

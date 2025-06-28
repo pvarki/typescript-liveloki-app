@@ -18,13 +18,14 @@ export const addEvents = async (req, res) => {
         await client.query('BEGIN');
 
         const eventPromises = events.map(event => {
-            const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, group } = event;
+            const { header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups } = event;
             const id = uuidv7();
             const keywordArray = convertTagArray(keywords);
+            const groupsArray = groups ? (Array.isArray(groups) ? groups : [groups]) : [];
 
             return client.query(
-                'INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, "group") VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
-                [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, group]
+                'INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)',
+                [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groupsArray]
             );
         });
 
@@ -289,13 +290,20 @@ export const createGroup = async (req, res) => {
     try {
         await client.query('BEGIN');
 
-        // Update all specified events with the group name
-        const updateQuery = 'UPDATE events SET "group" = $1 WHERE id = ANY($2)';
+        // Add the group name to the groups array for all specified events
+        const updateQuery = `
+            UPDATE events 
+            SET groups = CASE 
+                WHEN groups IS NULL THEN ARRAY[$1]
+                ELSE array_append(groups, $1)
+            END
+            WHERE id = ANY($2) AND NOT ($1 = ANY(groups))
+        `;
         await client.query(updateQuery, [groupName, eventIds]);
 
         await client.query('COMMIT');
-        logger.info(`Group "${groupName}" created with ${eventIds.length} events`);
-        res.status(201).json({ message: `Group "${groupName}" created successfully`, groupName, eventCount: eventIds.length });
+        logger.info(`Group "${groupName}" added to ${eventIds.length} events`);
+        res.status(201).json({ message: `Group "${groupName}" added successfully`, groupName, eventCount: eventIds.length });
     } catch (error) {
         await client.query('ROLLBACK');
         logger.error('Error creating group: ' + error.message);
@@ -315,10 +323,18 @@ export const updateEventGroup = async (req, res) => {
 
     const client = await pool.connect();
     try {
-        const result = await client.query('UPDATE events SET "group" = $1 WHERE id = $2 RETURNING *', [groupName, eventId]);
+        const result = await client.query(`
+            UPDATE events 
+            SET groups = CASE 
+                WHEN groups IS NULL THEN ARRAY[$1]
+                ELSE array_append(groups, $1)
+            END
+            WHERE id = $2 AND NOT ($1 = ANY(groups))
+            RETURNING *
+        `, [groupName, eventId]);
         
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Event not found' });
+            return res.status(404).json({ error: 'Event not found or already in group' });
         }
 
         logger.info(`Event ${eventId} added to group "${groupName}"`);
@@ -335,11 +351,11 @@ export const fetchGroups = async (req, res) => {
     const client = await pool.connect();
     try {
         const result = await client.query(`
-            SELECT "group", COUNT(*) as event_count
+            SELECT unnest(groups) as group_name, COUNT(*) as event_count
             FROM events 
-            WHERE "group" IS NOT NULL AND "group" != ''
-            GROUP BY "group"
-            ORDER BY "group"
+            WHERE groups IS NOT NULL AND array_length(groups, 1) > 0
+            GROUP BY group_name
+            ORDER BY group_name
         `);
 
         res.json(result.rows);
@@ -356,7 +372,7 @@ export const fetchEventsByGroup = async (req, res) => {
 
     const client = await pool.connect();
     try {
-        const result = await client.query('SELECT * FROM events WHERE "group" = $1 ORDER BY creation_time DESC', [groupName]);
+        const result = await client.query('SELECT * FROM events WHERE $1 = ANY(groups) ORDER BY creation_time DESC', [groupName]);
         
         if (result.rows.length === 0) {
             return res.status(404).json({ message: `No events found in group "${groupName}"` });
@@ -373,16 +389,26 @@ export const fetchEventsByGroup = async (req, res) => {
 
 export const removeFromGroup = async (req, res) => {
     const { eventId } = req.params;
+    const { groupName } = req.body;
+
+    if (!groupName) {
+        return res.status(400).json({ error: 'Group name is required' });
+    }
 
     const client = await pool.connect();
     try {
-        const result = await client.query('UPDATE events SET "group" = NULL WHERE id = $1 RETURNING *', [eventId]);
+        const result = await client.query(`
+            UPDATE events 
+            SET groups = array_remove(groups, $1)
+            WHERE id = $2
+            RETURNING *
+        `, [groupName, eventId]);
         
         if (result.rows.length === 0) {
             return res.status(404).json({ error: 'Event not found' });
         }
 
-        logger.info(`Event ${eventId} removed from group`);
+        logger.info(`Event ${eventId} removed from group "${groupName}"`);
         res.json({ message: 'Event removed from group successfully', event: result.rows[0] });
     } catch (error) {
         logger.error('Error removing event from group: ' + error.message);

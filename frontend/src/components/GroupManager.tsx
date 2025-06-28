@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useSWR from "swr";
+
 import { getEvents } from "../helpers/api.ts";
 import type { Event, Group } from "../types.ts";
 

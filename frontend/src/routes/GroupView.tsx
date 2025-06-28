@@ -1,5 +1,6 @@
-import useSWR from "swr";
 import { useParams } from "react-router-dom";
+import useSWR from "swr";
+
 import { EventsList } from "../components/EventsList.tsx";
 
 export function GroupView() {

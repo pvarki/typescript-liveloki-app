@@ -9,12 +9,18 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
+  if (process.env.PRESEED === 'true') {
+    console.log('Preseeding database with events from /tmp/preseed.csv');
     pgm.sql(`
         COPY events (id,header,link,source,admiralty_reliability,admiralty_accuracy,keywords,event_time,notes,hcoe_domains,author,location,location_lng,location_lat,creation_time,groups)
         FROM '/tmp/preseed.csv'
         DELIMITER ','
         CSV HEADER;
     `);
+    } else {
+    // Create a no-op SQL statement
+    pgm.sql('SELECT 1 as preseed_skipped;');
+  }
 };
 
 /**

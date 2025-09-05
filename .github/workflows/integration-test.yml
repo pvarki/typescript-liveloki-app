@@ -15,10 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: "Set environment"
-        run: cp .env_example .env
-      - name: "Set preseed"
-        run: echo "PRESEED=true" >> $GITHUB_ENV
+        run: cp .env_example .env && echo "PRESEED=true" >> .env
       - name: "Start service"
-        run: docker compose -f docker-compose.yml up -d --wait
+        run: docker compose -f docker-compose.yml up -d
       - name: "Test server"
-        run: docker exec -it service-a-1 yarn test
+        run: docker compose run test npm run test:integration

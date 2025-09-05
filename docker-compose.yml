@@ -30,6 +30,7 @@ services:
         condition: service_healthy
     volumes:
       - uploads:/usr/src/app/uploads
+      - ./preseed:/tmp
 
   caddy:
     image: caddy:latest

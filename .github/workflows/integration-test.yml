@@ -16,6 +16,8 @@ jobs:
       - uses: actions/checkout@v5
       - name: "Set environment"
         run: cp .env_example .env
+      - name: "Set preseed"
+        run: echo "PRESEED=true" >> $GITHUB_ENV
       - name: "Start service"
         run: docker compose -f docker-compose.yml up -d --wait
       - name: "Test server"

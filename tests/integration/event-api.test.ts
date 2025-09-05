@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import type { AxiosResponse } from "axios";
 
 // API base URL
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000/";
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000/ll";
 
 // Type definitions based on the OpenAPI schema
 interface Event {

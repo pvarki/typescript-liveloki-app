@@ -206,11 +206,43 @@ pub async fn fetch_event_by_id(id: String, db: &State<DbPool>) -> Value {
 }
 
 pub async fn fetch_keywords(db: &State<DbPool>) -> Value {
-    // Implement keywords fetch logic
-    json!({
-        "status": "success",
-        "keywords": []
-    })
+    let mut conn = match db.get() {
+        Ok(conn) => conn,
+        Err(_) => {
+            return json!({
+                "error": "Failed to get database connection"
+            })
+        }
+    };
+
+    // Use raw SQL to unnest keywords array and count occurrences
+    let results = conn.as_sql(
+        r#"
+        SELECT UNNEST(keywords) AS keyword, COUNT(*) AS count
+        FROM events
+        WHERE keywords IS NOT NULL
+        GROUP BY keyword
+        ORDER BY count DESC
+        "#,
+    )
+        .load::<KeywordCount>(&mut conn);
+
+    match results {
+        Ok(keyword_counts) => {
+            // Convert to HashMap<String, i32> format like the JavaScript version
+            let mut keywords_with_count = HashMap::new();
+            for kc in keyword_counts {
+                keywords_with_count.insert(kc.keyword, kc.count);
+            }
+            json!(keywords_with_count)
+        }
+        Err(e) => {
+            eprintln!("Database error fetching keywords: {}", e);
+            json!({
+                "error": "Failed to fetch keywords from database"
+            })
+        }
+    }
 }
 
 pub async fn search_events_by_location(query: Value, db: &State<DbPool>) -> Value {

@@ -3,7 +3,7 @@ import { describe, it, expect } from "vitest";
 import type { AxiosResponse } from "axios";
 
 // API base URL
-const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000/ll";
+const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
 // Add these interface definitions after the existing ones
 interface Group {

@@ -43,7 +43,7 @@ services:
     environment:
       LIVLOKI_URL: "http://app:3000"
     ports:
-      - "8000:8000"
+      - "8009:8009"
     depends_on:
       - app
 

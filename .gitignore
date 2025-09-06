@@ -131,3 +131,6 @@ dist
 
 # python
 *.py[cod]
+
+backend/rust/target
+

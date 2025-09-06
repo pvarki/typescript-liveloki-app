@@ -33,9 +33,9 @@ const sampleGroupRequest: GroupCreateRequest = {
 // Add this new test suite at the end of the file
 describe("Groups API Integration Tests", () => {
 
-  describe("GET /api/groups", () => {
+  describe("GET /api/v1/groups", () => {
     it("should return a list of existing groups", async () => {
-      const response = await axios.get(`${API_BASE_URL}/api/groups`);
+      const response = await axios.get(`${API_BASE_URL}/api/v1/groups`);
 
       // Status code should be 200
       expect(response.status).to.equal(200);
@@ -52,7 +52,7 @@ describe("Groups API Integration Tests", () => {
     });
   });
 
-  describe("GET /api/groups/{groupName}", () => {
+  describe("GET /api/v1/groups/{groupName}", () => {
     it("should return group details for an existing group", async () => {
       // First create a group
       const uniqueGroupName = `TestGroupDetails${Date.now()}`;
@@ -62,10 +62,10 @@ describe("Groups API Integration Tests", () => {
         eventIds: ["0197b30c-9acd-7e4a-b757-e51550b03376", "0197b30c-9acd-7006-8446-e6ee745686ee"] // From preseed data
       };
 
-      await axios.post(`${API_BASE_URL}/api/groups`, groupRequest);
+      await axios.post(`${API_BASE_URL}/api/v1/groups`, groupRequest);
 
       // Then get the group details
-      const response = await axios.get(`${API_BASE_URL}/api/groups/${uniqueGroupName}`);
+      const response = await axios.get(`${API_BASE_URL}/api/v1/groups/${uniqueGroupName}`);
 
       // Status code should be 200
       expect(response.status).to.equal(200);
@@ -82,7 +82,7 @@ describe("Groups API Integration Tests", () => {
     it("should handle existent event ID", async () => {
       const eventId = "0197b30c-9acd-7f21-94d6-0fb19cb05543";
 
-      const response = await axios.get(`${API_BASE_URL}/api/event/${eventId}`);
+      const response = await axios.get(`${API_BASE_URL}/api/v1/event/${eventId}`);
 
       expect(response.status).to.equal(200);
       expect(response.data).to.be.an("object");

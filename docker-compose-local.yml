@@ -34,6 +34,20 @@ services:
     volumes:
       - uploads:/usr/src/app/uploads
 
+
+  integration:
+    build:
+      context: ./integration
+      dockerfile: Dockerfile
+    init: true
+    environment:
+      LIVLOKI_URL: "http://app:3000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - app
+
+
 volumes:
   db-data:
   uploads:

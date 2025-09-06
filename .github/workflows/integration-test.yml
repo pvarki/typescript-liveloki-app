@@ -18,5 +18,7 @@ jobs:
         run: cp .env_example .env && echo "PRESEED=true" >> .env
       - name: "Start service"
         run: docker compose -f docker-compose.yml up -d
-      - name: "Test server"
+      - name: "Test backend"
         run: docker compose run test npm run test:integration
+      - name: "Test Rust backend"
+        run: docker compose run -e API_BASE_URL=http://app-rust:4000 test npm run test:integration

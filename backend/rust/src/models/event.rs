@@ -4,7 +4,7 @@ use diesel::backend::Backend;
 use diesel::deserialize::{self, FromSql};
 use diesel::prelude::*;
 use diesel::serialize::ToSql;
-use diesel::sql_types::{Nullable, Text};
+use diesel::sql_types::{Nullable, Text, BigInt};
 use diesel::FromSqlRow;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
@@ -72,6 +72,14 @@ pub struct Event {
     pub location_lng: Option<f32>, // Longitude as a floating-point value
     pub location_lat: Option<f32>, // Latitude as a floating-point value
     pub author: Option<String>,
+}
+
+#[derive(QueryableByName, Debug)]
+pub struct KeywordCount {
+    #[diesel(sql_type = Text)]
+    pub keyword: String,
+    #[diesel(sql_type = BigInt)]
+    pub count: i64,
 }
 
 // impl Event {

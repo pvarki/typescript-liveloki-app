@@ -1,9 +1,10 @@
 use crate::db::DbPool;
-use crate::models::event::Event;
+use crate::models::event::*;
 use crate::schema::events;
 use diesel::prelude::*;
 use rocket::State;
 use serde_json::{json, Value};
+use std::collections::HashMap;
 use uuid::Uuid;
 
 pub async fn fetch_events(db: &State<DbPool>) -> Value {
@@ -216,7 +217,7 @@ pub async fn fetch_keywords(db: &State<DbPool>) -> Value {
     };
 
     // Use raw SQL to unnest keywords array and count occurrences
-    let results = conn.as_sql(
+    let results = diesel::sql_query(
         r#"
         SELECT UNNEST(keywords) AS keyword, COUNT(*) AS count
         FROM events

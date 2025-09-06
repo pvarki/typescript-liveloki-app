@@ -38,7 +38,10 @@ where
             Some(s) => {
                 // Attempt to parse the string into a NaiveDateTime
                 // Adjust the format string to match your data
-                let parsed = NaiveDateTime::parse_from_str(&s, "%Y-%m-%dT%H:%M")
+                let parsed = NaiveDateTime::parse_from_str(&s, "%Y-%m-%dT%H:%M:%S%.fZ")
+                    .or_else(|_| NaiveDateTime::parse_from_str(&s, "%Y-%m-%dT%H:%M:%SZ"))
+                    .or_else(|_| NaiveDateTime::parse_from_str(&s, "%Y-%m-%dT%H:%M:%S"))
+                    .or_else(|_| NaiveDateTime::parse_from_str(&s, "%Y-%m-%dT%H:%M"))
                     .map_err(|e: ParseError| Box::new(e) as Box<dyn Error + Send + Sync>)?;
                 Ok(TextTimestamp(Some(parsed)))
             }

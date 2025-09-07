@@ -25,6 +25,8 @@
     "@opentelemetry/sdk-node": "^0.204.0",
     "@opentelemetry/sdk-trace-node": "^2.1.0",
     "@redocly/cli": "^2.0.8",
+    "@tak-ps/node-cot": "^14.6.0",
+    "fast-xml-parser": "^4.5.0",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "express-jwt": "^8.4.1",

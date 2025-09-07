@@ -23,6 +23,8 @@
     "date-fns": "^4.1.0",
     "geojson": "^0.5.0",
     "maplibre-gl": "^4.7.1",
+    "ol": "10.5.0",
+    "ol-mapbox-style": "^13.0.1",
     "mutative": "^1.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

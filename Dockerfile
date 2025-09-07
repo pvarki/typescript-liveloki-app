@@ -23,6 +23,7 @@ RUN npm install
 # Bundle app source
 COPY backend/. .
 COPY --from=build /usr/src/app/dist ./public
+COPY DP-Testing ./DP-Testing
 
 # Expose the port the app runs on
 EXPOSE 3000

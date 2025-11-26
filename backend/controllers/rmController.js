@@ -27,6 +27,7 @@ function getBattlelogUrl() {
       return url;
     } catch (error) {
       logger.error('Error reading kraftwerk file:', error);
+      return `http://localhost:${config.port}`;
     }
   } else {
     logger.warn('Kraftwerk file not found, using default battlelog URL');

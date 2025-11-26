@@ -97,10 +97,6 @@ export const fetchEvents = async (req, res) => {
 
     const result = await client.query(query, values);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "No events found matching the search criteria" });
-    }
-
     res.json(result.rows);
   } catch (error) {
     logger.error("Error: " + error.message);

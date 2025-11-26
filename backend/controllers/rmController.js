@@ -46,6 +46,7 @@ const descriptionBase = {
         type: 'link',
         ref: BATTLELOG_URL,
     },
+    docs: "https://github.com/pvarki/typescript-liveloki-app/"
 }
 
 const descriptions = {

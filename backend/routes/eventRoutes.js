@@ -1,13 +1,13 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { 
-    addEvents, 
-    fetchEvents, 
-    fetchEventById, 
-    fetchTrendingEventsDay, 
-    fetchTrendingEventsWeek, 
-    fetchKeywords, 
-    searchEventsByLocation, 
+import {
+    addEvents,
+    fetchEvents,
+    fetchEventById,
+    fetchTrendingEventsDay,
+    fetchTrendingEventsWeek,
+    fetchKeywords,
+    searchEventsByLocation,
     uploadImages,
     fetchMetrics,
     createGroup,

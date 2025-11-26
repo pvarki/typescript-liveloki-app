@@ -1,23 +1,5 @@
 {
-  "name": "event-tracker",
-  "version": "1.0.0",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "start": "node index.js",
-    "start:instrumented": "node --require ./instrumentation.js index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "migrate:up": "node-pg-migrate up",
-    "migrate:down": "node-pg-migrate down",
-    "migrate:redo": "node-pg-migrate redo",
-    "migrate:create": "node-pg-migrate create",
-    "lint": "eslint .",
-    "prettier": "prettier ."
-  },
-  "keywords": [],
   "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.62.2",
@@ -38,6 +20,7 @@
     "uuid": "^12.0.0",
     "winston": "^3.17.0"
   },
+  "description": "",
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "eslint": "^9.19.0",
@@ -46,5 +29,22 @@
     "eslint-plugin-unicorn": "^61.0.1",
     "globals": "^16.3.0",
     "nodemon": "^3.1.4"
-  }
+  },
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "event-tracker",
+  "scripts": {
+    "lint": "eslint .",
+    "migrate:create": "node-pg-migrate create",
+    "migrate:down": "node-pg-migrate down",
+    "migrate:redo": "node-pg-migrate redo",
+    "migrate:up": "node-pg-migrate up",
+    "prettier": "prettier .",
+    "start": "node index.js",
+    "start:instrumented": "node --require ./instrumentation.js index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "version": "1.0.0"
 }

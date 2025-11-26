@@ -6,23 +6,23 @@ import {
 
 const router = express.Router();
 
-router.get('/healthcheck', checkHealth);
+router.get('/api/v1/healthcheck', checkHealth);
 
 // POST /created - New device cert was created
 router.post('/api/v1/users/created', noOp);
 
 // POST /revoked - Device cert was revoked
-router.post('/users/revoked', noOp);
+router.post('/api/v1/users/revoked', noOp);
 
 // POST /promoted - Device cert was promoted to admin privileges
-router.post('/users/promoted', noOp);
+router.post('/api/v1/users/promoted', noOp);
 
 // POST /demoted - Device cert was demoted to standard privileges
-router.post('/users/demoted', noOp);
+router.post('/api/v1/users/demoted', noOp);
 
 // PUT /updated - Device callsign updated
-router.put('/users/updated', noOp);
+router.put('/api/v1/users/updated', noOp);
 
-router.get('/description/:language', descriptionHandler);
+router.get('/api/v2/description/:language', descriptionHandler);
 
 export default router;

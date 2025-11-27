@@ -39,7 +39,7 @@ const BATTLELOG_URL = getBattlelogUrl();
 
 const descriptionBase = {
     shortname: 'battlelog',
-    title: 'Battlelog',
+    title: 'BattleLog',
     icon: null,
     description: 'Event management and tracking',
     language: 'en',

@@ -12,7 +12,7 @@ exports.up = (pgm) => {
     pgm.createTable('event_media', {
         id: {type: 'uuid', primaryKey: true, notNull: true},
         event_id: {
-            type: 'uuid', 
+            type: 'uuid',
             notNull: true,
             references: 'events(id)'
         },

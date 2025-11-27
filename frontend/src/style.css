@@ -1,21 +1,21 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: Inter, Arial, sans-serif;
+    --font-sans: Inter, Arial, sans-serif;
 
-  --color-blue-50: #f2f5fc;
-  --color-blue-100: #e1e8f8;
-  --color-blue-200: #cbd8f2;
-  --color-blue-300: #a6bfea;
-  --color-blue-400: #7c9dde;
-  --color-blue-500: #5d7dd4;
-  --color-blue-600: #4963c7;
-  --color-blue-700: #3f51b5;
-  --color-blue-800: #394494;
-  --color-blue-900: #323d76;
-  --color-blue-950: #222749;
+    --color-blue-50: #f2f5fc;
+    --color-blue-100: #e1e8f8;
+    --color-blue-200: #cbd8f2;
+    --color-blue-300: #a6bfea;
+    --color-blue-400: #7c9dde;
+    --color-blue-500: #5d7dd4;
+    --color-blue-600: #4963c7;
+    --color-blue-700: #3f51b5;
+    --color-blue-800: #394494;
+    --color-blue-900: #323d76;
+    --color-blue-950: #222749;
 }
 
 /*
@@ -27,90 +27,90 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentcolor);
+    }
 }
 
 @utility ll-input {
-  @apply bg-gray-800 text-gray-200 border-none rounded-md p-2;
+    @apply bg-gray-800 text-gray-200 border-none rounded-md p-2;
 }
 
 @utility ll-btn {
-  @apply bg-blue-800 text-gray-200 border-none rounded-md p-2 hover:bg-blue-700;
-  @apply disabled:opacity-50;
+    @apply bg-blue-800 text-gray-200 border-none rounded-md p-2 hover:bg-blue-700;
+    @apply disabled:opacity-50;
 }
 
 @utility ll-btn-secondary {
-  @apply bg-blue-900 text-gray-300 border-none rounded-md p-2 hover:bg-blue-800;
-  @apply disabled:opacity-50;
+    @apply bg-blue-900 text-gray-300 border-none rounded-md p-2 hover:bg-blue-800;
+    @apply disabled:opacity-50;
 }
 
 @utility ll-events-table {
-  @apply w-full border-collapse text-sm;
+    @apply w-full border-collapse text-sm;
 
-  thead > tr > th {
-    @apply bg-neutral-900 px-2 py-1 border-b border-gray-500 text-left font-bold text-ellipsis align-bottom;
-  }
-
-  tbody > tr > td {
-    @apply px-2 py-1 border-b border-gray-500 wrap-break-word;
-
-    a {
-      @apply text-pink-500 underline;
+    thead > tr > th {
+        @apply bg-neutral-900 px-2 py-1 border-b border-gray-500 text-left font-bold text-ellipsis align-bottom;
     }
-  }
 
-  tbody > tr {
-    @apply even:bg-neutral-800 hover:bg-neutral-700;
-  }
+    tbody > tr > td {
+        @apply px-2 py-1 border-b border-gray-500 wrap-break-word;
+
+        a {
+            @apply text-pink-500 underline;
+        }
+    }
+
+    tbody > tr {
+        @apply even:bg-neutral-800 hover:bg-neutral-700;
+    }
 }
 
 @utility ll-event-card-table {
-  @apply w-full border-collapse text-sm;
+    @apply w-full border-collapse text-sm;
 
-  tbody > tr > th {
-    @apply px-2 py-1 border-b border-gray-500 text-left font-bold text-ellipsis;
-  }
-
-  tbody > tr > td {
-    @apply px-2 py-1 border-b border-gray-500 wrap-break-word;
-
-    a {
-      @apply text-pink-500 underline;
+    tbody > tr > th {
+        @apply px-2 py-1 border-b border-gray-500 text-left font-bold text-ellipsis;
     }
-  }
 
-  tbody > tr {
-    @apply even:bg-neutral-800 hover:bg-neutral-700;
-  }
+    tbody > tr > td {
+        @apply px-2 py-1 border-b border-gray-500 wrap-break-word;
+
+        a {
+            @apply text-pink-500 underline;
+        }
+    }
+
+    tbody > tr {
+        @apply even:bg-neutral-800 hover:bg-neutral-700;
+    }
 }
 
 @utility ll-react-select-container {
-  & .ll-react-select__control {
-    @apply bg-gray-800 border-0 grow min-w-40 p-2 rounded-md;
-  }
+    & .ll-react-select__control {
+        @apply bg-gray-800 border-0 grow min-w-40 p-2 rounded-md;
+    }
 }
 
 @utility ll-react-select__control {
-  .ll-react-select-container & {
-    @apply bg-gray-800 border-0 grow min-w-40 p-2 rounded-md;
-  }
+    .ll-react-select-container & {
+        @apply bg-gray-800 border-0 grow min-w-40 p-2 rounded-md;
+    }
 }
 
 @utility ll-toggles {
-  display: inline-flex;
+    display: inline-flex;
 
-  & > button {
-    @apply bg-blue-800 text-gray-200 border-none rounded-md p-2 hover:bg-blue-700;
-    @apply disabled:opacity-50 flex items-center justify-center ml-px;
-    @apply first-of-type:ml-0;
-    @apply data-[state='on']:bg-blue-700 data-[state='on']:text-gray-100;
-  }
+    & > button {
+        @apply bg-blue-800 text-gray-200 border-none rounded-md p-2 hover:bg-blue-700;
+        @apply disabled:opacity-50 flex items-center justify-center ml-px;
+        @apply first-of-type:ml-0;
+        @apply data-[state='on']:bg-blue-700 data-[state='on']:text-gray-100;
+    }
 }
 
 .maplibregl-popup-content {

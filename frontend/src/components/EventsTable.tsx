@@ -175,7 +175,7 @@ export function EventsTable({ events, options }: EventsTableProps) {
       </thead>
       <tbody>
         {events.map((event) => (
-          <tr key={event.id} className={event.alert ? "!bg-red-900" : undefined}>
+          <tr key={event.id} className={event.alert ? "bg-red-900!" : undefined}>
             {columns
               .filter(({ id }) => shouldShowColumn(id, options))
               .map(({ render }) => render(event, options))}

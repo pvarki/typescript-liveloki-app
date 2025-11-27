@@ -110,7 +110,7 @@ export function GroupManager() {
   return (
     <div className="space-y-4">
       {/* Toggle Header */}
-      <div className="bg-slate-800 p-4 rounded">
+      <div className="bg-slate-800 p-4 rounded-sm">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold">Event Group Manager</h2>
           <button onClick={() => setIsExpanded(!isExpanded)} className="ll-btn text-sm">
@@ -129,7 +129,7 @@ export function GroupManager() {
       {isExpanded && (
         <div>
           {/* Filter Section */}
-          <div className="bg-slate-800 p-4 rounded">
+          <div className="bg-slate-800 p-4 rounded-sm">
             <h3 className="text-md font-medium mb-2">Select Events by Filter</h3>
             <div className="flex gap-2 mb-2">
               <select
@@ -155,7 +155,7 @@ export function GroupManager() {
           </div>
 
           {/* Group Creation */}
-          <div className="bg-slate-800 p-4 rounded">
+          <div className="bg-slate-800 p-4 rounded-sm">
             <h3 className="text-md font-medium mb-2">Add to Group</h3>
             <div className="flex gap-2">
               <input
@@ -176,7 +176,7 @@ export function GroupManager() {
           </div>
 
           {/* Events List */}
-          <div className="bg-slate-800 p-4 rounded">
+          <div className="bg-slate-800 p-4 rounded-sm">
             <h3 className="text-md font-medium mb-4">Events</h3>
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {events.map((event: Event) => (
@@ -232,13 +232,13 @@ export function GroupManager() {
 
           {/* Groups List */}
           {groups && groups.length > 0 && (
-            <div className="bg-slate-800 p-4 rounded">
+            <div className="bg-slate-800 p-4 rounded-sm">
               <h3 className="text-md font-medium mb-4">Existing Groups</h3>
               <div className="space-y-2">
                 {groups.map((group: Group) => (
                   <div
                     key={group.group_name}
-                    className="flex justify-between items-center p-2 bg-slate-700 rounded"
+                    className="flex justify-between items-center p-2 bg-slate-700 rounded-sm"
                   >
                     <span className="font-medium">{group.group_name}</span>
                     <span className="text-sm text-slate-400">{group.event_count} events</span>

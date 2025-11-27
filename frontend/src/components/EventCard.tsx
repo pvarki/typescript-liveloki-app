@@ -23,14 +23,14 @@ export function EventCard({ event }: { event: FilteredEvent }) {
     <div className="grid grid-cols-3 gap-4">
       {(event.images ?? []).map((path, index) => (
         <a href={path} key={index} title="raw image">
-          <img className="rounded max-w-72 max-h-72" alt="ze picture" src={path} />
+          <img className="rounded-sm max-w-72 max-h-72" alt="ze picture" src={path} />
         </a>
       ))}
     </div>
   );
 
   return (
-    <div className="p-2 rounded-sm">
+    <div className="p-2 rounded-xs">
       <h3 className="text-lg font-bold">
         {event.header}
         <Link to={`/event/${event.id}`} className="ps-2 text-pink-400">
@@ -116,7 +116,7 @@ export function EventCard({ event }: { event: FilteredEvent }) {
       <input
         id="media-input"
         type="file"
-        className="ll-input rounded"
+        className="ll-input rounded-sm"
         onChange={(e) => {
           setMedia(e.target.files?.[0] ?? null);
         }}

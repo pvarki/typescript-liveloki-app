@@ -1,4 +1,4 @@
-# livelogi
+# BattleLog
 
 ## Install
 

@@ -23,6 +23,7 @@ router.post('/api/v1/users/demoted', noOp);
 // PUT /updated - Device callsign updated
 router.put('/api/v1/users/updated', noOp);
 
-router.get('/api/v2/description/:language', descriptionHandler);
+// GET /description - Card for modular UI. Admin only for now.
+router.get('/api/v2/admin/description/:language', descriptionHandler);
 
 export default router;

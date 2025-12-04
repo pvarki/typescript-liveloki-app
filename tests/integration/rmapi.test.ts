@@ -24,7 +24,7 @@ describe("RMAPI Integration Tests", () => {
     });
 
     it("should return a valid description response", async () => {
-      const response = await axios.get(`${API_BASE_URL}/rmapi/api/v2/description/en`);
+      const response = await axios.get(`${API_BASE_URL}/rmapi/api/v2/admin/description/en`);
 
       // Status code should be 200
       expect(response.status).to.equal(200);

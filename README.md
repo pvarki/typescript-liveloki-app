@@ -1,4 +1,4 @@
-# livelogi
+# BattleLog
 
 ## Install
 
@@ -32,3 +32,13 @@ Remove comments from "jwt-test-network" for local jwt testing, to allow joining 
 ## OpenAPI Specification
 
 https://pvarki.github.io/typescript-liveloki-app/
+
+## Running tests
+
+In directory `tests`, use
+
+```shell
+npm run test:integration
+```
+
+with the server running in `localhost:3000` as it does by default after `docker compose up -d`.

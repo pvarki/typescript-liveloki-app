@@ -1,70 +1,111 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer components {
-    .ll-input {
-        @apply bg-gray-800 text-gray-200 border-none rounded-md p-2;
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+    --font-sans: Inter, Arial, sans-serif;
+
+    --color-blue-50: #f2f5fc;
+    --color-blue-100: #e1e8f8;
+    --color-blue-200: #cbd8f2;
+    --color-blue-300: #a6bfea;
+    --color-blue-400: #7c9dde;
+    --color-blue-500: #5d7dd4;
+    --color-blue-600: #4963c7;
+    --color-blue-700: #3f51b5;
+    --color-blue-800: #394494;
+    --color-blue-900: #323d76;
+    --color-blue-950: #222749;
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentcolor);
+    }
+}
+
+@utility ll-input {
+    @apply bg-gray-800 text-gray-200 border-none rounded-md p-2;
+}
+
+@utility ll-btn {
+    @apply bg-blue-800 text-gray-200 border-none rounded-md p-2 hover:bg-blue-700;
+    @apply disabled:opacity-50;
+}
+
+@utility ll-btn-secondary {
+    @apply bg-blue-900 text-gray-300 border-none rounded-md p-2 hover:bg-blue-800;
+    @apply disabled:opacity-50;
+}
+
+@utility ll-events-table {
+    @apply w-full border-collapse text-sm;
+
+    thead > tr > th {
+        @apply bg-neutral-900 px-2 py-1 border-b border-gray-500 text-left font-bold text-ellipsis align-bottom;
     }
 
-    .ll-btn {
-        @apply bg-blue-800 text-gray-200 border-none rounded-md p-2 hover:bg-blue-700;
-        @apply disabled:opacity-50;
-    }
-    .ll-btn-secondary {
-        @apply bg-blue-900 text-gray-300 border-none rounded-md p-2 hover:bg-blue-800;
-        @apply disabled:opacity-50;
-    }
+    tbody > tr > td {
+        @apply px-2 py-1 border-b border-gray-500 wrap-break-word;
 
-    .ll-events-table {
-        @apply w-full border-collapse text-sm;
-
-        thead > tr > th {
-            @apply bg-neutral-900 px-2 py-1 border-b border-gray-500 text-left font-bold overflow-ellipsis align-bottom;
-        }
-
-        tbody > tr > td {
-            @apply px-2 py-1 border-b border-gray-500 break-words;
-
-            a {
-                @apply text-pink-500 underline;
-            }
-        }
-
-        tbody > tr {
-            @apply even:bg-neutral-800 hover:bg-neutral-700;
+        a {
+            @apply text-pink-500 underline;
         }
     }
 
-    .ll-event-card-table {
-        @apply w-full border-collapse text-sm;
+    tbody > tr {
+        @apply even:bg-neutral-800 hover:bg-neutral-700;
+    }
+}
 
-        tbody > tr > th {
-            @apply px-2 py-1 border-b border-gray-500 text-left font-bold overflow-ellipsis;
-        }
+@utility ll-event-card-table {
+    @apply w-full border-collapse text-sm;
 
-        tbody > tr > td {
-            @apply px-2 py-1 border-b border-gray-500 break-words;
+    tbody > tr > th {
+        @apply px-2 py-1 border-b border-gray-500 text-left font-bold text-ellipsis;
+    }
 
-            a {
-                @apply text-pink-500 underline;
-            }
-        }
+    tbody > tr > td {
+        @apply px-2 py-1 border-b border-gray-500 wrap-break-word;
 
-        tbody > tr {
-            @apply even:bg-neutral-800 hover:bg-neutral-700;
+        a {
+            @apply text-pink-500 underline;
         }
     }
 
-    .ll-react-select-container .ll-react-select__control {
+    tbody > tr {
+        @apply even:bg-neutral-800 hover:bg-neutral-700;
+    }
+}
+
+@utility ll-react-select-container {
+    & .ll-react-select__control {
         @apply bg-gray-800 border-0 grow min-w-40 p-2 rounded-md;
     }
+}
 
-    .ll-toggles {
-        display: inline-flex;
+@utility ll-react-select__control {
+    .ll-react-select-container & {
+        @apply bg-gray-800 border-0 grow min-w-40 p-2 rounded-md;
     }
+}
 
-    .ll-toggles > button {
+@utility ll-toggles {
+    display: inline-flex;
+
+    & > button {
         @apply bg-blue-800 text-gray-200 border-none rounded-md p-2 hover:bg-blue-700;
         @apply disabled:opacity-50 flex items-center justify-center ml-px;
         @apply first-of-type:ml-0;

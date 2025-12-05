@@ -44,7 +44,7 @@ export function EventsMap({ events }: { events: FilteredEvent[] }) {
             setPopupEvent(ev);
           }}
         >
-          <div className="bg-black/60 p-px max-w-24 break-words rounded-sm group-hover:text-white">
+          <div className="bg-black/60 p-px max-w-24 wrap-break-word rounded-xs group-hover:text-white">
             {shouldTruncateEventTitles ? truncateHeader(ev.header, 20) : ev.header}
           </div>
           <MdLocationPin size="2em" className="block mx-auto group-hover:text-pink-300" />

@@ -1,0 +1,22 @@
+name: integration-test.yml
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+jobs:
+  tests:
+    name: "Integration testing"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: "Set environment"
+        run: cp .env_example .env && echo "PRESEED=true" >> .env
+      - name: "Start service"
+        run: docker compose -f docker-compose.yml up -d
+      - name: "Test server"
+        run: docker compose run test npm run test:integration

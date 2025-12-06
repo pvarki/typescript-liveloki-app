@@ -37,13 +37,13 @@ export function EventsTimeline({ events }: { events: FilteredEvent[] }) {
       setMouseTime(null);
     };
 
-    timelineRef.current.addEventListener('mousemove', handleMouseMove);
-    timelineRef.current.addEventListener('mouseleave', handleMouseLeave);
+    timelineRef.current.addEventListener("mousemove", handleMouseMove);
+    timelineRef.current.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
       if (timelineRef.current) {
-        timelineRef.current.removeEventListener('mousemove', handleMouseMove);
-        timelineRef.current.removeEventListener('mouseleave', handleMouseLeave);
+        timelineRef.current.removeEventListener("mousemove", handleMouseMove);
+        timelineRef.current.removeEventListener("mouseleave", handleMouseLeave);
       }
     };
   }, []);
@@ -89,7 +89,7 @@ export function EventsTimeline({ events }: { events: FilteredEvent[] }) {
         zoomMax: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years in milliseconds
         timeAxis: {
           scale: "hour" as const,
-          step: 1
+          step: 1,
         },
         format: {
           minorLabels: {
@@ -156,43 +156,49 @@ export function EventsTimeline({ events }: { events: FilteredEvent[] }) {
         // Add zoom handler to adjust time axis step
         timelineInstance.current.on("rangechange", () => {
           if (!timelineInstance.current) return;
-          
+
           const window = timelineInstance.current.getWindow();
           const range = window.end.getTime() - window.start.getTime();
           const hoursInRange = range / (1000 * 60 * 60);
-          
+
           // Adjust scale and step based on visible range
           let scale: "hour" | "day" | "week" | "month" = "hour";
           let step = 1;
-          
-          if (hoursInRange > 24 * 365) { // More than a year
+
+          if (hoursInRange > 24 * 365) {
+            // More than a year
             scale = "month";
             step = 3; // Show every 3 months
-          } else if (hoursInRange > 24 * 30) { // More than a month
+          } else if (hoursInRange > 24 * 30) {
+            // More than a month
             scale = "month";
             step = 1; // Show every month
-          } else if (hoursInRange > 24 * 7) { // More than a week
+          } else if (hoursInRange > 24 * 7) {
+            // More than a week
             scale = "day";
             step = 1; // Show every week
-          } else if (hoursInRange > 24) { // More than a day
+          } else if (hoursInRange > 24) {
+            // More than a day
             scale = "day";
             step = 1; // Show every day
-          } else if (hoursInRange > 12) { // More than 12 hours
+          } else if (hoursInRange > 12) {
+            // More than 12 hours
             scale = "hour";
             step = 1; // Show every 3 hours
-          } else if (hoursInRange > 6) { // More than 6 hours
+          } else if (hoursInRange > 6) {
+            // More than 6 hours
             scale = "hour";
             step = 1; // Show every 2 hours
           } else {
             scale = "hour";
             step = 1; // Show every hour
           }
-          
+
           timelineInstance.current.setOptions({
             timeAxis: {
               scale,
-              step
-            }
+              step,
+            },
           });
         });
 
@@ -304,4 +310,4 @@ export function EventsTimeline({ events }: { events: FilteredEvent[] }) {
       </style>
     </div>
   );
-} 
+}

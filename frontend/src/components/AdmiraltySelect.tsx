@@ -26,8 +26,10 @@ export const AdmiraltyOption = (props: OptionProps<AdmiraltyOption, false>) => (
   </components.Option>
 );
 
-interface AdmiraltySelectProps
-  extends Omit<SelectProps<AdmiraltyOption, false, GroupBase<AdmiraltyOption>>, "onChange" | "value"> {
+interface AdmiraltySelectProps extends Omit<
+  SelectProps<AdmiraltyOption, false, GroupBase<AdmiraltyOption>>,
+  "onChange" | "value"
+> {
   onChange: (value: string | null) => void;
   value: string | null;
   options: AdmiraltyOption[];

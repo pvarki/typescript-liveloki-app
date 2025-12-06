@@ -43,7 +43,7 @@ npm run test:integration
 
 with the server running in `localhost:3000` as it does by default after `docker compose up -d`.
 
-## Running Harveste
+## Running Harvester
 
 1. Navigate to harverster folder
 2. Set required keyword to HARVESTER_KEYWORDS=CHANGE_ME

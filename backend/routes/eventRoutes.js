@@ -27,7 +27,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 // Rate limiting configurations
 const generalRateLimit = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 2000, // Limit each IP to 100 requests per windowMs
     message: {
         error: 'Too many requests from this IP, please try again later.'
     },
@@ -37,7 +37,7 @@ const generalRateLimit = rateLimit({
 
 const strictRateLimit = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // More restrictive for write operations
+    max: 200, // More restrictive for write operations
     message: {
         error: 'Too many write requests from this IP, please try again later.'
     },
@@ -47,7 +47,7 @@ const strictRateLimit = rateLimit({
 
 const uploadRateLimit = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // Very restrictive for file uploads
+    max: 50, // Very restrictive for file uploads
     message: {
         error: 'Too many upload requests from this IP, please try again later.'
     },

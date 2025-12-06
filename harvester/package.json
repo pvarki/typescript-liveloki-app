@@ -1,0 +1,14 @@
+{
+  "name": "bluesky-harvester",
+  "version": "0.1.0",
+  "description": "Standalone Bluesky Jetstream harvester with keyword filtering",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "ws": "^8.18.0"
+  }
+}

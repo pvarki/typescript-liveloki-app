@@ -1,0 +1,15 @@
+services:
+  harvester:
+    build:
+      context: ..
+      dockerfile: Dockerfile.harvester
+    env_file:
+      - .env
+    # Configure runtime overrides here if needed, otherwise use values from .env
+    #environment:
+    #  HARVESTER_KEYWORDS: "ukraine,finland"
+    #  JETSTREAM_URL: "wss://jetstream2.us-east.bsky.network/subscribe"
+    #  JETSTREAM_WANTED_COLLECTIONS: "app.bsky.feed.post"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

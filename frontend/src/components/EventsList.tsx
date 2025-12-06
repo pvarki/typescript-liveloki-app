@@ -1,7 +1,7 @@
 import * as Popover from "@radix-ui/react-popover";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { useMemo, useState } from "react";
-import { MdList, MdMap, MdViewColumn, MdTimeline } from "react-icons/md";
+import { MdList, MdMap, MdTimeline, MdViewColumn } from "react-icons/md";
 import useSWR from "swr";
 
 import { getEvents } from "../helpers/api.ts";
@@ -9,8 +9,8 @@ import { filterEvents } from "../helpers/eventFilter.ts";
 import { toggleInSet } from "../helpers/immutability.ts";
 import type { Event } from "../types.ts";
 import { EventsMap } from "./EventsMap.tsx";
+import { columns,EventsTable, EventsTableOptions } from "./EventsTable";
 import { EventsTimeline } from "./EventsTimeline.tsx";
-import { columns, EventsTable, EventsTableOptions } from "./EventsTable";
 
 type EventsListMode = "list" | "map" | "timeline";
 

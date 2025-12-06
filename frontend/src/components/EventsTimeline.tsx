@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Timeline, TimelineOptions } from "vis-timeline";
 import "vis-timeline/styles/vis-timeline-graph2d.css";
-import { FilteredEvent } from "../types";
+
+import { useEffect, useRef, useState } from "react";
+import { Timeline, type TimelineOptions } from "vis-timeline";
+
+import type { FilteredEvent } from "../types";
 
 interface TimelineItem {
   id: number;
@@ -56,7 +58,7 @@ export function EventsTimeline({ events }: { events: FilteredEvent[] }) {
         .map((event) => {
           try {
             const start = new Date(event.event_time);
-            if (isNaN(start.getTime())) {
+            if (Number.isNaN(start.getTime())) {
               console.error("Invalid date for event:", event);
               return null;
             }
@@ -135,7 +137,7 @@ export function EventsTimeline({ events }: { events: FilteredEvent[] }) {
         timelineInstance.current.on("click", (properties) => {
           if (properties.item) {
             const eventId = properties.item;
-            window.location.hash = `#/event/${eventId}`;
+            globalThis.location.hash = `#/event/${eventId}`;
           }
         });
 
@@ -215,7 +217,7 @@ export function EventsTimeline({ events }: { events: FilteredEvent[] }) {
       };
     } catch (error) {
       console.error("Error in timeline effect:", error);
-      return undefined;
+      return;
     }
   }, [events]);
 

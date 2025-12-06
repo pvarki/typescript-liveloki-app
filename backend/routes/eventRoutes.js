@@ -20,9 +20,19 @@ import multer from 'multer';
 import path from 'path';
 import { v7 as uuidv7 } from 'uuid';
 import { fileURLToPath } from 'url';
+import config from '../config/index.js';
 
 const router = express.Router();
 const dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const isHarvesterRequest = (req) => {
+    if (!config.harvesterApiKey) {
+        return false;
+    }
+
+    const headerKey = req.headers['x-harvester-key'];
+    return typeof headerKey === 'string' && headerKey === config.harvesterApiKey;
+};
 
 // Rate limiting configurations
 const generalRateLimit = rateLimit({
@@ -33,6 +43,7 @@ const generalRateLimit = rateLimit({
     },
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    skip: isHarvesterRequest,
 });
 
 const strictRateLimit = rateLimit({
@@ -43,6 +54,7 @@ const strictRateLimit = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: isHarvesterRequest,
 });
 
 const uploadRateLimit = rateLimit({
@@ -53,6 +65,7 @@ const uploadRateLimit = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
+    skip: isHarvesterRequest,
 });
 
 const storage = multer.diskStorage({

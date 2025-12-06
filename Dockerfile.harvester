@@ -1,0 +1,12 @@
+FROM node:22-slim
+
+WORKDIR /usr/src/harvester
+
+COPY harvester/package*.json ./
+RUN npm install --omit=dev
+
+COPY harvester/. .
+
+ENV NODE_ENV=production
+
+CMD ["node", "index.js"]

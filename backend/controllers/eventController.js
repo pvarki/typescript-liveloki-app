@@ -39,15 +39,42 @@ export const addEvents = async (req, res) => {
         location_lng,
         location_lat,
         author,
-        groups
+        groups,
+        creation_time,
       } = event;
       const id = uuidv7();
       const keywordArray = convertTagArray(keywords);
       const groupsArray = groups ? (Array.isArray(groups) ? groups : [groups]) : [];
 
+      const baseValues = [
+        id,
+        header,
+        link,
+        source,
+        admiralty_reliability,
+        admiralty_accuracy,
+        keywordArray,
+        event_time,
+        notes,
+        hcoe_domains,
+        location,
+        location_lng,
+        location_lat,
+        author,
+        groupsArray,
+      ];
+
+      if (creation_time) {
+        const creationTimeIso = new Date(creation_time).toISOString();
+        return client.query(
+          "INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups, creation_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)",
+          [...baseValues, creationTimeIso],
+        );
+      }
+
       return client.query(
         "INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)",
-        [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groupsArray]
+        baseValues,
       );
     });
 

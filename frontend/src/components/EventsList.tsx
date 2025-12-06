@@ -1,7 +1,7 @@
 import * as Popover from "@radix-ui/react-popover";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { useMemo, useState } from "react";
-import { MdList, MdMap, MdViewColumn } from "react-icons/md";
+import { MdList, MdMap, MdViewColumn, MdTimeline } from "react-icons/md";
 import useSWR from "swr";
 
 import { getEvents } from "../helpers/api.ts";
@@ -9,9 +9,10 @@ import { filterEvents } from "../helpers/eventFilter.ts";
 import { toggleInSet } from "../helpers/immutability.ts";
 import type { Event } from "../types.ts";
 import { EventsMap } from "./EventsMap.tsx";
+import { EventsTimeline } from "./EventsTimeline.tsx";
 import { columns, EventsTable, EventsTableOptions } from "./EventsTable";
 
-type EventsListMode = "list" | "map";
+type EventsListMode = "list" | "map" | "timeline";
 
 interface EventsListProps {
   initialEvents?: Event[];
@@ -20,7 +21,7 @@ interface EventsListProps {
 export function EventsList({ initialEvents }: EventsListProps = {}) {
   const [search, setSearch] = useState(""); // Use this to capture the search field input
   const [highlight, setHighlight] = useState(""); // For alert keywords
-  const [mode, setMode] = useState<EventsListMode>("list"); // For list/map toggle
+  const [mode, setMode] = useState<EventsListMode>("list"); // For list/map/timeline toggle
   const [showKeywordsAndDomainsInHeaderColumn, setShowKeywordsAndDomainsInHeaderColumn] = useState(false);
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => new Set(columns.map((c) => c.id)));
 
@@ -67,6 +68,10 @@ export function EventsList({ initialEvents }: EventsListProps = {}) {
     }
     case "map": {
       component = <EventsMap events={filteredEvents} />;
+      break;
+    }
+    case "timeline": {
+      component = <EventsTimeline events={filteredEvents} />;
       break;
     }
   }
@@ -149,6 +154,9 @@ export function EventsList({ initialEvents }: EventsListProps = {}) {
         >
           <ToggleGroup.Item value="map" aria-label="Map">
             <MdMap />
+          </ToggleGroup.Item>
+          <ToggleGroup.Item value="timeline" aria-label="Timeline">
+            <MdTimeline />
           </ToggleGroup.Item>
           <ToggleGroup.Item value="list" aria-label="List">
             <MdList />

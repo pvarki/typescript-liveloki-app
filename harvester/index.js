@@ -7,7 +7,7 @@ const DEFAULT_JETSTREAM_URL = process.env.JETSTREAM_URL || 'wss://jetstream2.us-
 const DEFAULT_COLLECTIONS = process.env.JETSTREAM_WANTED_COLLECTIONS || 'app.bsky.feed.post';
 
 const KEYWORDS_RAW = process.env.HARVESTER_KEYWORDS || '';
-const KEYWORDS = KEYWORDS_RAW
+const BASE_KEYWORDS = KEYWORDS_RAW
   .split(',')
   .map((k) => k.trim().toLowerCase())
   .filter((k) => k.length > 0);
@@ -19,11 +19,19 @@ const MAX_RECONNECT_DELAY_MS = Number.parseInt(process.env.HARVESTER_RECONNECT_D
 
 const BATTLELOG_BASE_URL = process.env.BATTLELOG_BASE_URL || process.env.HARVESTER_BATTLELOG_URL || '';
 const BATTLELOG_EVENTS_PATH = process.env.BATTLELOG_EVENTS_PATH || '/api/events';
-const SEND_TO_BATTLELOG = (process.env.HARVESTER_SEND_TO_BATTLELOG ?? '0') === '1';
+const SEND_TO_BATTLELOG_ENV = (process.env.HARVESTER_SEND_TO_BATTLELOG ?? '0') === '1';
 const HARVESTER_API_KEY = process.env.HARVESTER_API_KEY || '';
+
+const CONFIG_POLL_INTERVAL_MS = Number.parseInt(process.env.HARVESTER_CONFIG_POLL_MS ?? '5000', 10);
+const HARVESTER_CONFIG_URL =
+  process.env.HARVESTER_CONFIG_URL || (BATTLELOG_BASE_URL ? new URL('/api/harvester/config', BATTLELOG_BASE_URL).toString() : '');
+const HARVESTER_PREVIEW_URL =
+  process.env.HARVESTER_PREVIEW_URL || (BATTLELOG_BASE_URL ? new URL('/api/harvester/preview', BATTLELOG_BASE_URL).toString() : '');
 
 let reconnectDelayMs = INITIAL_RECONNECT_DELAY_MS;
 let shuttingDown = false;
+let activeKeywords = BASE_KEYWORDS;
+let configEnabled = SEND_TO_BATTLELOG_ENV;
 
 function buildJetstreamUrl() {
   const url = new URL(DEFAULT_JETSTREAM_URL);
@@ -48,10 +56,15 @@ function shouldKeepEvent(envelope) {
   return true;
 }
 
+function getActiveKeywords() {
+  return activeKeywords;
+}
+
 function matchKeywords(text) {
   const lowered = (text || '').toLowerCase();
-  if (KEYWORDS.length === 0) return [];
-  return KEYWORDS.filter((keyword) => lowered.includes(keyword));
+  const keywords = getActiveKeywords();
+  if (keywords.length === 0) return [];
+  return keywords.filter((keyword) => lowered.includes(keyword));
 }
 
 function microsecondsToIso(timeUs) {
@@ -71,10 +84,11 @@ function buildBattlelogEvent(output) {
   const eventTimeIso = createdAt || creationTimeIso || new Date().toISOString();
 
   let keywords = [];
+  const effectiveKeywords = getActiveKeywords();
   if (Array.isArray(matchedKeywords) && matchedKeywords.length > 0) {
     keywords = matchedKeywords;
-  } else if (KEYWORDS.length > 0) {
-    keywords = KEYWORDS;
+  } else if (effectiveKeywords.length > 0) {
+    keywords = effectiveKeywords;
   }
 
   return {
@@ -96,7 +110,7 @@ function buildBattlelogEvent(output) {
 }
 
 async function sendToBattlelog(output) {
-  if (!SEND_TO_BATTLELOG || !BATTLELOG_BASE_URL) {
+  if (!configEnabled || !SEND_TO_BATTLELOG_ENV || !BATTLELOG_BASE_URL) {
     return;
   }
 
@@ -122,6 +136,61 @@ async function sendToBattlelog(output) {
   }
 }
 
+async function sendToPreview(output) {
+  if (!HARVESTER_PREVIEW_URL || !BATTLELOG_BASE_URL) {
+    return;
+  }
+
+  try {
+    const response = await fetch(HARVESTER_PREVIEW_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(HARVESTER_API_KEY ? { 'x-harvester-key': HARVESTER_API_KEY } : {}),
+      },
+      body: JSON.stringify({ events: [output] }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      console.error('Failed to send preview event to Battlelog:', response.status, text);
+    }
+  } catch (error) {
+    console.error('Error sending preview event to Battlelog:', error);
+  }
+}
+
+async function refreshConfigFromBackend() {
+  if (!HARVESTER_CONFIG_URL || !BATTLELOG_BASE_URL) {
+    return;
+  }
+
+  try {
+    const response = await fetch(HARVESTER_CONFIG_URL, {
+      headers: HARVESTER_API_KEY ? { 'x-harvester-key': HARVESTER_API_KEY } : {},
+    });
+    if (!response.ok) {
+      const text = await response.text().catch(() => '');
+      console.error('Failed to fetch harvester config:', response.status, text);
+      return;
+    }
+
+    const config = await response.json();
+
+    if (Array.isArray(config.keywords)) {
+      activeKeywords = config.keywords
+        .map((k) => (typeof k === 'string' ? k.trim().toLowerCase() : ''))
+        .filter((k) => k.length > 0);
+    }
+
+    if (typeof config.enabled === 'boolean') {
+      configEnabled = config.enabled;
+    }
+  } catch (error) {
+    console.error('Error fetching harvester config:', error);
+  }
+}
+
 function handleMessage(raw) {
   let envelope;
   try {
@@ -138,7 +207,8 @@ function handleMessage(raw) {
   const text = typeof record.text === 'string' ? record.text : '';
 
   let matchedKeywords = [];
-  if (KEYWORDS.length === 0 && MATCH_ALL_IF_NO_KEYWORDS) {
+  const currentKeywords = getActiveKeywords();
+  if (currentKeywords.length === 0 && MATCH_ALL_IF_NO_KEYWORDS) {
     matchedKeywords = [];
   } else {
     matchedKeywords = matchKeywords(text);
@@ -160,15 +230,21 @@ function handleMessage(raw) {
 
   process.stdout.write(`${JSON.stringify(output)}\n`);
 
-  // Fire-and-forget send to Battlelog if configured
-  void sendToBattlelog(output);
+  // Always send to preview stream for the UI
+  void sendToPreview(output);
+
+  // Optionally also send to Battlelog DB when enabled
+  if (configEnabled) {
+    void sendToBattlelog(output);
+  }
 }
 
 function start() {
   const url = buildJetstreamUrl();
   console.log(`Connecting to Jetstream at ${url}`);
-  if (KEYWORDS.length > 0) {
-    console.log(`Filtering posts containing any of: ${KEYWORDS.join(', ')}`);
+  const initialKeywords = getActiveKeywords();
+  if (initialKeywords.length > 0) {
+    console.log(`Filtering posts containing any of: ${initialKeywords.join(', ')}`);
   } else if (MATCH_ALL_IF_NO_KEYWORDS) {
     console.log('No HARVESTER_KEYWORDS set; passing through all posts');
   } else {
@@ -216,6 +292,13 @@ function start() {
 
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
+}
+
+if (HARVESTER_CONFIG_URL) {
+  void refreshConfigFromBackend();
+  setInterval(() => {
+    void refreshConfigFromBackend();
+  }, CONFIG_POLL_INTERVAL_MS);
 }
 
 start();

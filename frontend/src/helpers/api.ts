@@ -1,4 +1,4 @@
-import { Event, EventPayload } from "../types.ts";
+import { Event, EventPayload, HarvesterConfig, HarvesterPreviewItem } from "../types.ts";
 
 export async function postEvents(states: readonly EventPayload[]) {
   const response = await fetch("api/events", {
@@ -42,6 +42,34 @@ export async function getEvents(): Promise<Event[]> {
   const response = await fetch("api/events");
   if (!response.ok) {
     throw new Error(`Failed to fetch events: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function getHarvesterConfig(): Promise<HarvesterConfig> {
+  const response = await fetch("/api/harvester/config");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch harvester config: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function updateHarvesterConfig(config: Partial<HarvesterConfig>): Promise<HarvesterConfig> {
+  const response = await fetch("/api/harvester/config", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(config),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to update harvester config: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function getHarvesterPreview(): Promise<HarvesterPreviewItem[]> {
+  const response = await fetch("/api/harvester/preview");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch harvester preview: ${response.statusText}`);
   }
   return response.json();
 }

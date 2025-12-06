@@ -1,7 +1,7 @@
 import * as Popover from "@radix-ui/react-popover";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 import { useMemo, useState } from "react";
-import { MdList, MdMap, MdTimeline, MdViewColumn } from "react-icons/md";
+import { MdList, MdMap, MdTimeline, MdViewColumn, MdSensors } from "react-icons/md";
 import useSWR from "swr";
 
 import { getEvents } from "../helpers/api.ts";
@@ -11,8 +11,9 @@ import type { Event } from "../types.ts";
 import { EventsMap } from "./EventsMap.tsx";
 import { columns, EventsTable, EventsTableOptions } from "./EventsTable";
 import { EventsTimeline } from "./EventsTimeline.tsx";
+import { HarvesterView } from "./HarvesterView.tsx";
 
-type EventsListMode = "list" | "map" | "timeline";
+type EventsListMode = "list" | "map" | "timeline" | "harvester";
 
 interface EventsListProps {
   initialEvents?: Event[];
@@ -72,6 +73,10 @@ export function EventsList({ initialEvents }: EventsListProps = {}) {
     }
     case "timeline": {
       component = <EventsTimeline events={filteredEvents} />;
+      break;
+    }
+    case "harvester": {
+      component = <HarvesterView />;
       break;
     }
   }
@@ -157,6 +162,9 @@ export function EventsList({ initialEvents }: EventsListProps = {}) {
           </ToggleGroup.Item>
           <ToggleGroup.Item value="timeline" aria-label="Timeline">
             <MdTimeline />
+          </ToggleGroup.Item>
+          <ToggleGroup.Item value="harvester" aria-label="Harvester">
+            <MdSensors />
           </ToggleGroup.Item>
           <ToggleGroup.Item value="list" aria-label="List">
             <MdList />

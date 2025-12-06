@@ -43,6 +43,23 @@ export interface Group {
   event_count: number;
 }
 
+export interface HarvesterConfig {
+  enabled: boolean;
+  keywords: string[];
+}
+
+export interface HarvesterPreviewItem {
+  id: number;
+  inserted_at: string;
+  event: {
+    time_us?: number | string | null;
+    did?: string | null;
+    text?: string;
+    matchedKeywords?: string[];
+    createdAt?: string;
+  };
+}
+
 export interface LngLatData {
   lat: number;
   lng: number;

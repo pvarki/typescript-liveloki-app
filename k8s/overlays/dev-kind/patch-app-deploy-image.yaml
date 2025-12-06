@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: battlelog-app
+spec:
+  template:
+    spec:
+      containers:
+        - name: app
+          image: typescript-liveloki-app:local
+          imagePullPolicy: Never

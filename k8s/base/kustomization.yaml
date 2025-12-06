@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: battlelog
+labels:
+  - pairs:
+      app: battlelog
+    includeSelectors: true
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.yaml
+  - uploads-pvc.yaml
+  - app-deploy.yaml
+  - app-svc.yaml
+  - db/db-svc.yaml
+  - db/db-statefulset.yaml
+configMapGenerator:
+  - name: battlelog-preseed
+    behavior: create
+    files:
+      - preseed/preseed.csv
+generatorOptions:
+  disableNameSuffixHash: true

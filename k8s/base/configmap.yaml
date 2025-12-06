@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: battlelog-config
+  labels:
+    component: config
+data:
+  POSTGRES_DB: livelogi
+  POSTGRES_USER: livelogiuser
+  BASE_URL: "/"
+  API_BASE_URL: "http://battlelog-app:3000"
+  PRESEED: "false"

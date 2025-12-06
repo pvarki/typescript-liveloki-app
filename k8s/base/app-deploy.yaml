@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: battlelog-app
+  labels:
+    component: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: battlelog
+      component: app
+  template:
+    metadata:
+      labels:
+        app: battlelog
+        component: app
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: postgres:16-alpine
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -c
+            - until pg_isready -h battlelog-postgres -p 5432 -U $POSTGRES_USER -d $POSTGRES_DB; do echo waiting for db; sleep 2; done
+          envFrom:
+            - configMapRef:
+                name: battlelog-config
+            - secretRef:
+                name: battlelog-secrets
+      containers:
+        - name: app
+          image: ghcr.io/pvarki/typescript-liveloki-app:main
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http
+          envFrom:
+            - configMapRef:
+                name: battlelog-config
+            - secretRef:
+                name: battlelog-secrets
+          volumeMounts:
+            - name: uploads
+              mountPath: /usr/src/app/uploads
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+      volumes:
+        - name: uploads
+          persistentVolumeClaim:
+            claimName: battlelog-uploads

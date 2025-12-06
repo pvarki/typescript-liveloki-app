@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: battlelog-postgres
+  labels:
+    component: postgres
+spec:
+  serviceName: battlelog-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: battlelog
+      component: postgres
+  template:
+    metadata:
+      labels:
+        app: battlelog
+        component: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgis/postgis:16-3.4
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: pg
+          envFrom:
+            - configMapRef:
+                name: battlelog-config
+            - secretRef:
+                name: battlelog-secrets
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - pg_isready -U $POSTGRES_USER -d $POSTGRES_DB
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/postgresql/data
+            - name: preseed
+              mountPath: /tmp/preseed.csv
+              subPath: preseed.csv
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+      volumes:
+        - name: preseed
+          configMap:
+            name: battlelog-preseed
+            items:
+              - key: preseed.csv
+                path: preseed.csv
+  volumeClaimTemplates:
+    - metadata:
+        name: db-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

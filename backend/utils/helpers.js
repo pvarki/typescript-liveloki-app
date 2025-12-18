@@ -22,7 +22,7 @@ export const getTrendingEvents = (events) => {
         }
     }
 
-    const trendingKeyword = Object.keys(keywordCounts).reduce((a, b) => 
+    const trendingKeyword = Object.keys(keywordCounts).reduce((a, b) =>
         keywordCounts[a] > keywordCounts[b] ? a : b
     );
 

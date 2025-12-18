@@ -3,6 +3,7 @@
 ## Install
 
 1. Install docker + compose
+2. Install `pre-commit` and run `pre-commit install`
 2. Rename .env_example --> .env and modify as you like.
 3. Run docker compose build --no-cache
 4. Run docker compose up -d
@@ -42,3 +43,9 @@ npm run test:integration
 ```
 
 with the server running in `localhost:3000` as it does by default after `docker compose up -d`.
+
+Running them in the `docker` environment
+
+```shell
+docker compose run test npm run test:integration
+```

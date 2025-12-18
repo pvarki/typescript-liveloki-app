@@ -1,26 +1,12 @@
 {
-  "name": "api-integration-tests",
-  "version": "1.0.0",
-  "description": "Integration tests for API validation using Chai and Axios",
-  "main": "index.js",
-  "type": "module",
-  "scripts": {
-    "test:integration": "vitest integration/*.test.ts",
-    "lint": "eslint ."
-  },
-  "keywords": [
-    "testing",
-    "integration",
-    "api"
-  ],
   "author": "",
-  "license": "MIT",
   "dependencies": {
     "axios": "^1.6.7",
     "chai": "^6.0.1",
     "dotenv": "^17.2.2",
     "uuid": "^12.0.0"
   },
+  "description": "Integration tests for API validation using Chai and Axios",
   "devDependencies": {
     "@types/chai": "^5.2.2",
     "@types/chai-as-promised": "^8.0.2",
@@ -33,5 +19,19 @@
     "mocha": "^11.7.2",
     "prettier": "^3.4.2",
     "vitest": "^3.2.4"
-  }
+  },
+  "keywords": [
+    "testing",
+    "integration",
+    "api"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "api-integration-tests",
+  "scripts": {
+    "lint": "eslint .",
+    "test:integration": "vitest integration/*.test.ts"
+  },
+  "type": "module",
+  "version": "1.0.0"
 }

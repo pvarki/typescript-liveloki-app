@@ -337,8 +337,8 @@ export const createGroup = async (req, res) => {
 
         // Add the group name to the groups array for all specified events
         const updateQuery = `
-            UPDATE events 
-            SET groups = CASE 
+            UPDATE events
+            SET groups = CASE
                 WHEN groups IS NULL THEN ARRAY[$1]
                 ELSE array_append(groups, $1)
             END
@@ -369,8 +369,8 @@ export const updateEventGroup = async (req, res) => {
     const client = await pool.connect();
     try {
         const result = await client.query(`
-            UPDATE events 
-            SET groups = CASE 
+            UPDATE events
+            SET groups = CASE
                 WHEN groups IS NULL THEN ARRAY[$1]
                 ELSE array_append(groups, $1)
             END
@@ -397,7 +397,7 @@ export const fetchGroups = async (req, res) => {
     try {
         const result = await client.query(`
             SELECT unnest(groups) as group_name, COUNT(*) as event_count
-            FROM events 
+            FROM events
             WHERE groups IS NOT NULL AND array_length(groups, 1) > 0
             GROUP BY group_name
             ORDER BY group_name
@@ -443,7 +443,7 @@ export const removeFromGroup = async (req, res) => {
     const client = await pool.connect();
     try {
         const result = await client.query(`
-            UPDATE events 
+            UPDATE events
             SET groups = array_remove(groups, $1)
             WHERE id = $2
             RETURNING *

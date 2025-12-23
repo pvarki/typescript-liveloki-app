@@ -7,7 +7,7 @@
     "@opentelemetry/sdk-metrics": "^2.1.0",
     "@opentelemetry/sdk-node": "^0.204.0",
     "@opentelemetry/sdk-trace-node": "^2.1.0",
-    "@redocly/cli": "^2.0.8",
+    "@redocly/cli": "^2.12.1",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "express-jwt": "^8.4.1",

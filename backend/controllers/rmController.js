@@ -1,33 +1,16 @@
-import fs from 'node:fs';
-
 import config from '../config/index.js';
 import logger from '../logger.js';
+import { getManifestProductUri } from '../utils/kraftwerkManifest.js';
 
-const KRAFTWERK_FILE_PATH = '/pvarki/kraftwerk-init.json';
 const BATTLELOG_DOCS_URL = 'https://github.com/pvarki/typescript-liveloki-app/';
+const BATTLELOG_SHORTNAME = 'bl';
 const DEFAULT_DESCRIPTION_LANGUAGE = 'en';
 
 const buildFallbackBattlelogUrl = () => `http://localhost:${config.port}`;
 const LOCALHOST_HOSTNAMES = new Set(['localhost', '127.0.0.1', '::1']);
 
-const readKraftwerkManifest = () => {
-    if (!fs.existsSync(KRAFTWERK_FILE_PATH)) {
-        logger.warn('Kraftwerk file not found, using fallback Battlelog URL');
-        return null;
-    }
-
-    try {
-        const rawManifest = fs.readFileSync(KRAFTWERK_FILE_PATH, 'utf8');
-        return JSON.parse(rawManifest);
-    } catch (error) {
-        logger.error(`Error reading kraftwerk file: ${error.message}`);
-        return null;
-    }
-};
-
 const getBattlelogUrl = () => {
-    const manifest = readKraftwerkManifest();
-    const productUri = manifest?.product?.uri;
+    const productUri = getManifestProductUri();
     if (typeof productUri === 'string' && productUri.trim()) {
         try {
             const url = new URL(productUri);
@@ -47,7 +30,7 @@ const getBattlelogUrl = () => {
 const BATTLELOG_URL = getBattlelogUrl();
 
 const descriptionBase = {
-    shortname: 'battlelog',
+    shortname: BATTLELOG_SHORTNAME,
     title: 'BattleLog',
     icon: null,
     description: 'Event management and tracking',

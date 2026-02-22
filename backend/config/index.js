@@ -20,6 +20,7 @@ const config = {
     rmMtlsEnforce: parseBoolean(process.env.RM_MTLS_ENFORCE, false),
     rmMtlsHeader: process.env.RM_MTLS_HEADER || 'x-clientcert-dn',
     rmExpectedCertCn: process.env.RM_EXPECTED_CERT_CN || manifestRmCertCn || 'rasenmaeher',
+    mainUiCardVisible: parseBoolean(process.env.BL_MAIN_UI_CARD_VISIBLE, false),
 };
 
 export default config;

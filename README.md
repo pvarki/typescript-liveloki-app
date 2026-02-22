@@ -5,6 +5,7 @@
 1. Install docker + compose
 2. Install `pre-commit` and run `pre-commit install`
 2. Rename .env_example --> .env and modify as you like.
+   - Set `BL_MAIN_UI_CARD_VISIBLE=false` to hide Battlelog from Deploy App main UI cards (RM API calls to non-admin description endpoints return `404`).
 3. Run docker compose build --no-cache
 4. Run docker compose up -d
 5. Navigate to localhost:3000

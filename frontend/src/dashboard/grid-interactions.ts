@@ -1,4 +1,4 @@
-export const GRID_DRAG_HANDLE_SELECTOR = ".cursor-grab";
+export const GRID_DRAG_HANDLE_SELECTOR = ".dashboard-widget-drag-handle";
 export const GRID_DRAG_CANCEL_SELECTOR =
   ".weather-map-container, .weather-map-container *";
 export const GRID_ALLOW_OVERLAP = true;

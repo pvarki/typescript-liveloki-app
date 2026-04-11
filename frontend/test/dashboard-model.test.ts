@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { parseLayout, serializeLayout } from "../src/api/client";
+import {
+  DEFAULT_DASHBOARD_SETTINGS,
+  sanitizeDashboardSettings,
+} from "../src/dashboard/dashboard-settings";
 import { useDashboardStore } from "../src/stores/dashboard-store";
 import type { WidgetInstance } from "../src/types";
 
@@ -20,6 +24,7 @@ describe("dashboard model", () => {
         name: "Test",
         cols: 24,
         rowHeight: 50,
+        settings: DEFAULT_DASHBOARD_SETTINGS,
         widgets: [widget],
       },
       isDirty: false,
@@ -34,6 +39,45 @@ describe("dashboard model", () => {
 
   it("returns an empty layout for invalid JSON", () => {
     expect(parseLayout("not json")).toEqual([]);
+  });
+
+  it("hydrates missing and malformed dashboard settings with safe defaults", () => {
+    expect(sanitizeDashboardSettings(null)).toEqual(DEFAULT_DASHBOARD_SETTINGS);
+    expect(sanitizeDashboardSettings({ gap: 8, widgetHeaders: "always" })).toEqual({
+      ...DEFAULT_DASHBOARD_SETTINGS,
+      gap: 8,
+      widgetHeaders: "always",
+    });
+    expect(
+      sanitizeDashboardSettings({
+        gap: 7,
+        padding: -1,
+        widgetBorders: "loud",
+        widgetHeaders: "sometimes",
+      }),
+    ).toEqual(DEFAULT_DASHBOARD_SETTINGS);
+  });
+
+  it("updates dashboard grid settings and marks the dashboard dirty", () => {
+    useDashboardStore.getState().updateGridConfig(32, 40, {
+      gap: 8,
+      padding: 16,
+      widgetBorders: "visible",
+      widgetHeaders: "always",
+    });
+
+    const state = useDashboardStore.getState();
+    expect(state.isDirty).toEqual(true);
+    expect(state.activeDashboard).toMatchObject({
+      cols: 32,
+      rowHeight: 40,
+      settings: {
+        gap: 8,
+        padding: 16,
+        widgetBorders: "visible",
+        widgetHeaders: "always",
+      },
+    });
   });
 
   it("updates widget grid positions and marks the dashboard dirty", () => {

@@ -1,9 +1,10 @@
 import "react-grid-layout/css/styles.css";
 
 import { useCallback, useMemo, useRef } from "react";
-import { type Layout,Responsive, WidthProvider } from "react-grid-layout";
+import { type Layout, Responsive, WidthProvider } from "react-grid-layout";
 
 import { useDashboardStore } from "../stores/dashboard-store";
+import { DEFAULT_DASHBOARD_SETTINGS } from "./dashboard-settings";
 import {
   GRID_ALLOW_OVERLAP,
   GRID_DRAG_CANCEL_SELECTOR,
@@ -18,6 +19,7 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 export default function DashboardGrid() {
   const {
     activeDashboard,
+    gridPreview,
     isEditMode,
     updateWidgetPositions,
     selectWidget,
@@ -39,9 +41,6 @@ export default function DashboardGrid() {
       })),
     };
   }, [activeDashboard?.widgets]);
-
-  const cols = activeDashboard?.cols ?? 24;
-  const rowHeight = activeDashboard?.rowHeight ?? 50;
 
   const commitLayout = useCallback(
     (currentLayout: Layout[], trigger: "layout-change" | "drag-stop" | "resize-stop") => {
@@ -67,6 +66,11 @@ export default function DashboardGrid() {
     );
   }
 
+  const effectiveCols = gridPreview?.cols ?? activeDashboard.cols;
+  const effectiveRowHeight = gridPreview?.rowHeight ?? activeDashboard.rowHeight;
+  const effectiveSettings =
+    gridPreview?.settings ?? activeDashboard.settings ?? DEFAULT_DASHBOARD_SETTINGS;
+
   return (
     <div
       ref={containerRef}
@@ -77,15 +81,15 @@ export default function DashboardGrid() {
         className="layout"
         layouts={layouts}
         breakpoints={{ lg: 0 }}
-        cols={{ lg: cols }}
-        rowHeight={rowHeight}
+        cols={{ lg: effectiveCols }}
+        rowHeight={effectiveRowHeight}
         isDraggable={isEditMode}
         isResizable={isEditMode}
         compactType={null}
         allowOverlap={GRID_ALLOW_OVERLAP}
         preventCollision={GRID_PREVENT_COLLISION}
-        margin={[4, 4]}
-        containerPadding={[4, 4]}
+        margin={[effectiveSettings.gap, effectiveSettings.gap]}
+        containerPadding={[effectiveSettings.padding, effectiveSettings.padding]}
         onDragStop={(currentLayout) => commitLayout(currentLayout, "drag-stop")}
         onResizeStop={(currentLayout) => commitLayout(currentLayout, "resize-stop")}
         draggableHandle={GRID_DRAG_HANDLE_SELECTOR}

@@ -7,6 +7,9 @@ export default function GridLinesOverlay() {
 
   const cols = gridPreview?.cols ?? activeDashboard?.cols ?? 24;
   const rowHeight = gridPreview?.rowHeight ?? activeDashboard?.rowHeight ?? 50;
+  const settings = gridPreview?.settings ?? activeDashboard?.settings;
+  const gap = settings?.gap ?? 4;
+  const padding = settings?.padding ?? 4;
 
   const gridStyle = useMemo(
     () =>
@@ -14,11 +17,11 @@ export default function GridLinesOverlay() {
         display: "grid",
         gridTemplateColumns: `repeat(${cols}, 1fr)`,
         gridAutoRows: `${rowHeight}px`,
-        gap: "4px",
-        padding: "4px",
+        gap: `${gap}px`,
+        padding: `${padding}px`,
         height: "100%",
       }) as React.CSSProperties,
-    [cols, rowHeight]
+    [cols, gap, padding, rowHeight]
   );
 
   const lines = useMemo(() => {

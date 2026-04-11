@@ -55,9 +55,17 @@ export interface DashboardData {
   name: string;
   cols: number;
   rowHeight: number;
+  settings?: unknown;
   layout: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface DashboardSettings {
+  gap: 0 | 2 | 4 | 8;
+  padding: 0 | 4 | 8 | 16;
+  widgetBorders: "none" | "subtle" | "visible";
+  widgetHeaders: "always" | "edit-only" | "never";
 }
 
 export interface GridPosition {
@@ -81,6 +89,7 @@ export interface DashboardLayout {
   name: string;
   cols: number;
   rowHeight: number;
+  settings: DashboardSettings;
   widgets: WidgetInstance[];
 }
 

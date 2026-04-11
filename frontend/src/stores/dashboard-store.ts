@@ -1,8 +1,14 @@
 import { create } from "zustand";
 
-import { parseLayout } from "../api/client";
 import * as api from "../api/client";
-import type { DashboardData, DashboardLayout, WidgetInstance } from "../types";
+import { sanitizeDashboardSettings } from "../dashboard/dashboard-settings";
+import type { DashboardData, DashboardLayout, DashboardSettings, WidgetInstance } from "../types";
+
+interface GridPreview {
+  cols: number;
+  rowHeight: number;
+  settings: DashboardSettings;
+}
 
 interface DashboardState {
   dashboards: DashboardData[];
@@ -13,7 +19,7 @@ interface DashboardState {
   isSaving: boolean;
   isLoading: boolean;
   hasLoadedDashboards: boolean;
-  gridPreview: { cols: number; rowHeight: number } | null;
+  gridPreview: GridPreview | null;
 
   loadDashboards: () => Promise<void>;
   selectDashboard: (id: string) => Promise<void>;
@@ -25,7 +31,7 @@ interface DashboardState {
   toggleMode: () => void;
   setEditMode: (edit: boolean) => void;
 
-  setGridPreview: (preview: { cols: number; rowHeight: number } | null) => void;
+  setGridPreview: (preview: GridPreview | null) => void;
 
   addWidget: (widget: WidgetInstance) => void;
   updateWidget: (id: string, updates: Partial<WidgetInstance>) => void;
@@ -33,7 +39,7 @@ interface DashboardState {
   updateWidgetPositions: (
     layouts: { i: string; x: number; y: number; w: number; h: number }[]
   ) => void;
-  updateGridConfig: (cols: number, rowHeight: number) => void;
+  updateGridConfig: (cols: number, rowHeight: number, settings: DashboardSettings) => void;
   updateName: (name: string) => void;
   selectWidget: (id: string | null) => void;
   updateWidgetConfig: (id: string, config: Record<string, unknown>) => void;
@@ -67,7 +73,8 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         name: data.name,
         cols: data.cols,
         rowHeight: data.rowHeight,
-        widgets: parseLayout(data.layout),
+        settings: sanitizeDashboardSettings(data.settings),
+        widgets: api.parseLayout(data.layout),
       },
       isLoading: false,
       isDirty: false,
@@ -111,6 +118,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       name: activeDashboard.name,
       cols: activeDashboard.cols,
       rowHeight: activeDashboard.rowHeight,
+      settings: activeDashboard.settings,
       widgets: activeDashboard.widgets,
     });
     set({
@@ -185,12 +193,17 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       };
     }),
 
-  updateGridConfig: (cols, rowHeight) =>
+  updateGridConfig: (cols, rowHeight, settings) =>
     set((s) => {
       if (!s.activeDashboard) return s;
       return {
         isDirty: true,
-        activeDashboard: { ...s.activeDashboard, cols, rowHeight },
+        activeDashboard: {
+          ...s.activeDashboard,
+          cols,
+          rowHeight,
+          settings: sanitizeDashboardSettings(settings),
+        },
       };
     }),
 

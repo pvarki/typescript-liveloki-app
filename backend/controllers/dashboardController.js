@@ -5,6 +5,16 @@ import pool from '../models/pool.js';
 
 const DEFAULT_COLS = 24;
 const DEFAULT_ROW_HEIGHT = 50;
+const DEFAULT_SETTINGS = Object.freeze({
+  gap: 4,
+  padding: 4,
+  widgetBorders: 'subtle',
+  widgetHeaders: 'edit-only',
+});
+const VALID_GAPS = new Set([0, 2, 4, 8]);
+const VALID_PADDING = new Set([0, 4, 8, 16]);
+const VALID_WIDGET_BORDERS = new Set(['none', 'subtle', 'visible']);
+const VALID_WIDGET_HEADERS = new Set(['always', 'edit-only', 'never']);
 
 function parsePositiveInteger(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -34,12 +44,39 @@ function normalizeLayout(layout = '[]') {
   return JSON.stringify(layout);
 }
 
+function parseSettings(settings) {
+  if (typeof settings === 'string') {
+    try {
+      const parsed = JSON.parse(settings);
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  return settings && typeof settings === 'object' && !Array.isArray(settings) ? settings : null;
+}
+
+function normalizeSettings(settings, fallback = DEFAULT_SETTINGS) {
+  const source = parseSettings(settings);
+  const base = { ...DEFAULT_SETTINGS, ...fallback };
+  if (!source) return base;
+
+  return {
+    gap: VALID_GAPS.has(source.gap) ? source.gap : base.gap,
+    padding: VALID_PADDING.has(source.padding) ? source.padding : base.padding,
+    widgetBorders: VALID_WIDGET_BORDERS.has(source.widgetBorders) ? source.widgetBorders : base.widgetBorders,
+    widgetHeaders: VALID_WIDGET_HEADERS.has(source.widgetHeaders) ? source.widgetHeaders : base.widgetHeaders,
+  };
+}
+
 function toDashboard(row) {
   return {
     id: row.id,
     name: row.name,
     cols: row.cols,
     rowHeight: row.row_height,
+    settings: normalizeSettings(row.settings),
     layout: typeof row.layout === 'string' ? row.layout : JSON.stringify(row.layout ?? []),
     createdAt: row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at,
     updatedAt: row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at,
@@ -67,12 +104,13 @@ export const createDashboard = async (request, response) => {
     const cols = parsePositiveInteger(request.body?.cols, DEFAULT_COLS);
     const rowHeight = parsePositiveInteger(request.body?.rowHeight ?? request.body?.row_height, DEFAULT_ROW_HEIGHT);
     const layout = normalizeLayout(request.body?.layout ?? '[]');
+    const settings = normalizeSettings(request.body?.settings);
 
     const result = await client.query(
-      `INSERT INTO dashboards (id, name, cols, row_height, layout)
-       VALUES ($1, $2, $3, $4, $5::jsonb)
+      `INSERT INTO dashboards (id, name, cols, row_height, layout, settings)
+       VALUES ($1, $2, $3, $4, $5::jsonb, $6::jsonb)
        RETURNING *`,
-      [id, name, cols, rowHeight, layout],
+      [id, name, cols, rowHeight, layout, JSON.stringify(settings)],
     );
 
     response.status(201).json(toDashboard(result.rows[0]));
@@ -110,13 +148,14 @@ export const updateDashboard = async (request, response) => {
     const cols = parsePositiveInteger(request.body?.cols, current.cols);
     const rowHeight = parsePositiveInteger(request.body?.rowHeight ?? request.body?.row_height, current.row_height);
     const layout = normalizeLayout(request.body?.layout ?? current.layout ?? []);
+    const settings = normalizeSettings(request.body?.settings, normalizeSettings(current.settings));
 
     const result = await client.query(
       `UPDATE dashboards
-       SET name = $1, cols = $2, row_height = $3, layout = $4::jsonb, updated_at = NOW()
-       WHERE id = $5
+       SET name = $1, cols = $2, row_height = $3, layout = $4::jsonb, settings = $5::jsonb, updated_at = NOW()
+       WHERE id = $6
        RETURNING *`,
-      [name, cols, rowHeight, layout, request.params.id],
+      [name, cols, rowHeight, layout, JSON.stringify(settings), request.params.id],
     );
 
     return response.json(toDashboard(result.rows[0]));

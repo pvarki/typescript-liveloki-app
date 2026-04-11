@@ -148,7 +148,7 @@ export default function TopBar() {
                 + Add Widget
               </Button>
               <Button variant="minimal" size="small" onClick={() => setSettingsOpen(true)}>
-                Grid
+                Dashboard
               </Button>
               <Button
                 intent="primary"

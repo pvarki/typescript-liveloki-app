@@ -1,5 +1,5 @@
 import { sanitizeWidgetsLayout } from "../dashboard/grid-layout-model";
-import type { DashboardData, WidgetInstance } from "../types";
+import type { DashboardData, DashboardSettings, WidgetInstance } from "../types";
 
 function parseLayout(layoutJson: string): WidgetInstance[] {
   try {
@@ -27,6 +27,7 @@ export async function createDashboard(data: {
   name?: string;
   cols?: number;
   rowHeight?: number;
+  settings?: DashboardSettings;
   widgets?: WidgetInstance[];
 }): Promise<DashboardData> {
   const body: Record<string, unknown> = { ...data };
@@ -49,6 +50,7 @@ export async function updateDashboard(
     name?: string;
     cols?: number;
     rowHeight?: number;
+    settings?: DashboardSettings;
     widgets?: WidgetInstance[];
   }
 ): Promise<DashboardData> {

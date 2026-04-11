@@ -8,10 +8,23 @@ interface DashboardResponse {
   name: string;
   cols: number;
   rowHeight: number;
+  settings: {
+    gap: number;
+    padding: number;
+    widgetBorders: string;
+    widgetHeaders: string;
+  };
   layout: string;
   createdAt: string;
   updatedAt: string;
 }
+
+const defaultSettings = {
+  gap: 4,
+  padding: 4,
+  widgetBorders: "subtle",
+  widgetHeaders: "edit-only",
+};
 
 function uniqueName() {
   return `Dashboard ${Date.now()} ${Math.random().toString(36).slice(2, 8)}`;
@@ -25,6 +38,7 @@ describe("Dashboard API Integration Tests", () => {
     expect(response.data.name).to.equal("Untitled Dashboard");
     expect(response.data.cols).to.equal(24);
     expect(response.data.rowHeight).to.equal(50);
+    expect(response.data.settings).to.deep.equal(defaultSettings);
     expect(response.data.layout).to.equal("[]");
 
     await axios.delete(`${API_BASE_URL}/api/dashboards/${response.data.id}`);
@@ -70,11 +84,23 @@ describe("Dashboard API Integration Tests", () => {
       name: uniqueName(),
       cols: 24,
       rowHeight: 50,
+      settings: {
+        gap: 8,
+        padding: 16,
+        widgetBorders: "visible",
+        widgetHeaders: "always",
+      },
       layout: [],
     });
 
     expect(createResponse.status).to.equal(201);
     expect(createResponse.data.id).to.be.a("string");
+    expect(createResponse.data.settings).to.deep.equal({
+      gap: 8,
+      padding: 16,
+      widgetBorders: "visible",
+      widgetHeaders: "always",
+    });
     expect(createResponse.data.layout).to.equal("[]");
 
     const listResponse = await axios.get<DashboardResponse[]>(`${API_BASE_URL}/api/dashboards`);
@@ -97,6 +123,12 @@ describe("Dashboard API Integration Tests", () => {
       name: "Updated Dashboard",
       cols: 18,
       rowHeight: 42,
+      settings: {
+        gap: 2,
+        padding: 0,
+        widgetBorders: "none",
+        widgetHeaders: "never",
+      },
       layout: nextLayout,
     });
 
@@ -104,6 +136,12 @@ describe("Dashboard API Integration Tests", () => {
     expect(updateResponse.data.name).to.equal("Updated Dashboard");
     expect(updateResponse.data.cols).to.equal(18);
     expect(updateResponse.data.rowHeight).to.equal(42);
+    expect(updateResponse.data.settings).to.deep.equal({
+      gap: 2,
+      padding: 0,
+      widgetBorders: "none",
+      widgetHeaders: "never",
+    });
     expect(JSON.parse(updateResponse.data.layout)).to.deep.equal(nextLayout);
 
     const deleteResponse = await axios.delete(`${API_BASE_URL}/api/dashboards/${createResponse.data.id}`);
@@ -117,6 +155,24 @@ describe("Dashboard API Integration Tests", () => {
     }, { validateStatus: () => true });
 
     expect(response.status).to.equal(400);
+  });
+
+  it("defaults malformed dashboard settings safely", async () => {
+    const response = await axios.post<DashboardResponse>(`${API_BASE_URL}/api/dashboards`, {
+      name: uniqueName(),
+      settings: {
+        gap: 7,
+        padding: -1,
+        widgetBorders: "loud",
+        widgetHeaders: "sometimes",
+      },
+      layout: [],
+    });
+
+    expect(response.status).to.equal(201);
+    expect(response.data.settings).to.deep.equal(defaultSettings);
+
+    await axios.delete(`${API_BASE_URL}/api/dashboards/${response.data.id}`);
   });
 
   it("supports /api/v1 dashboard route parity", async () => {

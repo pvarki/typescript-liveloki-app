@@ -15,13 +15,16 @@ import { useEffect, useMemo, useRef } from "react";
 
 import { useBattlelogEvents } from "../../battlelog/event-data";
 import { useEventDetailStore } from "../../battlelog/event-detail-store";
+import { useWidgetParams } from "../../hooks/use-widget-params";
 import type { ConfigPanelProps, Event, WidgetDescriptor, WidgetProps } from "../../types";
 
 function readNumber(value: unknown, fallback: number) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
 }
 
-export function eventHasCoordinates(event: Event): event is Event & { location_lat: number; location_lng: number } {
+export function eventHasCoordinates(
+  event: Event,
+): event is Event & { location_lat: number; location_lng: number } {
   return (
     typeof event.location_lat === "number" &&
     Number.isFinite(event.location_lat) &&
@@ -30,7 +33,10 @@ export function eventHasCoordinates(event: Event): event is Event & { location_l
   );
 }
 
-function createEventFeature(event: Event & { location_lat: number; location_lng: number }) {
+function createEventFeature(
+  event: Event & { location_lat: number; location_lng: number },
+  selected: boolean,
+) {
   const feature = new Feature({
     geometry: new Point(fromLonLat([event.location_lng, event.location_lat])),
     eventId: String(event.id),
@@ -39,8 +45,8 @@ function createEventFeature(event: Event & { location_lat: number; location_lng:
   feature.setStyle(
     new Style({
       image: new CircleStyle({
-        radius: 7,
-        fill: new Fill({ color: "#ec4899" }),
+        radius: selected ? 9 : 7,
+        fill: new Fill({ color: selected ? "#f59e0b" : "#ec4899" }),
         stroke: new Stroke({ color: "#ffffff", width: 2 }),
       }),
     }),
@@ -53,6 +59,7 @@ function WeatherMapWidget({ config, isEditMode }: WidgetProps) {
   const mapRef = useRef<Map | null>(null);
   const vectorSourceRef = useRef<VectorSource | null>(null);
   const openEvent = useEventDetailStore((state) => state.openEvent);
+  const { selectedItem, setSelectedItem } = useWidgetParams();
   const { data: events, error, isLoading } = useBattlelogEvents();
 
   const center = useMemo(() => {
@@ -78,7 +85,10 @@ function WeatherMapWidget({ config, isEditMode }: WidgetProps) {
     map.on("singleclick", (event) => {
       map.forEachFeatureAtPixel(event.pixel, (feature) => {
         const eventId = feature.get("eventId") as string | undefined;
-        if (eventId) openEvent(eventId);
+        if (eventId) {
+          setSelectedItem(eventId);
+          openEvent(eventId);
+        }
       });
     });
 
@@ -88,7 +98,7 @@ function WeatherMapWidget({ config, isEditMode }: WidgetProps) {
       mapRef.current = null;
       vectorSourceRef.current = null;
     };
-  }, [center, openEvent, zoom]);
+  }, [center, openEvent, setSelectedItem, zoom]);
 
   useEffect(() => {
     mapRef.current?.getView().setCenter(center);
@@ -99,14 +109,30 @@ function WeatherMapWidget({ config, isEditMode }: WidgetProps) {
     const source = vectorSourceRef.current;
     if (!source) return;
     source.clear();
-    source.addFeatures((events ?? []).filter(eventHasCoordinates).map(createEventFeature));
-  }, [events]);
+    source.addFeatures(
+      (events ?? [])
+        .filter(eventHasCoordinates)
+        .map((event) => createEventFeature(event, String(event.id) === selectedItem)),
+    );
+  }, [events, selectedItem]);
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      <div ref={containerRef} className="h-full w-full" style={{ pointerEvents: isEditMode ? "none" : "auto" }} />
-      {isLoading && <div className="absolute inset-0 flex items-center justify-center bg-black/20 text-sm text-white">Loading events...</div>}
-      {error && <div className="absolute inset-0 flex items-center justify-center bg-black/40 p-4 text-center text-sm text-[var(--color-danger)]">Failed to load map events: {String(error)}</div>}
+      <div
+        ref={containerRef}
+        className="h-full w-full"
+        style={{ pointerEvents: isEditMode ? "none" : "auto" }}
+      />
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 text-sm text-white">
+          Loading events...
+        </div>
+      )}
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 p-4 text-center text-sm text-[var(--color-danger)]">
+          Failed to load map events: {String(error)}
+        </div>
+      )}
     </div>
   );
 }
@@ -120,15 +146,26 @@ function WeatherMapConfigPanel({ config, onChange }: ConfigPanelProps) {
   return (
     <div className="flex flex-col gap-3">
       <FormGroup label="Center latitude">
-        <InputGroup value={String(readNumber(config.lat, 60.45))} onChange={(event) => setNumber("lat", event.target.value)} />
+        <InputGroup
+          value={String(readNumber(config.lat, 60.45))}
+          onChange={(event) => setNumber("lat", event.target.value)}
+        />
       </FormGroup>
       <FormGroup label="Center longitude">
-        <InputGroup value={String(readNumber(config.lng, 22.24))} onChange={(event) => setNumber("lng", event.target.value)} />
+        <InputGroup
+          value={String(readNumber(config.lng, 22.24))}
+          onChange={(event) => setNumber("lng", event.target.value)}
+        />
       </FormGroup>
       <FormGroup label="Zoom">
-        <InputGroup value={String(readNumber(config.zoom, 5))} onChange={(event) => setNumber("zoom", event.target.value)} />
+        <InputGroup
+          value={String(readNumber(config.zoom, 5))}
+          onChange={(event) => setNumber("zoom", event.target.value)}
+        />
       </FormGroup>
-      <Button small onClick={() => onChange({ ...config, lat: 60.45, lng: 22.24, zoom: 5 })}>Reset Finland view</Button>
+      <Button small onClick={() => onChange({ ...config, lat: 60.45, lng: 22.24, zoom: 5 })}>
+        Reset Finland view
+      </Button>
     </div>
   );
 }

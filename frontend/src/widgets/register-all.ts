@@ -1,6 +1,10 @@
 import { useWidgetRegistry } from "../stores/widget-registry";
 import { clockDescriptor } from "./clock";
+import { detailViewDescriptor } from "./detail-view";
+import { eventsFeedDescriptor } from "./events-feed";
+import { externalEmbedDescriptor } from "./external-embed";
 import { formDescriptor } from "./form";
+import { mapDescriptor } from "./map";
 import { metricDescriptor } from "./metric";
 import { noteDescriptor } from "./note";
 import { rtmpVideoDescriptor } from "./rtmp-video";
@@ -13,6 +17,10 @@ import { weatherMapDescriptor } from "./weather-map";
 export function registerAllWidgets() {
   const { register } = useWidgetRegistry.getState();
   register(clockDescriptor);
+  register(eventsFeedDescriptor);
+  register(detailViewDescriptor);
+  register(externalEmbedDescriptor);
+  register(mapDescriptor);
   register(noteDescriptor);
   register(metricDescriptor);
   register(todoDescriptor);

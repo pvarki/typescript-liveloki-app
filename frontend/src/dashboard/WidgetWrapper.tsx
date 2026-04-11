@@ -1,10 +1,16 @@
 import { Button, Card } from "@blueprintjs/core";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 import { useDashboardStore } from "../stores/dashboard-store";
 import { useWidgetRegistry } from "../stores/widget-registry";
 import type { WidgetInstance } from "../types";
 import { DEFAULT_DASHBOARD_SETTINGS } from "./dashboard-settings";
+import {
+  createWidgetClipboardPayload,
+  createWidgetFromClipboard,
+  serializeWidgetForClipboard,
+} from "./widget-clipboard";
 
 interface WidgetWrapperProps {
   widget: WidgetInstance;
@@ -13,14 +19,22 @@ interface WidgetWrapperProps {
 
 export default function WidgetWrapper({ widget, isEditMode }: WidgetWrapperProps) {
   const descriptor = useWidgetRegistry((s) => s.widgets.get(widget.type));
-  const { activeDashboard, selectedWidgetId, selectWidget, removeWidget, updateWidgetConfig } =
-    useDashboardStore();
+  const getDescriptor = useWidgetRegistry((s) => s.get);
+  const {
+    activeDashboard,
+    selectedWidgetId,
+    selectWidget,
+    addWidget,
+    removeWidget,
+    updateWidget,
+    updateWidgetConfig,
+  } = useDashboardStore();
   const isSelected = selectedWidgetId === widget.id;
   const ref = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const settings = activeDashboard?.settings ?? DEFAULT_DASHBOARD_SETTINGS;
   const showHeader =
-    settings.widgetHeaders === "always" ||
-    (settings.widgetHeaders === "edit-only" && isEditMode);
+    settings.widgetHeaders === "always" || (settings.widgetHeaders === "edit-only" && isEditMode);
   let borderColor = "var(--color-separator)";
   if (settings.widgetBorders === "none") {
     borderColor = "transparent";
@@ -37,23 +51,82 @@ export default function WidgetWrapper({ widget, isEditMode }: WidgetWrapperProps
   }
 
   const WidgetComponent = descriptor.component;
+  const copyWidget = async () => {
+    try {
+      await navigator.clipboard.writeText(serializeWidgetForClipboard(widget, descriptor));
+      toast.success("Widget copied");
+    } catch {
+      toast.error("Clipboard write failed");
+    }
+  };
+  const duplicateWidget = () => {
+    const payload = createWidgetClipboardPayload(widget, descriptor);
+    const pasted = createWidgetFromClipboard(JSON.stringify(payload), getDescriptor);
+    if (!pasted.ok || !pasted.widget) {
+      toast.error(pasted.error ?? "Could not duplicate widget");
+      return;
+    }
+
+    addWidget({
+      ...pasted.widget,
+      gridPosition: {
+        ...pasted.widget.gridPosition,
+        x: widget.gridPosition.x + 1,
+        y: widget.gridPosition.y + 1,
+      },
+    });
+    selectWidget(pasted.widget.id);
+  };
+  const pasteWidget = async () => {
+    try {
+      const pasted = createWidgetFromClipboard(await navigator.clipboard.readText(), getDescriptor);
+      if (!pasted.ok || !pasted.widget) {
+        toast.error(pasted.error ?? "Could not paste widget");
+        return;
+      }
+
+      addWidget(pasted.widget);
+      selectWidget(pasted.widget.id);
+      toast.success("Widget pasted");
+    } catch {
+      toast.error("Clipboard read failed");
+    }
+  };
+  const resetSize = () => {
+    updateWidget(widget.id, {
+      gridPosition: {
+        ...widget.gridPosition,
+        w: descriptor.defaultSize.w,
+        h: descriptor.defaultSize.h,
+        minW: descriptor.defaultSize.minW,
+        minH: descriptor.defaultSize.minH,
+      },
+    });
+  };
+  const closeMenu = () => setMenuOpen(false);
 
   return (
     <div
       ref={ref}
       className="h-full w-full"
+      onContextMenu={(event) => {
+        if (!isEditMode) return;
+        event.preventDefault();
+        event.stopPropagation();
+        selectWidget(widget.id);
+        setMenuOpen(true);
+      }}
       onClick={(e) => {
         if (isEditMode) {
           e.stopPropagation();
           selectWidget(widget.id);
+          setMenuOpen(false);
         }
       }}
     >
       <Card
         className={`relative flex h-full w-full flex-col overflow-hidden !p-0 ${
-          isSelected && isEditMode
-            ? "ring-2 ring-[var(--color-accent)]"
-            : ""
+          isSelected && isEditMode ? "ring-2 ring-[var(--color-accent)]" : ""
         }`}
         style={{
           borderColor,
@@ -76,32 +149,92 @@ export default function WidgetWrapper({ widget, isEditMode }: WidgetWrapperProps
             aria-hidden="true"
           />
         )}
-        <div className={`min-h-0 flex-1 p-0 ${descriptor.needsScroll ? "overflow-y-auto" : "overflow-hidden"}`}>
+        <div
+          className={`min-h-0 flex-1 p-0 ${descriptor.needsScroll ? "overflow-y-auto" : "overflow-hidden"}`}
+        >
           <WidgetComponent
             instanceId={widget.id}
             config={widget.config}
             isEditMode={isEditMode}
-            onChange={(newConfig: Record<string, unknown>) =>
-              updateWidgetConfig(widget.id, newConfig)
-            }
+            onChange={(newConfig: Record<string, unknown>) => updateWidgetConfig(widget.id, newConfig)}
           />
         </div>
       </Card>
       {isEditMode && (
-        <Button
-          icon="cross"
-          intent="danger"
-          size="small"
-          variant="minimal"
-          className="absolute right-1 top-1 z-50 flex h-5 w-5 items-center justify-center rounded-full bg-[var(--color-danger)] text-xs text-white opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
-          style={{ opacity: isSelected ? 1 : undefined }}
-          onClick={(e) => {
-            e.stopPropagation();
-            removeWidget(widget.id);
-          }}
-          title="Remove widget"
-          aria-label="Remove widget"
-        />
+        <div className="absolute right-1 top-1 z-50">
+          <Button
+            icon="more"
+            size="small"
+            variant="minimal"
+            className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-surface)] text-xs opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
+            style={{ opacity: isSelected || menuOpen ? 1 : undefined }}
+            onClick={(event) => {
+              event.stopPropagation();
+              selectWidget(widget.id);
+              setMenuOpen((open) => !open);
+            }}
+            title="Widget actions"
+            aria-label="Widget actions"
+          />
+          {menuOpen && (
+            <div
+              className="absolute right-0 mt-1 flex w-40 flex-col rounded border border-[var(--color-separator)] bg-[var(--color-surface)] p-1 text-xs shadow-lg"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <button
+                className="rounded px-2 py-1 text-left hover:bg-[var(--color-surface-secondary)]"
+                type="button"
+                onClick={closeMenu}
+              >
+                Settings
+              </button>
+              <button
+                className="rounded px-2 py-1 text-left hover:bg-[var(--color-surface-secondary)]"
+                type="button"
+                onClick={() => void copyWidget().finally(closeMenu)}
+              >
+                Copy
+              </button>
+              <button
+                className="rounded px-2 py-1 text-left hover:bg-[var(--color-surface-secondary)]"
+                type="button"
+                onClick={() => void pasteWidget().finally(closeMenu)}
+              >
+                Paste
+              </button>
+              <button
+                className="rounded px-2 py-1 text-left hover:bg-[var(--color-surface-secondary)]"
+                type="button"
+                onClick={() => {
+                  duplicateWidget();
+                  closeMenu();
+                }}
+              >
+                Duplicate
+              </button>
+              <button
+                className="rounded px-2 py-1 text-left hover:bg-[var(--color-surface-secondary)]"
+                type="button"
+                onClick={() => {
+                  resetSize();
+                  closeMenu();
+                }}
+              >
+                Reset size
+              </button>
+              <button
+                className="rounded px-2 py-1 text-left text-[var(--color-danger)] hover:bg-[var(--color-surface-secondary)]"
+                type="button"
+                onClick={() => {
+                  removeWidget(widget.id);
+                  closeMenu();
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

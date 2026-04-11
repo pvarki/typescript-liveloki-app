@@ -1,49 +1,56 @@
 import axios from "axios";
-import { describe, it, expect } from "vitest";
-import type { AxiosResponse } from "axios";
+import { describe, expect, it } from "vitest";
 
-// API base URL
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 
-// Add these interface definitions after the existing ones
-interface Group {
-  groupName: string;
-  eventIds: string[];
+interface EventInput {
+  header: string;
+  link: string;
+  source: string;
+  admiralty_reliability: string;
+  admiralty_accuracy: string;
+  event_time: string;
+  keywords: string[];
+  hcoe_domains: string[];
+  location: string;
+  author: string;
+  location_lat: string;
+  location_lng: string;
 }
 
-interface GroupCreateRequest {
-  groupName: string;
-  eventIds: string[];
+function sampleEvent(header: string): EventInput {
+  return {
+    header,
+    link: "https://example.com/group-test",
+    source: "Group Integration Test",
+    admiralty_reliability: "A",
+    admiralty_accuracy: "1",
+    event_time: new Date().toISOString(),
+    keywords: ["group-test"],
+    hcoe_domains: ["Cyber"],
+    location: "Test Location",
+    author: "Integration Tester",
+    location_lat: "60.1695",
+    location_lng: "24.9354",
+  };
 }
 
-interface GroupCreateResponse {
-  message: string;
-  eventCount: number;
+async function createEventAndReturnId(header: string): Promise<string> {
+  await axios.post(`${API_BASE_URL}/api/events`, { events: [sampleEvent(header)] });
+  const eventsResponse = await axios.get(`${API_BASE_URL}/api/events`);
+  const created = eventsResponse.data.find((event: { header: string }) => event.header === header);
+  expect(created).to.not.be.undefined;
+  return String(created.id);
 }
 
-// Add this test data after the existing sampleEvent
-const sampleGroupRequest: GroupCreateRequest = {
-  groupName: `TestGroup${Date.now()}`,
-  eventIds: [
-    "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11",
-    "550e8400-e29b-41d4-a716-446655440000"
-  ]
-};
-
-// Add this new test suite at the end of the file
 describe("Groups API Integration Tests", () => {
-
   describe("GET /api/groups", () => {
     it("should return a list of existing groups", async () => {
       const response = await axios.get(`${API_BASE_URL}/api/groups`);
 
-      // Status code should be 200
       expect(response.status).to.equal(200);
-
-      // Response should be an array
       expect(response.data).to.be.an("array");
 
-      // Each group should have the expected structure if any exist
       if (response.data.length > 0) {
         const group = response.data[0];
         expect(group).to.have.property("group_name");
@@ -54,41 +61,34 @@ describe("Groups API Integration Tests", () => {
 
   describe("GET /api/groups/{groupName}", () => {
     it("should return group details for an existing group", async () => {
-      // First create a group
       const uniqueGroupName = `TestGroupDetails${Date.now()}`;
-      const groupRequest = {
-        ...sampleGroupRequest,
-        groupName: uniqueGroupName,
-        eventIds: ["0197b30c-9acd-7e4a-b757-e51550b03376", "0197b30c-9acd-7006-8446-e6ee745686ee"] // From preseed data
-      };
+      const eventIds = [
+        await createEventAndReturnId(`Group detail event A ${Date.now()}`),
+        await createEventAndReturnId(`Group detail event B ${Date.now()}`),
+      ];
 
-      await axios.post(`${API_BASE_URL}/api/groups`, groupRequest);
+      await axios.post(`${API_BASE_URL}/api/groups`, { groupName: uniqueGroupName, eventIds });
 
-      // Then get the group details
-      const response = await axios.get(`${API_BASE_URL}/api/groups/${uniqueGroupName}`);
+      const response = await axios.get(`${API_BASE_URL}/api/groups/${encodeURIComponent(uniqueGroupName)}`);
 
-      // Status code should be 200
       expect(response.status).to.equal(200);
-
-      // Response should contain group information
       expect(response.data).to.be.an("array");
-      // Note: The actual response structure may vary based on implementation
-      // Adjust these assertions based on your API's actual response format
+      expect(response.data.length).to.be.at.least(1);
     });
   });
 
   describe("GET /api/event/{eventId}", () => {
-
     it("should handle existent event ID", async () => {
-      const eventId = "0197b30c-9acd-7f21-94d6-0fb19cb05543";
+      const groupName = `EventDetailGroup${Date.now()}`;
+      const eventId = await createEventAndReturnId(`Grouped event ${Date.now()}`);
 
+      await axios.post(`${API_BASE_URL}/api/groups`, { groupName, eventIds: [eventId] });
       const response = await axios.get(`${API_BASE_URL}/api/event/${eventId}`);
 
       expect(response.status).to.equal(200);
       expect(response.data).to.be.an("object");
       expect(response.data.groups).to.be.an("array");
-      expect(response.data.groups.length).to.equal(1);
-      expect(response.data.groups).to.contain("Group 1");
+      expect(response.data.groups).to.contain(groupName);
     });
 
     it("should handle non-existent event ID", async () => {
@@ -97,7 +97,7 @@ describe("Groups API Integration Tests", () => {
       try {
         await axios.get(`${API_BASE_URL}/api/event/${nonExistentEventId}`);
         throw new Error("Expected request to fail with 404 status");
-      } catch (error: any) {
+      } catch (error: unknown) {
         if (axios.isAxiosError(error)) {
           expect(error.response?.status).to.equal(404);
         } else {
@@ -105,6 +105,5 @@ describe("Groups API Integration Tests", () => {
         }
       }
     });
-
   });
 });

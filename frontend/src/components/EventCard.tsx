@@ -9,7 +9,7 @@ import { EventLocationLink } from "./EventLocationLink.tsx";
 import { EventRelAcc } from "./EventRelAcc.tsx";
 import { Keywords } from "./Keywords.tsx";
 
-export function uploadMedia(eventId: number, media: File) {
+export function uploadMedia(eventId: number | string, media: File) {
   const formData = new FormData();
   formData.append("files", media, media?.name);
   formData.append("eventId", eventId.toString());

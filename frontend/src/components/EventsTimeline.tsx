@@ -6,7 +6,7 @@ import { Timeline, type TimelineOptions } from "vis-timeline";
 import type { FilteredEvent } from "../types";
 
 interface TimelineItem {
-  id: number;
+  id: number | string;
   content: string;
   start: Date;
   type: "point";

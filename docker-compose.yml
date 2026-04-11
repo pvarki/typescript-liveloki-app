@@ -40,19 +40,19 @@ services:
 #    networks:
 #      - testing-network
 
-  caddy:
-    image: caddy:latest
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    depends_on:
-      app:
-        condition: service_started
+#  caddy:
+#    image: caddy:latest
+#    restart: unless-stopped
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+#      - caddy-data:/data
+#      - caddy-config:/config
+#    depends_on:
+#      app:
+#        condition: service_started
 
   test:
     profiles: ["cli-only"]

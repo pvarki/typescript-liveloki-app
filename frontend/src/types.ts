@@ -1,5 +1,7 @@
+import type { FC, ReactNode } from "react";
+
 export interface Event {
-  id: number;
+  id: number | string;
   header: string;
   link: string;
   source: string;
@@ -46,4 +48,62 @@ export interface Group {
 export interface LngLatData {
   lat: number;
   lng: number;
+}
+
+export interface DashboardData {
+  id: string;
+  name: string;
+  cols: number;
+  rowHeight: number;
+  layout: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GridPosition {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  minW?: number;
+  minH?: number;
+}
+
+export interface WidgetInstance {
+  id: string;
+  type: string;
+  gridPosition: GridPosition;
+  config: Record<string, unknown>;
+}
+
+export interface DashboardLayout {
+  id: string;
+  name: string;
+  cols: number;
+  rowHeight: number;
+  widgets: WidgetInstance[];
+}
+
+export interface WidgetDescriptor {
+  type: string;
+  name: string;
+  description: string;
+  icon: ReactNode;
+  defaultSize: { w: number; h: number; minW: number; minH: number };
+  defaultConfig: Record<string, unknown>;
+  component: FC<WidgetProps>;
+  configPanel?: FC<ConfigPanelProps>;
+  needsScroll?: boolean;
+}
+
+export interface WidgetProps {
+  instanceId: string;
+  config: Record<string, unknown>;
+  isEditMode: boolean;
+  onChange?: (config: Record<string, unknown>) => void;
+}
+
+export interface ConfigPanelProps {
+  config: Record<string, unknown>;
+  onChange: (config: Record<string, unknown>) => void;
 }

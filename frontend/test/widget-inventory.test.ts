@@ -9,8 +9,10 @@ describe("widget registry inventory", () => {
     registerAllWidgets();
 
     expect(new Set(useWidgetRegistry.getState().getAll().map((widget) => widget.type))).toEqual(new Set([
+      "calendar",
       "clock",
       "form",
+      "inventory",
       "metric",
       "note",
       "rtmp-video",

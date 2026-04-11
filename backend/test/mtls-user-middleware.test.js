@@ -18,18 +18,18 @@ test('parseDistinguishedName returns empty object for empty input', async () => 
     const { parseDistinguishedName } = await import('../middleware/mtlsUserMiddleware.js');
     assert.deepStrictEqual(parseDistinguishedName(''), {});
     assert.deepStrictEqual(parseDistinguishedName(null), {});
-    assert.deepStrictEqual(parseDistinguishedName(undefined), {});
+    const nil = undefined;
+    assert.deepStrictEqual(parseDistinguishedName(nil), {});
 });
 
 test('mtlsUserMiddleware returns 401 when enforcement on and no header', async () => {
     const { createMtlsUserMiddleware } = await import('../middleware/mtlsUserMiddleware.js');
     const middleware = createMtlsUserMiddleware({ enforce: true, header: 'x-clientcert-dn' });
 
-    const req = { get: () => undefined };
+    const req = { get: () => null };
     let statusCode = null;
-    let responseBody = null;
     const res = {
-        status: (code) => { statusCode = code; return { json: (body) => { responseBody = body; } }; },
+        status: (code) => { statusCode = code; return { json: () => {} }; },
     };
     const next = () => { assert.fail('next should not be called'); };
 
@@ -56,7 +56,7 @@ test('mtlsUserMiddleware attaches default user when enforcement off', async () =
     const { createMtlsUserMiddleware } = await import('../middleware/mtlsUserMiddleware.js');
     const middleware = createMtlsUserMiddleware({ enforce: false, header: 'x-clientcert-dn' });
 
-    const req = { get: () => undefined };
+    const req = { get: () => null };
     const res = {};
     let nextCalled = false;
     const next = () => { nextCalled = true; };

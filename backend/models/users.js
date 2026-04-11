@@ -1,4 +1,3 @@
-import logger from '../logger.js';
 import pool from './pool.js';
 
 export const findUserByCn = async (cn) => {

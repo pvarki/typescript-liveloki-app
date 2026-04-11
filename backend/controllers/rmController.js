@@ -1,6 +1,7 @@
 import config from '../config/index.js';
 import logger from '../logger.js';
 import { getManifestProductUri } from '../utils/kraftwerkManifest.js';
+import { createUser, promoteUser, demoteUser, deleteUser, updateUserCallsign } from '../models/users.js';
 
 const BATTLELOG_DOCS_URL = 'https://github.com/pvarki/typescript-liveloki-app/';
 const BATTLELOG_SHORTNAME = 'bl';
@@ -94,6 +95,66 @@ export const checkHealth = async (_request, response) => {
 
 export const noOp = async (_request, response) => {
     response.json({ success: true });
+};
+
+export const userCreated = async (request, response) => {
+    try {
+        const { uuid, callsign, cert_cn } = request.body || {};
+        await createUser({ cn: cert_cn, rmUuid: uuid, callsign });
+        logger.info(`User created: cn=${cert_cn}, uuid=${uuid}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userCreated: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const userPromoted = async (request, response) => {
+    try {
+        const { uuid } = request.body || {};
+        await promoteUser(uuid);
+        logger.info(`User promoted: uuid=${uuid}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userPromoted: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const userDemoted = async (request, response) => {
+    try {
+        const { uuid } = request.body || {};
+        await demoteUser(uuid);
+        logger.info(`User demoted: uuid=${uuid}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userDemoted: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const userRevoked = async (request, response) => {
+    try {
+        const { uuid } = request.body || {};
+        await deleteUser(uuid);
+        logger.info(`User revoked: uuid=${uuid}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userRevoked: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const userUpdated = async (request, response) => {
+    try {
+        const { uuid, callsign } = request.body || {};
+        await updateUserCallsign(uuid, callsign);
+        logger.info(`User updated: uuid=${uuid}, callsign=${callsign}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userUpdated: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
+    }
 };
 
 export const descriptionV1Handler = async (request, response) => {

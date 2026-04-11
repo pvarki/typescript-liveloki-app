@@ -1,6 +1,6 @@
 import config from '../config/index.js';
 import logger from '../logger.js';
-import { findUserByCn, createUser } from '../models/users.js';
+import { findUserByCn, upsertUserByCn } from '../models/users.js';
 
 const parseDistinguishedName = (rawDn) => {
     if (typeof rawDn !== 'string' || !rawDn.trim()) {
@@ -62,7 +62,7 @@ export const createMtlsUserMiddleware = (options = {}) => {
             let user = await findUserByCn(cn);
             if (!user) {
                 logger.info(`Auto-registering user CN=${cn}`);
-                user = await createUser({ cn });
+                user = await upsertUserByCn({ cn });
             }
             req.user = {
                 cn: user.cn,

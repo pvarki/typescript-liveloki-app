@@ -29,18 +29,13 @@ function getPlaybackMode(value: unknown): VideoPlaybackMode {
 export function getRtmpVideoConfig(config: Record<string, unknown>): RtmpVideoWidgetConfig {
   return {
     title: typeof config.title === "string" ? config.title : DEFAULT_RTMP_VIDEO_CONFIG.title,
-    sourceUrl:
-      typeof config.sourceUrl === "string" ? config.sourceUrl : DEFAULT_RTMP_VIDEO_CONFIG.sourceUrl,
-    username:
-      typeof config.username === "string" ? config.username : DEFAULT_RTMP_VIDEO_CONFIG.username,
-    password:
-      typeof config.password === "string" ? config.password : DEFAULT_RTMP_VIDEO_CONFIG.password,
+    sourceUrl: typeof config.sourceUrl === "string" ? config.sourceUrl : DEFAULT_RTMP_VIDEO_CONFIG.sourceUrl,
+    username: typeof config.username === "string" ? config.username : DEFAULT_RTMP_VIDEO_CONFIG.username,
+    password: typeof config.password === "string" ? config.password : DEFAULT_RTMP_VIDEO_CONFIG.password,
     playbackMode: getPlaybackMode(config.playbackMode),
-    autoplay:
-      typeof config.autoplay === "boolean" ? config.autoplay : DEFAULT_RTMP_VIDEO_CONFIG.autoplay,
+    autoplay: typeof config.autoplay === "boolean" ? config.autoplay : DEFAULT_RTMP_VIDEO_CONFIG.autoplay,
     muted: typeof config.muted === "boolean" ? config.muted : DEFAULT_RTMP_VIDEO_CONFIG.muted,
-    controls:
-      typeof config.controls === "boolean" ? config.controls : DEFAULT_RTMP_VIDEO_CONFIG.controls,
+    controls: typeof config.controls === "boolean" ? config.controls : DEFAULT_RTMP_VIDEO_CONFIG.controls,
   };
 }
 
@@ -86,6 +81,48 @@ export function buildVideoSourceUrl(config: RtmpVideoWidgetConfig): string {
   if (!sourceUrl || config.playbackMode !== "hls" || isHlsSource(sourceUrl)) return sourceUrl;
 
   return `${sourceUrl.replace(/\/+$/, "")}/index.m3u8`;
+}
+
+const SECRET_QUERY_PARAMS = new Set([
+  "access_token",
+  "api_key",
+  "apikey",
+  "auth",
+  "authorization",
+  "key",
+  "password",
+  "secret",
+  "sig",
+  "signature",
+  "token",
+]);
+
+function redactUrlCredentials(sourceUrl: string): string {
+  try {
+    const parsed = new URL(sourceUrl);
+    parsed.username = "";
+    parsed.password = "";
+    parsed.hash = "";
+    const searchParamKeys = [...parsed.searchParams.keys()];
+    for (const key of searchParamKeys) {
+      if (SECRET_QUERY_PARAMS.has(key.toLowerCase())) {
+        parsed.searchParams.delete(key);
+      }
+    }
+    return parsed.toString();
+  } catch {
+    return sourceUrl;
+  }
+}
+
+export function redactRtmpVideoConfig(config: Record<string, unknown>): RtmpVideoWidgetConfig {
+  const video = getRtmpVideoConfig(config);
+  return {
+    ...video,
+    sourceUrl: redactUrlCredentials(video.sourceUrl),
+    username: "",
+    password: "",
+  };
 }
 
 export function isRtmpSource(sourceUrl: string): boolean {

@@ -8,19 +8,32 @@ describe("widget registry inventory", () => {
     useWidgetRegistry.setState({ widgets: new Map() });
     registerAllWidgets();
 
-    expect(new Set(useWidgetRegistry.getState().getAll().map((widget) => widget.type))).toEqual(new Set([
-      "calendar",
-      "clock",
-      "form",
-      "inventory",
-      "metric",
-      "note",
-      "rtmp-video",
-      "table",
-      "timeline",
-      "timer",
-      "todo",
-      "weather-map",
-    ]));
+    expect(
+      new Set(
+        useWidgetRegistry
+          .getState()
+          .getAll()
+          .map((widget) => widget.type),
+      ),
+    ).toEqual(
+      new Set([
+        "calendar",
+        "clock",
+        "detail-view",
+        "events-feed",
+        "external-embed",
+        "form",
+        "inventory",
+        "map",
+        "metric",
+        "note",
+        "rtmp-video",
+        "table",
+        "timeline",
+        "timer",
+        "todo",
+        "weather-map",
+      ]),
+    );
   });
 });

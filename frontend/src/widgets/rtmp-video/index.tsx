@@ -12,6 +12,7 @@ import {
   isBrowserPlayableVideoSource,
   isHlsSource,
   isRtmpSource,
+  redactRtmpVideoConfig,
 } from "./rtmp-video-model";
 
 function VideoElement({
@@ -223,10 +224,7 @@ function RtmpVideoConfigPanel({ config, onChange }: ConfigPanelProps) {
         />
       </FormGroup>
 
-      <FormGroup
-        label="Username"
-        helperText="Optional. Added to playback URL as https://USERNAME@host/..."
-      >
+      <FormGroup label="Username" helperText="Optional. Added to playback URL as https://USERNAME@host/...">
         <InputGroup
           value={video.username}
           onChange={(event) => onChange({ ...video, username: event.target.value })}
@@ -272,5 +270,7 @@ export const rtmpVideoDescriptor: WidgetDescriptor = {
   defaultConfig: DEFAULT_RTMP_VIDEO_CONFIG,
   component: RtmpVideoWidget,
   configPanel: RtmpVideoConfigPanel,
+  toClipboardConfig: redactRtmpVideoConfig,
+  fromClipboardConfig: redactRtmpVideoConfig,
   needsScroll: false,
 };

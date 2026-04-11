@@ -102,6 +102,8 @@ export interface WidgetDescriptor {
   defaultConfig: Record<string, unknown>;
   component: FC<WidgetProps>;
   configPanel?: FC<ConfigPanelProps>;
+  toClipboardConfig?: (config: Record<string, unknown>) => Record<string, unknown>;
+  fromClipboardConfig?: (config: Record<string, unknown>) => Record<string, unknown>;
   needsScroll?: boolean;
 }
 

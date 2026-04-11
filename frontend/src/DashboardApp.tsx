@@ -6,6 +6,7 @@ import DashboardGrid from "./dashboard/DashboardGrid";
 import { createDefaultBattlelogWidgets } from "./dashboard/default-dashboard";
 import GridLinesOverlay from "./dashboard/GridLinesOverlay";
 import TopBar from "./dashboard/TopBar";
+import { useWidgetKeyboardShortcuts } from "./dashboard/use-widget-keyboard-shortcuts";
 import WidgetConfigPanel from "./dashboard/WidgetConfigPanel";
 import { useAutoSave } from "./hooks/use-auto-save";
 import NotificationHost from "./notifications/NotificationHost";
@@ -69,6 +70,7 @@ export function DashboardPage() {
   const selectDashboard = useDashboardStore((state) => state.selectDashboard);
 
   useAutoSave();
+  useWidgetKeyboardShortcuts(isEditMode);
 
   useEffect(() => {
     if (!dashboardId) return;

@@ -1,10 +1,12 @@
 import "vis-timeline/styles/vis-timeline-graph2d.min.css";
 
 import { useEffect, useMemo, useRef } from "react";
+import useSWR from "swr";
 import { Timeline } from "vis-timeline/standalone";
 
-import { useBattlelogEvents } from "../../battlelog/event-data";
 import { useEventDetailStore } from "../../battlelog/event-detail-store";
+import { battlelogDataSource } from "../../data-sources/battlelog";
+import { useWidgetParams } from "../../hooks/use-widget-params";
 import type { Event, WidgetDescriptor, WidgetProps } from "../../types";
 
 interface TimelineItem {
@@ -16,14 +18,16 @@ interface TimelineItem {
 }
 
 function buildTooltip(event: Event): string {
-  return [
-    event.source && `<b>Source:</b> ${event.source}`,
-    event.location && `<b>Location:</b> ${event.location}`,
-    event.keywords?.length ? `<b>Keywords:</b> ${event.keywords.join(", ")}` : null,
-    event.notes && `<b>Notes:</b> ${event.notes}`,
-  ]
-    .filter(Boolean)
-    .join("<br>") || "No details";
+  return (
+    [
+      event.source && `<b>Source:</b> ${event.source}`,
+      event.location && `<b>Location:</b> ${event.location}`,
+      event.keywords?.length ? `<b>Keywords:</b> ${event.keywords.join(", ")}` : null,
+      event.notes && `<b>Notes:</b> ${event.notes}`,
+    ]
+      .filter(Boolean)
+      .join("<br>") || "No details"
+  );
 }
 
 export function eventToTimelineItem(event: Event): TimelineItem | null {
@@ -55,7 +59,12 @@ function TimelineWidget({ isEditMode }: WidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<Timeline | null>(null);
   const openEvent = useEventDetailStore((state) => state.openEvent);
-  const { data: events, error, isLoading } = useBattlelogEvents();
+  const { selectedItem, setSelectedItem, setTime } = useWidgetParams();
+  const {
+    data: events,
+    error,
+    isLoading,
+  } = useSWR(battlelogDataSource.listKey, battlelogDataSource.listFetcher, { refreshInterval: 10_000 });
 
   const items = useMemo(
     () => (events ?? []).map(eventToTimelineItem).filter((item): item is TimelineItem => item !== null),
@@ -80,7 +89,16 @@ function TimelineWidget({ isEditMode }: WidgetProps) {
     });
 
     timeline.on("click", (properties) => {
-      if (properties.item) openEvent(properties.item);
+      if (!properties.item) return;
+      setSelectedItem(String(properties.item));
+      openEvent(properties.item);
+    });
+
+    timeline.on("rangechanged", (properties) => {
+      const start = properties.start?.getTime();
+      const end = properties.end?.getTime();
+      if (!Number.isFinite(start) || !Number.isFinite(end)) return;
+      setTime(new Date((start + end) / 2).toISOString());
     });
 
     timelineRef.current = timeline;
@@ -88,12 +106,17 @@ function TimelineWidget({ isEditMode }: WidgetProps) {
       timeline.destroy();
       timelineRef.current = null;
     };
-  }, [isEditMode, openEvent]);
+  }, [isEditMode, openEvent, setSelectedItem, setTime]);
 
   useEffect(() => {
     if (!timelineRef.current) return;
     refreshTimelineView(timelineRef.current, items);
   }, [items]);
+
+  useEffect(() => {
+    if (!timelineRef.current) return;
+    timelineRef.current.setSelection(selectedItem ? [selectedItem] : []);
+  }, [selectedItem]);
 
   useEffect(() => {
     if (!containerRef.current) return;

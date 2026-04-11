@@ -1,11 +1,18 @@
 import { Button, Card, Checkbox, InputGroup, Popover } from "@blueprintjs/core";
-import { closestCenter, DndContext, type DragEndEvent,PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { SortableContext, useSortable,verticalListSortingStrategy } from "@dnd-kit/sortable";
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useState } from "react";
 
 import { useDashboardStore } from "../../stores/dashboard-store";
-import type { ConfigPanelProps,WidgetDescriptor, WidgetProps } from "../../types";
+import type { ConfigPanelProps, WidgetDescriptor, WidgetProps } from "../../types";
 
 interface Task {
   id: string;
@@ -97,10 +104,13 @@ function TodoWidget({ instanceId, config, isEditMode }: WidgetProps) {
         >
           <Checkbox
             checked={task.done}
+            disabled={isEditMode}
             onChange={() => updateTasks(tasks.map((t) => (t.id === task.id ? { ...t, done: !t.done } : t)))}
             className="mt-0.5"
           />
-          <span className={`flex-1 text-sm ${task.done ? "line-through text-[var(--color-muted-foreground)]" : ""}`}>
+          <span
+            className={`flex-1 text-sm ${task.done ? "line-through text-[var(--color-muted-foreground)]" : ""}`}
+          >
             {task.text}
           </span>
           <Button
@@ -108,6 +118,7 @@ function TodoWidget({ instanceId, config, isEditMode }: WidgetProps) {
             minimal
             size="small"
             className="mt-0.5 text-xs text-[var(--color-muted-foreground)] opacity-0 hover:text-[var(--color-danger)] group-hover:opacity-100"
+            disabled={isEditMode}
             onClick={() => updateTasks(tasks.filter((t) => t.id !== task.id))}
           />
         </div>
@@ -116,7 +127,15 @@ function TodoWidget({ instanceId, config, isEditMode }: WidgetProps) {
   );
 }
 
-function SortableTaskItem({ task, config, onChange }: { task: Task; config: Record<string, unknown>; onChange: (c: Record<string, unknown>) => void }) {
+function SortableTaskItem({
+  task,
+  config,
+  onChange,
+}: {
+  task: Task;
+  config: Record<string, unknown>;
+  onChange: (c: Record<string, unknown>) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: task.id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -125,7 +144,12 @@ function SortableTaskItem({ task, config, onChange }: { task: Task; config: Reco
 
   return (
     <Card ref={setNodeRef} style={style} className="flex items-center gap-2 !p-2">
-      <Button {...attributes} {...listeners} minimal className="cursor-grab text-[var(--color-muted-foreground)] active:cursor-grabbing">
+      <Button
+        {...attributes}
+        {...listeners}
+        minimal
+        className="cursor-grab text-[var(--color-muted-foreground)] active:cursor-grabbing"
+      >
         ⠿
       </Button>
       <InputGroup
@@ -206,20 +230,12 @@ function TodoConfigPanel({ config, onChange }: ConfigPanelProps) {
               if (e.key === "Enter") addTask();
             }}
           />
-          <Button
-            icon="plus"
-            onClick={addTask}
-            aria-label="Add task"
-          />
+          <Button icon="plus" onClick={addTask} aria-label="Add task" />
         </div>
         <div className="mt-2 flex items-center justify-between gap-2">
           <span className="text-xs font-medium">Task color</span>
           <div className="flex items-center gap-2">
-            <TaskColorPicker
-              label="New task color"
-              value={newTaskColor}
-              onChange={setNewTaskColor}
-            />
+            <TaskColorPicker label="New task color" value={newTaskColor} onChange={setNewTaskColor} />
             <Button
               type="button"
               minimal

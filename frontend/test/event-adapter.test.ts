@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { eventToTableRow } from "../src/battlelog/event-data";
+import { battlelogDataSource } from "../src/data-sources/battlelog";
 import type { Event } from "../src/types";
 import { eventToTimelineItem } from "../src/widgets/timeline";
 import { eventHasCoordinates } from "../src/widgets/weather-map";
@@ -26,6 +27,24 @@ const baseEvent: Event = {
 };
 
 describe("Battlelog event adapter", () => {
+  it("exposes minimal data-source metadata and accessors", () => {
+    expect(battlelogDataSource).toMatchObject({
+      id: "battlelog",
+      name: "Battlelog events",
+      listKey: "events",
+    });
+    expect(battlelogDataSource.getItemId(baseEvent)).toEqual("event-1");
+    expect(battlelogDataSource.getTimestamp?.(baseEvent)).toEqual("2026-04-11T05:00:00.000Z");
+    expect(battlelogDataSource.searchableFields).toContain("header");
+    expect(battlelogDataSource.columns.map((column) => column.key)).toContain("event_time");
+  });
+
+  it("uses adapter column value getters for Battlelog rows", () => {
+    const header = battlelogDataSource.columns.find((column) => column.key === "header");
+
+    expect(header?.getValue(baseEvent)).toEqual("Header");
+  });
+
   it("maps events to searchable table cells", () => {
     const row = eventToTableRow(baseEvent);
 
@@ -37,7 +56,13 @@ describe("Battlelog event adapter", () => {
   });
 
   it("uses safe placeholders for missing optional values", () => {
-    const row = eventToTableRow({ ...baseEvent, location: null, hcoe_domains: null, groups: undefined, notes: undefined });
+    const row = eventToTableRow({
+      ...baseEvent,
+      location: null,
+      hcoe_domains: null,
+      groups: undefined,
+      notes: undefined,
+    });
 
     expect(row.cells.location).toEqual("");
     expect(row.cells.domains).toEqual("");

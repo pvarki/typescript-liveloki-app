@@ -3,14 +3,16 @@ import Fuse from "fuse.js";
 import { useMemo, useState } from "react";
 import { MdLink } from "react-icons/md";
 import { Link } from "react-router-dom";
+import useSWR from "swr";
 
 import {
   BATTLELOG_TABLE_COLUMNS,
   DEFAULT_VISIBLE_BATTLELOG_COLUMNS,
   eventToTableRow,
-  useBattlelogEvents,
 } from "../../battlelog/event-data";
 import { useEventDetailStore } from "../../battlelog/event-detail-store";
+import { battlelogDataSource } from "../../data-sources/battlelog";
+import { useWidgetParams } from "../../hooks/use-widget-params";
 import type { ConfigPanelProps, WidgetDescriptor, WidgetProps } from "../../types";
 
 function getVisibleColumns(config: Record<string, unknown>) {
@@ -18,7 +20,9 @@ function getVisibleColumns(config: Record<string, unknown>) {
   if (!Array.isArray(configured)) return DEFAULT_VISIBLE_BATTLELOG_COLUMNS;
 
   const known = new Set(BATTLELOG_TABLE_COLUMNS.map((column) => column.key));
-  const visible = configured.filter((column): column is string => typeof column === "string" && known.has(column));
+  const visible = configured.filter(
+    (column): column is string => typeof column === "string" && known.has(column),
+  );
   return visible.length > 0 ? visible : DEFAULT_VISIBLE_BATTLELOG_COLUMNS;
 }
 
@@ -30,7 +34,10 @@ function HighlightedCell({ text, indices }: { text: string; indices?: ReadonlyAr
   for (const [start, end] of indices) {
     if (start > previous) parts.push(text.slice(previous, start));
     parts.push(
-      <mark key={`${start}-${end}`} className="rounded-sm bg-amber-300/60 px-0.5 text-inherit dark:bg-amber-500/50">
+      <mark
+        key={`${start}-${end}`}
+        className="rounded-sm bg-amber-300/60 px-0.5 text-inherit dark:bg-amber-500/50"
+      >
         {text.slice(start, end + 1)}
       </mark>,
     );
@@ -41,8 +48,13 @@ function HighlightedCell({ text, indices }: { text: string; indices?: ReadonlyAr
 }
 
 function TableWidget({ config }: WidgetProps) {
-  const { data: events, error, isLoading } = useBattlelogEvents();
+  const {
+    data: events,
+    error,
+    isLoading,
+  } = useSWR(battlelogDataSource.listKey, battlelogDataSource.listFetcher, { refreshInterval: 10_000 });
   const openEvent = useEventDetailStore((state) => state.openEvent);
+  const { selectedItem, setSelectedItem } = useWidgetParams();
   const [search, setSearch] = useState("");
   const visibleColumnKeys = getVisibleColumns(config);
   const visibleColumns = BATTLELOG_TABLE_COLUMNS.filter((column) => visibleColumnKeys.includes(column.key));
@@ -79,23 +91,41 @@ function TableWidget({ config }: WidgetProps) {
   }, [searchResults]);
 
   if (isLoading) {
-    return <div className="flex h-full items-center justify-center p-3 text-sm text-[var(--color-muted-foreground)]">Loading events...</div>;
+    return (
+      <div className="flex h-full items-center justify-center p-3 text-sm text-[var(--color-muted-foreground)]">
+        Loading events...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="flex h-full items-center justify-center p-3 text-sm text-[var(--color-danger)]">Failed to load events: {String(error)}</div>;
+    return (
+      <div className="flex h-full items-center justify-center p-3 text-sm text-[var(--color-danger)]">
+        Failed to load events: {String(error)}
+      </div>
+    );
   }
 
   return (
     <div className="flex h-full flex-col gap-2 overflow-hidden p-3">
-      <InputGroup leftIcon="search" placeholder="Search Battlelog events..." value={search} onChange={(event) => setSearch(event.target.value)} />
+      <InputGroup
+        leftIcon="search"
+        placeholder="Search Battlelog events..."
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
       <div className="min-h-0 flex-1 overflow-auto">
         <table className="w-full min-w-max border-separate border-spacing-0 text-left text-xs">
           <thead>
             <tr>
-              <th className="sticky top-0 z-10 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 font-semibold text-[var(--color-muted-foreground)]">Detail</th>
+              <th className="sticky top-0 z-10 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 font-semibold text-[var(--color-muted-foreground)]">
+                Detail
+              </th>
               {visibleColumns.map((column) => (
-                <th key={column.key} className="sticky top-0 z-10 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 font-semibold text-[var(--color-muted-foreground)]">
+                <th
+                  key={column.key}
+                  className="sticky top-0 z-10 border-b border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 font-semibold text-[var(--color-muted-foreground)]"
+                >
                   {column.label}
                 </th>
               ))}
@@ -104,15 +134,29 @@ function TableWidget({ config }: WidgetProps) {
           <tbody>
             {displayRows.map((row, index) => {
               const cellMatches = matchMap.get(row.id);
+              const isSelected = selectedItem === row.id;
               return (
-                <tr key={row.id} className={`border-b border-[var(--color-border)] last:border-b-0 ${index % 2 === 1 ? "bg-[var(--color-surface-secondary)]" : ""}`}>
+                <tr
+                  key={row.id}
+                  className={`cursor-pointer border-b border-[var(--color-border)] last:border-b-0 ${index % 2 === 1 ? "bg-[var(--color-surface-secondary)]" : ""} ${
+                    isSelected ? "outline outline-1 outline-[var(--color-accent)]" : ""
+                  }`}
+                  onClick={() => setSelectedItem(row.id)}
+                >
                   <td className="px-2 py-1.5 align-top">
                     <Link
                       to={`/event/${row.event.id}`}
                       className="inline-flex rounded p-1 text-[var(--color-accent)] hover:bg-[var(--color-surface-secondary)]"
                       aria-label={`Open ${row.cells.header || "event"}`}
                       onClick={(event) => {
-                        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                        if (
+                          event.metaKey ||
+                          event.ctrlKey ||
+                          event.shiftKey ||
+                          event.altKey ||
+                          event.button !== 0
+                        )
+                          return;
                         event.preventDefault();
                         openEvent(row.event.id);
                       }}
@@ -123,7 +167,10 @@ function TableWidget({ config }: WidgetProps) {
                   {visibleColumns.map((column) => (
                     <td key={column.key} className="max-w-56 px-2 py-1.5 align-top">
                       <span className="line-clamp-3 whitespace-pre-wrap break-words">
-                        <HighlightedCell text={row.cells[column.key] || "—"} indices={cellMatches?.get(column.key)} />
+                        <HighlightedCell
+                          text={row.cells[column.key] || "—"}
+                          indices={cellMatches?.get(column.key)}
+                        />
                       </span>
                     </td>
                   ))}
@@ -132,7 +179,10 @@ function TableWidget({ config }: WidgetProps) {
             })}
             {displayRows.length === 0 && (
               <tr>
-                <td colSpan={visibleColumns.length + 1} className="px-2 py-4 text-center text-xs text-[var(--color-muted-foreground)]">
+                <td
+                  colSpan={visibleColumns.length + 1}
+                  className="px-2 py-4 text-center text-xs text-[var(--color-muted-foreground)]"
+                >
                   {search.trim() ? `No events match "${search}"` : "No Battlelog events found."}
                 </td>
               </tr>
@@ -156,15 +206,32 @@ function TableConfigPanel({ config, onChange }: ConfigPanelProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-xs text-[var(--color-muted-foreground)]">Choose Battlelog event columns shown in this table.</p>
+      <p className="text-xs text-[var(--color-muted-foreground)]">
+        Choose Battlelog event columns shown in this table.
+      </p>
       <div className="flex flex-col gap-1">
         {BATTLELOG_TABLE_COLUMNS.map((column) => (
-          <Checkbox key={column.key} checked={visibleColumns.has(column.key)} label={column.label} onChange={(event) => setColumn(column.key, event.currentTarget.checked)} />
+          <Checkbox
+            key={column.key}
+            checked={visibleColumns.has(column.key)}
+            label={column.label}
+            onChange={(event) => setColumn(column.key, event.currentTarget.checked)}
+          />
         ))}
       </div>
       <div className="flex gap-2">
-        <Button small onClick={() => onChange({ ...config, visibleColumns: DEFAULT_VISIBLE_BATTLELOG_COLUMNS })}>All</Button>
-        <Button small onClick={() => onChange({ ...config, visibleColumns: ["header", "event_time", "location"] })}>Operational</Button>
+        <Button
+          small
+          onClick={() => onChange({ ...config, visibleColumns: DEFAULT_VISIBLE_BATTLELOG_COLUMNS })}
+        >
+          All
+        </Button>
+        <Button
+          small
+          onClick={() => onChange({ ...config, visibleColumns: ["header", "event_time", "location"] })}
+        >
+          Operational
+        </Button>
       </div>
     </div>
   );

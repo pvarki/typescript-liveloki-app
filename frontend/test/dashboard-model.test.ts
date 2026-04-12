@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { parseLayout, serializeLayout } from "../src/api/client";
+import type { ApiError } from "../src/api/client";
+import { listDashboards, parseLayout, serializeLayout } from "../src/api/client";
 import {
   DEFAULT_DASHBOARD_SETTINGS,
   sanitizeDashboardSettings,
@@ -19,6 +20,9 @@ describe("dashboard model", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     useDashboardStore.setState({
+      dashboards: [],
+      dashboardError: null,
+      hasLoadedDashboards: false,
       activeDashboard: {
         id: "dash-1",
         name: "Test",
@@ -56,6 +60,63 @@ describe("dashboard model", () => {
         widgetHeaders: "sometimes",
       }),
     ).toEqual(DEFAULT_DASHBOARD_SETTINGS);
+  });
+
+
+  it("rejects non-OK dashboard list responses with the API error message", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ error: "Missing mTLS client certificate" }), {
+          status: 401,
+          statusText: "Unauthorized",
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+    );
+
+    await expect(listDashboards()).rejects.toMatchObject({
+      name: "ApiError",
+      status: 401,
+      message: "Missing mTLS client certificate",
+    } satisfies Partial<ApiError>);
+  });
+
+  it("keeps dashboard state render-safe when loading dashboards fails", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ error: "Missing mTLS client certificate" }), {
+          status: 401,
+          statusText: "Unauthorized",
+          headers: { "Content-Type": "application/json" },
+        }),
+      ),
+    );
+
+    useDashboardStore.setState({
+      dashboards: [
+        {
+          id: "existing",
+          name: "Existing",
+          cols: 24,
+          rowHeight: 50,
+          settings: DEFAULT_DASHBOARD_SETTINGS,
+          layout: "[]",
+          createdAt: "2026-04-11T00:00:00.000Z",
+          updatedAt: "2026-04-11T00:00:00.000Z",
+        },
+      ],
+      dashboardError: null,
+      hasLoadedDashboards: false,
+    });
+
+    await useDashboardStore.getState().loadDashboards();
+
+    const state = useDashboardStore.getState();
+    expect(state.dashboards).toEqual([]);
+    expect(state.hasLoadedDashboards).toEqual(true);
+    expect(state.dashboardError).toEqual("Missing mTLS client certificate");
   });
 
   it("updates dashboard grid settings and marks the dashboard dirty", () => {

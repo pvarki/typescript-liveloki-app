@@ -37,11 +37,13 @@ export function NavigateToFirst() {
   const navigate = useNavigate();
   const createDashboard = useDashboardStore((state) => state.createDashboard);
   const dashboards = useDashboardStore((state) => state.dashboards);
+  const dashboardError = useDashboardStore((state) => state.dashboardError);
   const hasLoadedDashboards = useDashboardStore((state) => state.hasLoadedDashboards);
+  const loadDashboards = useDashboardStore((state) => state.loadDashboards);
   const didCreateDefault = useRef(false);
 
   useEffect(() => {
-    if (!hasLoadedDashboards) return;
+    if (!hasLoadedDashboards || dashboardError) return;
 
     if (dashboards.length > 0) {
       navigate(`/d/${dashboards[0].id}`, { replace: true });
@@ -50,10 +52,30 @@ export function NavigateToFirst() {
 
     if (didCreateDefault.current) return;
     didCreateDefault.current = true;
-    void createDashboard("Battlelog Operations", createDefaultBattlelogWidgets()).then((id) => {
-      navigate(`/d/${id}`, { replace: true });
-    });
-  }, [createDashboard, dashboards, hasLoadedDashboards, navigate]);
+    void createDashboard("Battlelog Operations", createDefaultBattlelogWidgets())
+      .then((id) => {
+        navigate(`/d/${id}`, { replace: true });
+      })
+      .catch(() => {
+        didCreateDefault.current = false;
+      });
+  }, [createDashboard, dashboardError, dashboards, hasLoadedDashboards, navigate]);
+
+  if (dashboardError) {
+    return (
+      <div className="flex h-full items-center justify-center p-6">
+        <div className="max-w-xl rounded border border-[var(--color-danger)]/40 bg-[var(--color-surface)] p-4 shadow">
+          <h1 className="mb-2 text-lg font-semibold text-[var(--color-danger)]">
+            Unable to load dashboards
+          </h1>
+          <p className="mb-4 text-sm text-[var(--color-muted-foreground)]">{dashboardError}</p>
+          <button type="button" className="ll-btn" onClick={() => void loadDashboards()}>
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full items-center justify-center">

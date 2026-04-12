@@ -20,6 +20,7 @@ interface DashboardState {
   isLoading: boolean;
   hasLoadedDashboards: boolean;
   gridPreview: GridPreview | null;
+  dashboardError: string | null;
 
   loadDashboards: () => Promise<void>;
   selectDashboard: (id: string) => Promise<void>;
@@ -32,6 +33,7 @@ interface DashboardState {
   setEditMode: (edit: boolean) => void;
 
   setGridPreview: (preview: GridPreview | null) => void;
+  setDashboardError: (error: string | null) => void;
 
   addWidget: (widget: WidgetInstance) => void;
   updateWidget: (id: string, updates: Partial<WidgetInstance>) => void;
@@ -58,34 +60,60 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   isLoading: false,
   hasLoadedDashboards: false,
   gridPreview: null,
+  dashboardError: null,
 
   loadDashboards: async () => {
-    const dashboards = await api.listDashboards();
-    set({ dashboards, hasLoadedDashboards: true });
+    try {
+      const dashboards = await api.listDashboards();
+      set({ dashboards, hasLoadedDashboards: true, dashboardError: null });
+    } catch (error) {
+      set({
+        dashboards: [],
+        hasLoadedDashboards: true,
+        dashboardError: api.getApiErrorMessage(error),
+      });
+    }
   },
 
   selectDashboard: async (id) => {
-    set({ isLoading: true });
-    const data = await api.getDashboard(id);
-    set({
-      activeDashboard: {
-        id: data.id,
-        name: data.name,
-        cols: data.cols,
-        rowHeight: data.rowHeight,
-        settings: sanitizeDashboardSettings(data.settings),
-        widgets: api.parseLayout(data.layout),
-      },
-      isLoading: false,
-      isDirty: false,
-      selectedWidgetId: null,
-    });
+    set({ isLoading: true, dashboardError: null });
+    try {
+      const data = await api.getDashboard(id);
+      set({
+        activeDashboard: {
+          id: data.id,
+          name: data.name,
+          cols: data.cols,
+          rowHeight: data.rowHeight,
+          settings: sanitizeDashboardSettings(data.settings),
+          widgets: api.parseLayout(data.layout),
+        },
+        isLoading: false,
+        isDirty: false,
+        selectedWidgetId: null,
+        dashboardError: null,
+      });
+    } catch (error) {
+      set({
+        activeDashboard: null,
+        isLoading: false,
+        selectedWidgetId: null,
+        dashboardError: api.getApiErrorMessage(error),
+      });
+      throw error;
+    }
   },
 
   createDashboard: async (name, widgets) => {
-    const data = await api.createDashboard({ name: name || "New Dashboard", widgets });
-    await get().loadDashboards();
-    return data.id;
+    try {
+      const data = await api.createDashboard({ name: name || "New Dashboard", widgets });
+      await get().loadDashboards();
+      set({ dashboardError: null });
+      return data.id;
+    } catch (error) {
+      set({ dashboardError: api.getApiErrorMessage(error) });
+      throw error;
+    }
   },
 
   deleteDashboard: async (id) => {
@@ -107,6 +135,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       isDirty: false,
       isSaving: false,
       hasLoadedDashboards: true,
+      dashboardError: null,
     });
   },
 
@@ -124,6 +153,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
     set({
       isDirty: false,
       isSaving: false,
+      dashboardError: null,
       dashboards: get().dashboards.map((d) =>
         d.id === activeDashboard.id ? { ...d, name: activeDashboard.name } : d
       ),
@@ -133,6 +163,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
   toggleMode: () => set((s) => ({ isEditMode: !s.isEditMode, selectedWidgetId: null })),
   setEditMode: (edit) => set({ isEditMode: edit, selectedWidgetId: null }),
   setGridPreview: (preview) => set({ gridPreview: preview }),
+  setDashboardError: (error) => set({ dashboardError: error }),
 
   addWidget: (widget) =>
     set((s) => {

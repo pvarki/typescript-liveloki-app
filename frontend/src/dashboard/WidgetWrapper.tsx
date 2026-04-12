@@ -150,7 +150,7 @@ export default function WidgetWrapper({ widget, isEditMode }: WidgetWrapperProps
           />
         )}
         <div
-          className={`min-h-0 flex-1 p-0 ${descriptor.needsScroll ? "overflow-y-auto" : "overflow-hidden"}`}
+          className={`min-h-0 flex-1 p-1 ${descriptor.needsScroll ? "overflow-y-auto" : "overflow-hidden"}`}
         >
           <WidgetComponent
             instanceId={widget.id}

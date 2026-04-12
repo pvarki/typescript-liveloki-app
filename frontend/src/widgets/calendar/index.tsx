@@ -551,7 +551,7 @@ function ColumnDayView({
                         : isMoving && !didDragMove.current ? 0.85
                         : isResizing ? 0.7 : 1,
                     }}
-                    onClick={(e) => { e.stopPropagation(); if (!didDragMove.current && !didResize.current) onSelectEvent(ev); }}
+                    onClick={() => { if (!didDragMove.current && !didResize.current) onSelectEvent(ev); }}
                     onMouseDown={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
@@ -791,7 +791,7 @@ function CalendarWidget({ instanceId, config: rawConfig, isEditMode }: WidgetPro
   const columnDays = isColumnView ? getDaysForView(resolvedView, refDate) : [];
 
   return (
-    <div ref={containerRef} className="relative flex h-full flex-col p-1" style={escalated ? { boxShadow: "inset 0 0 0 3px var(--color-accent)", animation: "border-pulse 1.5s ease-in-out infinite" } : undefined}>
+    <div ref={containerRef} className="relative flex h-full flex-col" style={escalated ? { boxShadow: "inset 0 0 0 3px var(--color-accent)", animation: "border-pulse 1.5s ease-in-out infinite" } : undefined}>
       {/* Alert bar */}
       {alertEvents.length > 0 && (
         <div className={`border-b border-[var(--color-accent)] ${escalated ? "bg-[var(--color-accent)]/30" : "animate-pulse bg-[var(--color-accent)]/20"}`}>
@@ -820,7 +820,7 @@ function CalendarWidget({ instanceId, config: rawConfig, isEditMode }: WidgetPro
       )}
 
       {/* Main view */}
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1 overflow-hidden">
         {resolvedView === "list" && <ListView events={config.events} upcomingDays={config.upcomingDays} onSelectEvent={(ev) => setEditingEvent(ev)} />}
         {resolvedView === "month" && (
           <MonthGrid year={viewYear} month={viewMonth} events={config.events} upcomingDays={config.upcomingDays} onPrevMonth={navigateBack} onNextMonth={navigateForward} onSelectDate={setSelectedDate} onToday={navigateToday} />
@@ -908,5 +908,12 @@ export const calendarDescriptor: WidgetDescriptor = {
   defaultConfig: DEFAULT_CALENDAR_CONFIG as unknown as Record<string, unknown>,
   component: CalendarWidget,
   configPanel: CalendarConfigPanel,
+  toClipboardConfig: (config) => {
+    const cfg = getCalendarConfig(config);
+    return {
+      ...config,
+      events: cfg.events.map((e) => ({ ...e, notified: false })),
+    };
+  },
   needsScroll: true,
 };

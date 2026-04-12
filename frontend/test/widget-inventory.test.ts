@@ -28,6 +28,7 @@ describe("widget registry inventory", () => {
         "metric",
         "note",
         "rtmp-video",
+        "sheet",
         "table",
         "timeline",
         "timer",

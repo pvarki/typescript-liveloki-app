@@ -49,11 +49,7 @@ export const DEFAULT_CATEGORIES: InventoryCategory[] = [
           { type: "category", targetId: "vehicles" },
         ],
       },
-      {
-        id: "officers", name: "Officers", count: 0,
-        linkedTo: [{ type: "item", targetId: "pistols" }],
-      },
-      { id: "medics", name: "Medics", count: 0 },
+      { id: "civilians", name: "Civilians", count: 0 },
     ],
   },
   {

@@ -10,6 +10,7 @@ import { mapDescriptor } from "./map";
 import { metricDescriptor } from "./metric";
 import { noteDescriptor } from "./note";
 import { rtmpVideoDescriptor } from "./rtmp-video";
+import { sheetDescriptor } from "./sheet";
 import { tableDescriptor } from "./table";
 import { timelineDescriptor } from "./timeline";
 import { timerDescriptor } from "./timer";
@@ -29,6 +30,7 @@ export function registerAllWidgets() {
   register(metricDescriptor);
   register(noteDescriptor);
   register(rtmpVideoDescriptor);
+  register(sheetDescriptor);
   register(tableDescriptor);
   register(timelineDescriptor);
   register(timerDescriptor);

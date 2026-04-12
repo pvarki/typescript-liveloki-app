@@ -288,19 +288,19 @@ function InventoryWidget({ instanceId, config, isEditMode }: WidgetProps) {
   };
 
   if (editing) {
-    return <div className="h-full p-1"><EditForm categories={categories} logChanges={logChanges} onSave={handleSave} onCancel={() => setEditing(false)} /></div>;
+    return <EditForm categories={categories} logChanges={logChanges} onSave={handleSave} onCancel={() => setEditing(false)} />;
   }
 
   if (categories.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center p-1">
+      <div className="flex h-full items-center justify-center">
         <span className="text-sm text-[var(--color-muted-foreground)]">No categories configured</span>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col p-1">
+    <div className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col gap-0.5">
           {categories.map((cat) => <CategorySection key={cat.id} category={cat} />)}

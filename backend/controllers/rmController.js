@@ -159,23 +159,16 @@ export const userUpdated = async (request, response) => {
 };
 
 export const descriptionV1Handler = async (request, response) => {
-    if (!config.mainUiCardVisible) {
-        return response.status(404).json({ error: 'Not found' });
-    }
     const { language } = request.params;
     return response.json(getDescriptionV1(language));
 };
 export const descriptionV2Handler = async (request, response) => {
-    if (!config.mainUiCardVisible) {
-        return response.status(404).json({ error: 'Not found' });
-    }
     const { language } = request.params;
     return response.json(getDescription(language));
 };
 
-export const descriptionV2AdminHandler = async (request, response) => {
-    const { language } = request.params;
-    return response.json(getDescription(language));
+export const descriptionV2AdminHandler = async (_request, response) => {
+    return response.status(404).json({ error: 'Not found' });
 };
 
 export const instructionsHandler = async (request, response) => {

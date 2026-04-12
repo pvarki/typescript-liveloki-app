@@ -1,7 +1,7 @@
 import config from '../config/index.js';
 import logger from '../logger.js';
 import { getManifestProductUri } from '../utils/kraftwerkManifest.js';
-import { createUser, promoteUser, demoteUser, deleteUser, updateUserCallsign } from '../models/users.js';
+import { createUser, promoteUser, demoteUser, deleteUser, getUserCn, updateUserCallsign } from '../models/users.js';
 
 const BATTLELOG_DOCS_URL = 'https://github.com/pvarki/typescript-liveloki-app/';
 const BATTLELOG_SHORTNAME = 'bl';
@@ -99,9 +99,10 @@ export const noOp = async (_request, response) => {
 
 export const userCreated = async (request, response) => {
     try {
-        const { uuid, callsign, cert_cn } = request.body || {};
-        await createUser({ cn: cert_cn, rmUuid: uuid, callsign });
-        logger.info(`User created: cn=${cert_cn}, uuid=${uuid}`);
+        const { uuid, callsign, cert_cn, x509cert } = request.body || {};
+        const cn = getUserCn({ certCn: cert_cn, x509cert, callsign });
+        await createUser({ cn, rmUuid: uuid, callsign });
+        logger.info(`User created: cn=${cn}, uuid=${uuid}`);
         response.json({ success: true });
     } catch (error) {
         logger.error(`Error in userCreated: ${error.message}`);
@@ -111,8 +112,8 @@ export const userCreated = async (request, response) => {
 
 export const userPromoted = async (request, response) => {
     try {
-        const { uuid } = request.body || {};
-        await promoteUser(uuid);
+        const { uuid, callsign, cert_cn, x509cert } = request.body || {};
+        await promoteUser(uuid, { certCn: cert_cn, x509cert, callsign });
         logger.info(`User promoted: uuid=${uuid}`);
         response.json({ success: true });
     } catch (error) {

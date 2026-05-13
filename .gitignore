@@ -143,3 +143,9 @@ dist
 .codex/skills/.system/**
 !.codex/prompts/
 !.codex/prompts/**
+
+# Local TAK Server artifacts, certs, data packages, and generated state
+.env.tak
+.tak/
+local/tak/
+tak-data/

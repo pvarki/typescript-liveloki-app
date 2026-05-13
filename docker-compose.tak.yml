@@ -1,0 +1,168 @@
+# Local TAK development override based on pvarki/docker-atak-server's service layout.
+# Start with:
+#   cp .env.tak.example .env.tak
+#   docker compose -f docker-compose.yml -f docker-compose.tak.yml up --build
+x-takbuilds: &takbuildinfo
+  image: "${PVARKI_DOCKER_REPO:-ghcr.io/}pvarki/takserver:${TAK_RELEASE:-5.6-RELEASE-20}${DOCKER_TAG_EXTRA:-}"
+
+services:
+  app:
+    env_file:
+      - .env
+      - .env.tak
+    volumes:
+      - takserver_data:/tak:ro
+    networks:
+      - default
+      - taknet
+    depends_on:
+      takserver_api:
+        condition: service_started
+
+  takserver_initialization:
+    <<: *takbuildinfo
+    env_file:
+      - .env.tak
+    depends_on:
+      takdb:
+        condition: service_healthy
+    networks:
+      - taknet
+    volumes:
+      - takserver_data:/opt/tak/data
+    command: /opt/scripts/firstrun.sh
+
+  takserver_config:
+    <<: *takbuildinfo
+    env_file:
+      - .env.tak
+    depends_on:
+      takserver_initialization:
+        condition: service_completed_successfully
+    volumes:
+      - takserver_data:/opt/tak/data
+    networks:
+      - taknet
+    ports:
+      - "${TAK_CLIENT_PORT:-8089}:8089"
+      - "${TAK_WEB_PORT:-8443}:8443"
+      - "${TAK_FEDERATION_PORT:-8444}:8444"
+      - "${TAK_CERT_PORT:-8446}:8446"
+      - "${TAK_FED_V1_PORT:-9000}:9000"
+      - "${TAK_FED_V2_PORT:-9001}:9001"
+    command: ./opt/scripts/start-tak.sh config
+    healthcheck:
+      test: "true"
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  takserver_messaging:
+    <<: *takbuildinfo
+    env_file:
+      - .env.tak
+    depends_on:
+      takdb:
+        condition: service_healthy
+      takserver_config:
+        condition: service_healthy
+    volumes:
+      - takserver_data:/opt/tak/data
+    network_mode: "service:takserver_config"
+    command: ./opt/scripts/start-tak.sh messaging
+    healthcheck:
+      test: "true"
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  takserver_api:
+    <<: *takbuildinfo
+    env_file:
+      - .env.tak
+    depends_on:
+      takdb:
+        condition: service_healthy
+      takserver_messaging:
+        condition: service_healthy
+      takserver_config:
+        condition: service_healthy
+    volumes:
+      - takserver_data:/opt/tak/data
+      - ./update:/opt/tak/webcontent/update
+    network_mode: "service:takserver_messaging"
+    command: ./opt/scripts/start-tak.sh api
+    healthcheck:
+      test: "true"
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  takserver_retention:
+    <<: *takbuildinfo
+    env_file:
+      - .env.tak
+    depends_on:
+      takdb:
+        condition: service_healthy
+      takserver_messaging:
+        condition: service_healthy
+      takserver_config:
+        condition: service_healthy
+    volumes:
+      - takserver_data:/opt/tak/data
+    network_mode: "service:takserver_messaging"
+    command: ./opt/scripts/start-tak.sh retention
+    healthcheck:
+      test: "true"
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  takserver_pluginmanager:
+    <<: *takbuildinfo
+    env_file:
+      - .env.tak
+    depends_on:
+      takdb:
+        condition: service_healthy
+      takserver_api:
+        condition: service_healthy
+      takserver_config:
+        condition: service_healthy
+    volumes:
+      - takserver_data:/opt/tak/data
+    network_mode: "service:takserver_messaging"
+    command: ./opt/scripts/start-tak.sh pm
+    healthcheck:
+      test: "true"
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  takdb:
+    image: postgis/postgis:15-3.3
+    networks:
+      - taknet
+    env_file:
+      - .env.tak
+    volumes:
+      - takdb_data:/var/lib/postgresql/data
+    healthcheck:
+      test: "pg_isready --dbname=$$POSTGRES_DB --username=$$POSTGRES_USER"
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+networks:
+  taknet:
+
+volumes:
+  takdb_data:
+  takserver_data:

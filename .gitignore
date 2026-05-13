@@ -135,14 +135,7 @@ dist
 # python
 *.py[cod]
 .omx/
-.codex/*
-!.codex/agents/
-!.codex/agents/**
-!.codex/skills/
-!.codex/skills/**
-.codex/skills/.system/**
-!.codex/prompts/
-!.codex/prompts/**
+.codex/
 
 # Local TAK Server artifacts, certs, data packages, and generated state
 .env.tak

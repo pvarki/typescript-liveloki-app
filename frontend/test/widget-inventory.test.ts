@@ -27,6 +27,7 @@ describe("widget registry inventory", () => {
         "note",
         "rtmp-video",
         "table",
+        "tak-chat",
         "timeline",
         "timer",
         "todo",

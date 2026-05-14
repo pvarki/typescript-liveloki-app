@@ -2,6 +2,7 @@ import fs from 'fs';
 import net from 'net';
 import tls from 'tls';
 
+import { parseCotChat } from './cotChatParser.js';
 import { extractCotEvents, parseCotMarker } from './cotMarkerParser.js';
 
 function readOptionalFile(path) {
@@ -127,6 +128,8 @@ export class TakCotStreamClient {
         for (const eventXml of events) {
             const marker = parseCotMarker(eventXml);
             if (marker) this.emit('marker', marker);
+            const chat = parseCotChat(eventXml);
+            if (chat) this.emit('chat', chat);
         }
     }
 

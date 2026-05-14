@@ -1,10 +1,17 @@
 import express from 'express';
 
-import { fetchTakMarkers, publishTakMarker } from '../controllers/takController.js';
+import {
+    fetchTakChat,
+    fetchTakMarkers,
+    publishTakChatMessage,
+    publishTakMarker,
+} from '../controllers/takController.js';
 
 const router = express.Router();
 
 router.get('/tak/markers', fetchTakMarkers);
 router.post('/tak/markers', publishTakMarker);
+router.get('/tak/chat', fetchTakChat);
+router.post('/tak/chat', publishTakChatMessage);
 
 export default router;

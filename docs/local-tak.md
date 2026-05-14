@@ -137,6 +137,40 @@ curl http://localhost:3000/api/tak/markers
 
 6. Open BattleLog and confirm the marker appears in the BattleLog map widget.
 
+## tak-chat smoke checklist
+
+The `tak-chat` widget is **live-only** for v1: the backend keeps an in-memory
+bounded chat history (max 200 messages, 1 hour TTL). It does **not** replay,
+catch up from the TAK database, or otherwise persist history across backend
+restarts. Missed messages while the TAK stream is disconnected are an accepted
+v1 limitation; the widget surfaces this as "history may be incomplete".
+
+Automated tests prove **code-complete only**. Final product acceptance requires
+manually running this checklist with the local TAK stack plus an ATAK Android
+phone.
+
+1. Start the TAK stack as documented above and verify
+   `curl http://localhost:3000/api/tak/markers` reports `connected`.
+2. Import the ATAK client data package on the phone and connect to the TAK
+   server.
+3. Add a `tak-chat` widget to the BattleLog dashboard. Confirm the header shows
+   `connected · live-only`.
+4. From ATAK, send a default/all chat message. Confirm it appears in the
+   BattleLog `tak-chat` widget with the ATAK callsign.
+5. From the BattleLog widget, send a message. Confirm it appears in ATAK
+   default/all chat, and confirm the BattleLog widget shows the message
+   **exactly once** (no double render when the TAK stream echoes it back).
+6. From ATAK, send two back-to-back messages from the same callsign. Confirm
+   both messages appear in BattleLog (no last-write-wins collapse).
+7. Disconnect/reconnect the TAK stream (e.g. stop and restart `takserver_*`
+   services, or briefly drop the phone link). Confirm:
+   - the widget header changes to `disconnected` or `error`,
+   - after a healthy reconnect the header surfaces
+     "history may be incomplete" until the backend process is restarted.
+8. Record the actual observed CoT type, `<__chat>` attributes, default-room
+   encoding, and whether `messageId` round-trips. These are implementation
+   hypotheses in v1 and need to be captured for any future hardening.
+
 ## Stop-and-ask boundaries
 
 Stop and ask before any of these changes:

@@ -1,6 +1,8 @@
 import { createTakCotStreamClient } from './takCotStreamClient.js';
 import { createTakCotDatabasePoller } from './takCotDatabasePoller.js';
+import { buildCotChatEvent } from './cotChatBuilder.js';
 import { buildCotMarkerEvent } from './cotMarkerBuilder.js';
+import { createTakChatStore } from './takChatStore.js';
 import { createTakMarkerStore } from './takMarkerStore.js';
 
 export const TAK_STATUS = Object.freeze({
@@ -39,6 +41,7 @@ export class TakService {
             clientFactory = createTakCotStreamClient,
             dbPollerFactory = createTakCotDatabasePoller,
             store = null,
+            chatStore = null,
         } = {},
     ) {
         this.config = config;
@@ -46,12 +49,15 @@ export class TakService {
         this.clientFactory = clientFactory;
         this.dbPollerFactory = dbPollerFactory;
         this.store = store ?? createTakMarkerStore({ ttlSeconds: config.markerTtlSeconds });
+        this.chatStore = chatStore ?? createTakChatStore();
         this.client = null;
         this.dbPoller = null;
         this.status = config.enabled ? TAK_STATUS.DISCONNECTED : TAK_STATUS.DISABLED;
         this.lastError = null;
         this.lastDbPollAt = null;
         this.lastDbPollError = null;
+        this.hasBeenHealthy = false;
+        this.missedWhileDisconnected = false;
     }
 
     start() {
@@ -61,17 +67,23 @@ export class TakService {
         this.client.on('connected', () => {
             this.status = TAK_STATUS.CONNECTED;
             this.lastError = null;
+            this.hasBeenHealthy = true;
         });
         this.client.on('disconnected', () => {
             if (this.status !== TAK_STATUS.ERROR) this.status = TAK_STATUS.DISCONNECTED;
+            if (this.hasBeenHealthy) this.missedWhileDisconnected = true;
         });
         this.client.on('error', (error) => {
             this.status = TAK_STATUS.ERROR;
             this.lastError = error.message;
+            if (this.hasBeenHealthy) this.missedWhileDisconnected = true;
             this.logger.warn?.(`TAK stream error: ${error.message}`);
         });
         this.client.on('marker', (marker) => {
             this.store.upsert(marker);
+        });
+        this.client.on('chat', (chat) => {
+            this.chatStore.append(chat);
         });
         this.client.start();
 
@@ -117,6 +129,39 @@ export class TakService {
         };
     }
 
+    getChatSnapshot() {
+        const messages = this.chatStore.getMessages();
+        return {
+            enabled: Boolean(this.config.enabled),
+            connected: this.status === TAK_STATUS.CONNECTED,
+            status: this.status,
+            lastEventAt: this.chatStore.lastEventAt,
+            lastError: this.lastError,
+            liveOnly: true,
+            missedWhileDisconnected: this.missedWhileDisconnected,
+            messageCount: messages.length,
+            messages,
+        };
+    }
+
+    publishChatMessage(input) {
+        if (!this.config.enabled) {
+            const error = new Error('TAK integration is disabled');
+            error.statusCode = 503;
+            throw error;
+        }
+        if (!this.client?.sendCot) {
+            const error = new Error('TAK stream is not available');
+            error.statusCode = 503;
+            throw error;
+        }
+
+        const { message, xml } = buildCotChatEvent(input ?? {});
+        this.client.sendCot(xml);
+        const stored = this.chatStore.append(message);
+        return stored ?? message;
+    }
+
     publishMarker(input) {
         if (!this.config.enabled) {
             const error = new Error('TAK integration is disabled');
@@ -150,6 +195,20 @@ export function createDisabledTakSnapshot() {
         lastDbPollError: null,
         markerCount: 0,
         markers: [],
+    };
+}
+
+export function createDisabledTakChatSnapshot() {
+    return {
+        enabled: false,
+        connected: false,
+        status: TAK_STATUS.DISABLED,
+        lastEventAt: null,
+        lastError: null,
+        liveOnly: true,
+        missedWhileDisconnected: false,
+        messageCount: 0,
+        messages: [],
     };
 }
 

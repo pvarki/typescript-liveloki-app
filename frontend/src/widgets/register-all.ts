@@ -9,6 +9,7 @@ import { metricDescriptor } from "./metric";
 import { noteDescriptor } from "./note";
 import { rtmpVideoDescriptor } from "./rtmp-video";
 import { tableDescriptor } from "./table";
+import { takChatDescriptor } from "./tak-chat";
 import { timelineDescriptor } from "./timeline";
 import { timerDescriptor } from "./timer";
 import { todoDescriptor } from "./todo";
@@ -30,4 +31,5 @@ export function registerAllWidgets() {
   register(rtmpVideoDescriptor);
   register(formDescriptor);
   register(timelineDescriptor);
+  register(takChatDescriptor);
 }

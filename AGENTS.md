@@ -40,6 +40,7 @@ docker compose -f docker-compose.yml -f docker-compose.tak.yml up --build
 Useful TAK docs:
 
 - `docs/local-tak.md`
+- `docs/prod-tak.md` (wiring this backend to the docker-rasenmaeher-integration TAK server)
 - `scripts/tak/prepare-official-tak.sh`
 - `scripts/tak/generate-local-client.sh`
 - `scripts/tak/print-phone-setup.sh`

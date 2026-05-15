@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+
 import { createTakCotStreamClient } from './takCotStreamClient.js';
 import { createTakCotDatabasePoller } from './takCotDatabasePoller.js';
 import { buildCotChatEvent } from './cotChatBuilder.js';
@@ -12,6 +14,20 @@ export const TAK_STATUS = Object.freeze({
     DISCONNECTED: 'disconnected',
     ERROR: 'error',
 });
+
+function describeMissingCertPaths(config) {
+    if (!config.tls) return [];
+    const paths = [];
+    const usingPem = config.clientCertPath || config.clientKeyPath;
+    if (usingPem) {
+        if (config.clientCertPath) paths.push(['TAK_CLIENT_CERT_PATH', config.clientCertPath]);
+        if (config.clientKeyPath) paths.push(['TAK_CLIENT_KEY_PATH', config.clientKeyPath]);
+    } else if (config.clientP12Path) {
+        paths.push(['TAK_CLIENT_P12_PATH', config.clientP12Path]);
+    }
+    if (config.caPath) paths.push(['TAK_CA_PATH', config.caPath]);
+    return paths.filter(([, path]) => path && !fs.existsSync(path));
+}
 
 function createDbPollConfig(config) {
     if (!config.dbPoll?.enabled) return null;
@@ -62,6 +78,13 @@ export class TakService {
 
     start() {
         if (!this.config.enabled || this.client) return;
+        const missing = describeMissingCertPaths(this.config);
+        if (missing.length > 0) {
+            const descriptions = missing.map(([name, path]) => `${name}=${path}`).join(', ');
+            this.logger.warn?.(
+                `TAK enabled but cert/key files are missing: ${descriptions}. Connection attempts will fail until these paths exist.`,
+            );
+        }
         this.status = TAK_STATUS.CONNECTING;
         this.client = this.clientFactory(this.config, this.logger);
         this.client.on('connected', () => {

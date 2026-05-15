@@ -53,6 +53,12 @@ See [`docs/local-tak.md`](docs/local-tak.md) for running BattleLog with the
 Pvarki Docker TAK server stack, generating an ATAK client package, and testing
 TAK markers on the dashboard map.
 
+## Production TAK integration
+
+See [`docs/prod-tak.md`](docs/prod-tak.md) for the compose/env wiring required
+to connect BattleLog to the TAK server inside the
+`docker-rasenmaeher-integration` production stack.
+
 ## Info
 
 Database is currently preseeded with test data from preseed/preseed.csv

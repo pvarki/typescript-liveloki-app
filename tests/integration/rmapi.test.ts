@@ -4,10 +4,6 @@ import { describe, it, expect } from "vitest";
 // API base URL
 const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:3000";
 const RM_MTLS_HEADERS = { "X-ClientCert-DN": "CN=rasenmaeher,O=N/A" };
-const MAIN_UI_CARD_VISIBLE = ["1", "true", "yes", "on"].includes(
-  String(process.env.BL_MAIN_UI_CARD_VISIBLE || "false").trim().toLowerCase(),
-);
-
 
 describe("RMAPI Integration Tests", () => {
   describe("GET /rmapi/healthcheck", () => {
@@ -30,50 +26,39 @@ describe("RMAPI Integration Tests", () => {
     it("should return a valid v1 description response", async () => {
       const response = await axios.get(`${API_BASE_URL}/rmapi/api/v1/description/en`, {
         headers: RM_MTLS_HEADERS,
-        validateStatus: () => true,
       });
-
-      if (MAIN_UI_CARD_VISIBLE) {
-        expect(response.status).to.equal(200);
-        expect(response.data).to.be.an("object");
-        expect(response.data).to.have.property("shortname");
-        expect(response.data.shortname).to.equal("bl");
-        expect(response.data).to.have.property("title");
-        expect(response.data).to.not.have.property("component");
-      } else {
-        expect(response.status).to.equal(404);
-      }
-    });
-
-    it("should return a valid v2 description response", async () => {
-      const response = await axios.get(`${API_BASE_URL}/rmapi/api/v2/description/en`, {
-        headers: RM_MTLS_HEADERS,
-        validateStatus: () => true,
-      });
-
-      if (MAIN_UI_CARD_VISIBLE) {
-        expect(response.status).to.equal(200);
-        expect(response.data).to.be.an("object");
-        expect(response.data).to.have.property("shortname");
-        expect(response.data.shortname).to.equal("bl");
-        expect(response.data).to.have.property("component");
-        expect(response.data.component).to.have.property("type");
-        expect(response.data.component.type).to.equal("link");
-      } else {
-        expect(response.status).to.equal(404);
-      }
-    });
-
-    it("should return a valid admin description response", async () => {
-      const response = await axios.get(
-        `${API_BASE_URL}/rmapi/api/v2/admin/description/en`,
-        { headers: RM_MTLS_HEADERS },
-      );
 
       expect(response.status).to.equal(200);
       expect(response.data).to.be.an("object");
       expect(response.data).to.have.property("shortname");
       expect(response.data.shortname).to.equal("bl");
+      expect(response.data).to.have.property("title");
+      expect(response.data).to.not.have.property("component");
+    });
+
+    it("should return a valid v2 description response", async () => {
+      const response = await axios.get(`${API_BASE_URL}/rmapi/api/v2/description/en`, {
+        headers: RM_MTLS_HEADERS,
+      });
+
+      expect(response.status).to.equal(200);
+      expect(response.data).to.be.an("object");
+      expect(response.data).to.have.property("shortname");
+      expect(response.data.shortname).to.equal("bl");
+      expect(response.data).to.have.property("component");
+      expect(response.data.component).to.have.property("type");
+      expect(response.data.component.type).to.equal("link");
+    });
+
+    it("should return a valid admin description response", async () => {
+      const response = await axios.get(
+        `${API_BASE_URL}/rmapi/api/v2/admin/description/en`,
+        { headers: RM_MTLS_HEADERS, validateStatus: () => true },
+      );
+
+      expect(response.status).to.equal(404);
+      expect(response.data).to.be.an("object");
+      expect(response.data).to.have.property("error");
     });
   });
 

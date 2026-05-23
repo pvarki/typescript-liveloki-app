@@ -55,6 +55,21 @@ function dayLabel(date: Date) {
   return date.toLocaleDateString(undefined, { weekday: "short", month: "numeric", day: "numeric" });
 }
 
+function sortBarsByValueAndLabel(bars: BarDatum[]): BarDatum[] {
+  const sorted: BarDatum[] = [];
+  for (const bar of bars) {
+    const insertAt = sorted.findIndex(
+      (candidate) => candidate.value < bar.value || (candidate.value === bar.value && candidate.label > bar.label),
+    );
+    if (insertAt === -1) {
+      sorted.push(bar);
+    } else {
+      sorted.splice(insertAt, 0, bar);
+    }
+  }
+  return sorted;
+}
+
 function getTagBars(events: readonly Event[]): BarDatum[] {
   const counts = new Map<string, number>();
   for (const event of events) {
@@ -66,10 +81,8 @@ function getTagBars(events: readonly Event[]): BarDatum[] {
     }
   }
 
-  return [...counts.entries()]
-    .map(([tag, value]) => ({ key: tag, label: tag, value }))
-    .toSorted((a, b) => b.value - a.value || a.label.localeCompare(b.label))
-    .slice(0, 12);
+  const bars = [...counts.entries()].map(([tag, value]) => ({ key: tag, label: tag, value }));
+  return sortBarsByValueAndLabel(bars).slice(0, 12);
 }
 
 function getHourlyBars(events: readonly Event[], now: Date): BarDatum[] {

@@ -67,6 +67,8 @@ services:
     depends_on:
       app:
         condition: service_started
+    volumes:
+      - ./tests/integration:/usr/src/app/integration:ro
 #    networks:
 #      - testing-network
 

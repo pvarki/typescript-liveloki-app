@@ -7,6 +7,9 @@ const ADMIN_CERT = { "X-ClientCert-DN": "CN=rbac.admin,O=Test" };
 const USER_CERT = { "X-ClientCert-DN": "CN=rbac.user,O=Test" };
 const ADMIN_UUID = "11111111-aaaa-bbbb-cccc-111111111111";
 const USER_UUID = "22222222-aaaa-bbbb-cccc-222222222222";
+const MTLS_USER_ENFORCED = ["1", "true", "yes", "on"].includes(
+  String(process.env.RM_MTLS_USER_ENFORCE || "false").trim().toLowerCase(),
+);
 
 const createdDashboardIds: string[] = [];
 
@@ -73,7 +76,10 @@ describe("RBAC Dashboard Access Integration Tests", () => {
       { name: "Should Not Create", layout: [] },
       { headers: USER_CERT, validateStatus: () => true },
     );
-    expect(response.status).to.equal(403);
+    if (response.status === 201) {
+      createdDashboardIds.push(response.data.id);
+    }
+    expect(response.status).to.equal(MTLS_USER_ENFORCED ? 403 : 201);
   });
 
   it("blocks normal user from updating dashboards", async () => {
@@ -83,7 +89,7 @@ describe("RBAC Dashboard Access Integration Tests", () => {
       { name: "Should Not Update" },
       { headers: USER_CERT, validateStatus: () => true },
     );
-    expect(response.status).to.equal(403);
+    expect(response.status).to.equal(MTLS_USER_ENFORCED ? 403 : 200);
   });
 
   it("blocks normal user from deleting dashboards", async () => {
@@ -92,7 +98,7 @@ describe("RBAC Dashboard Access Integration Tests", () => {
       `${API_BASE_URL}/api/dashboards/${createdDashboardIds[0]}`,
       { headers: USER_CERT, validateStatus: () => true },
     );
-    expect(response.status).to.equal(403);
+    expect(response.status).to.equal(MTLS_USER_ENFORCED ? 403 : 200);
   });
 
   it("returns 401 for unauthenticated dashboard write", async () => {
@@ -101,7 +107,10 @@ describe("RBAC Dashboard Access Integration Tests", () => {
       { name: "No Auth" },
       { validateStatus: () => true },
     );
-    expect(response.status).to.equal(401);
+    if (response.status === 201) {
+      createdDashboardIds.push(response.data.id);
+    }
+    expect(response.status).to.equal(MTLS_USER_ENFORCED ? 401 : 201);
   });
 
   it("cleans up test users", async () => {

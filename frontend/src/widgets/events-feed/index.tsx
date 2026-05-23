@@ -95,7 +95,7 @@ function EventsFeedWidget({ config, isEditMode }: WidgetProps) {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden text-xs">
+    <div className="flex h-full flex-col overflow-hidden text-xs text-[var(--color-foreground)]">
       {time && (
         <div className="border-b border-[var(--color-separator)] px-3 py-1 text-[var(--color-muted-foreground)]">
           Time focus: {time}
@@ -112,7 +112,7 @@ function EventsFeedWidget({ config, isEditMode }: WidgetProps) {
                 key={id}
                 type="button"
                 disabled={isEditMode}
-                className={`rounded border border-transparent px-2 py-1 text-left transition-colors ${
+                className={`rounded border border-[var(--color-separator)] px-2 py-1 text-left transition-colors ${
                   isSelected ? "border-[var(--color-accent)] bg-[var(--color-surface-secondary)]" : ""
                 } ${isTimeFocused ? "border-dashed border-[var(--color-muted-foreground)]" : ""} ${
                   isEditMode ? "cursor-default opacity-80" : "hover:bg-[var(--color-surface-secondary)]"

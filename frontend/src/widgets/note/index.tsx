@@ -1,9 +1,12 @@
 import { TextArea } from "@blueprintjs/core";
 
-import type { ConfigPanelProps,WidgetDescriptor, WidgetProps } from "../../types";
+import type { ConfigPanelProps, WidgetDescriptor, WidgetProps } from "../../types";
+
+const EMPTY_NOTE_TEXT = "Double-click to edit...";
 
 function NoteWidget({ config, isEditMode, onChange }: WidgetProps) {
-  const text = (config.text as string) || "Double-click to edit...";
+  const text = (config.text as string) || "";
+  const isEmpty = text.trim().length === 0;
 
   if (isEditMode) {
     return (
@@ -12,15 +15,21 @@ function NoteWidget({ config, isEditMode, onChange }: WidgetProps) {
           className="h-full w-full resize-none"
           value={text}
           onChange={(event) => onChange?.({ ...config, text: event.target.value })}
-          placeholder="Type your note..."
+          placeholder={EMPTY_NOTE_TEXT}
         />
       </div>
     );
   }
 
   return (
-    <div className="flex h-full p-3">
-      <p className="text-sm whitespace-pre-wrap">{text}</p>
+    <div className="relative flex h-full p-3">
+      {isEmpty ? (
+        <span className="pointer-events-none absolute inset-3 flex items-center justify-center text-center text-sm text-[var(--color-muted-foreground)]">
+          {EMPTY_NOTE_TEXT}
+        </span>
+      ) : (
+        <p className="text-sm whitespace-pre-wrap">{text}</p>
+      )}
     </div>
   );
 }

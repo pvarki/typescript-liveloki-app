@@ -67,7 +67,7 @@ export default function TopBar() {
 
   if (isLoading) {
     return (
-      <div className="flex h-12 items-center justify-center border-b border-[var(--color-separator)] bg-[var(--color-surface)]">
+      <div className="flex h-12 items-center justify-center border-b border-[var(--color-separator)] bg-[var(--color-surface)] text-[var(--color-foreground)]">
         <span className="text-sm text-[var(--color-muted-foreground)]">Loading...</span>
       </div>
     );
@@ -75,7 +75,7 @@ export default function TopBar() {
 
   if (!isEditMode) {
     return (
-      <Navbar className="!flex !h-8 !items-center !justify-between border-b border-[var(--color-separator)] !bg-[var(--color-surface)] !px-3">
+      <Navbar className="!flex !h-8 !items-center !justify-between border-b border-[var(--color-separator)] !bg-[var(--color-surface)] !px-3 !text-[var(--color-foreground)]">
         <Navbar.Group className="flex items-center gap-2">
           {dashboards.length > 0 && (
             <HTMLSelect
@@ -95,10 +95,20 @@ export default function TopBar() {
           </span>
         </Navbar.Group>
         <Navbar.Group className="flex items-center gap-2">
-          <Button variant="minimal" size="small" onClick={toggleTheme} className="text-xs">
+          <Button
+            variant="minimal"
+            size="small"
+            onClick={toggleTheme}
+            className="text-xs !text-[var(--color-foreground)]"
+          >
             {isDark ? "Light" : "Dark"}
           </Button>
-          <Button variant="minimal" size="small" onClick={toggleMode} className="text-xs">
+          <Button
+            variant="minimal"
+            size="small"
+            onClick={toggleMode}
+            className="text-xs !text-[var(--color-foreground)]"
+          >
             Edit
           </Button>
         </Navbar.Group>
@@ -108,7 +118,7 @@ export default function TopBar() {
 
   return (
     <>
-      <Navbar className="!flex !h-12 !items-center !justify-between border-b border-[var(--color-separator)] !bg-[var(--color-surface)] !px-3">
+      <Navbar className="!flex !h-12 !items-center !justify-between border-b border-[var(--color-separator)] !bg-[var(--color-surface)] !px-3 !text-[var(--color-foreground)]">
         <Navbar.Group className="flex items-center gap-2">
           <HTMLSelect
             aria-label="Select dashboard"
@@ -124,7 +134,7 @@ export default function TopBar() {
             const id = await createDashboard();
             navigate(`/d/${id}`);
           }}>
-            + New
+            + New Dashboard
           </Button>
 
           {activeDashboard && (
@@ -137,7 +147,12 @@ export default function TopBar() {
         </Navbar.Group>
 
         <div className="flex items-center gap-2">
-          <Button variant="minimal" size="small" onClick={toggleTheme} className="text-xs">
+          <Button
+            variant="minimal"
+            size="small"
+            onClick={toggleTheme}
+            className="text-xs !text-[var(--color-foreground)]"
+          >
             {isDark ? "Light" : "Dark"}
           </Button>
         </div>

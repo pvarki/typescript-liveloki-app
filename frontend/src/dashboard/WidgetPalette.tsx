@@ -20,7 +20,7 @@ export default function WidgetPalette({ isOpen, onClose }: WidgetPaletteProps) {
   const filtered = allWidgets.filter(
     (w) =>
       w.name.toLowerCase().includes(search.toLowerCase()) ||
-      w.description.toLowerCase().includes(search.toLowerCase())
+      w.description.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleAdd = (type: string) => {
@@ -51,25 +51,27 @@ export default function WidgetPalette({ isOpen, onClose }: WidgetPaletteProps) {
         />
         <div className="flex flex-col gap-2 overflow-y-auto">
           {filtered.map((w) => (
-              <Card
-                key={w.type}
-                className="cursor-pointer transition-colors hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-foreground)]"
-                interactive
-                onClick={() => {
-                  handleAdd(w.type);
-                  onClose();
-                }}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{w.icon}</span>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">{w.name}</span>
-                    <span className="text-xs text-[var(--color-muted-foreground)]">
-                      {w.description}
-                    </span>
-                  </div>
+            <Card
+              key={w.type}
+              className="group cursor-pointer transition-colors hover:bg-[var(--color-accent)]"
+              interactive
+              onClick={() => {
+                handleAdd(w.type);
+                onClose();
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xl">{w.icon}</span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium group-hover:text-[var(--color-accent-foreground)]">
+                    {w.name}
+                  </span>
+                  <span className="text-xs text-[var(--color-muted-foreground)] group-hover:text-[var(--color-accent-foreground)]">
+                    {w.description}
+                  </span>
                 </div>
-              </Card>
+              </div>
+            </Card>
           ))}
           {filtered.length === 0 && (
             <p className="text-sm text-[var(--color-muted-foreground)]">No widgets found</p>

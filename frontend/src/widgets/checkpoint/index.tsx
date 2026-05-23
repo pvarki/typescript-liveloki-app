@@ -203,10 +203,10 @@ function CheckpointWidget({ config }: WidgetProps) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex min-h-0 flex-1">
-        <div className="min-h-0 w-1/2 shrink-0 overflow-y-auto border-r border-[var(--color-border)]">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="shrink-0 overflow-y-auto border-b border-[var(--color-border)]">
           <form className="flex flex-col gap-2 p-2" onSubmit={handleSubmit}>
-            <FormGroup label="NIMI" className="!mb-0">
+            <FormGroup label="NAME" className="!mb-0">
               <InputGroup
                 inputRef={(el) => { inputRef.current = el; }}
                 autoFocus
@@ -216,15 +216,15 @@ function CheckpointWidget({ config }: WidgetProps) {
                 onKeyDown={handleInputKeyDown}
               />
             </FormGroup>
-            <Button intent="primary" icon="log-in" text="Log" type="submit" />
+            <Button intent="primary" icon="log-in" text="Log" type="submit" className="!mt-2" />
             {pendingDiscriminator !== null && (
               <div className="rounded border border-[var(--color-accent)] bg-[var(--color-accent)]/10 p-2 text-xs">
                 <div className="mb-2 font-semibold">
-                  Lisää uusi: {pendingDiscriminator} <span className="font-normal text-[var(--color-muted-foreground)]">+ sukunimi tai tunnus</span>
+                  Add new: {pendingDiscriminator} <span className="font-normal text-[var(--color-muted-foreground)]">+ last name or tag</span>
                 </div>
                 <InputGroup
                   inputRef={(el) => { discriminatorRef.current = el; }}
-                  placeholder="esim. V tai Virtanen"
+                  placeholder="e.g. V or Smith"
                   value={discriminatorDraft}
                   onChange={(e) => setDiscriminatorDraft(e.target.value)}
                   onKeyDown={(e) => {
@@ -233,8 +233,8 @@ function CheckpointWidget({ config }: WidgetProps) {
                 />
                 <div className="mt-1 text-right text-[10px] text-[var(--color-muted-foreground)]">
                   {discriminatorDraft.trim()
-                    ? `Tallentuu: ${pendingDiscriminator} ${discriminatorDraft.trim()}`
-                    : `Tyhjä → auto #N`}
+                    ? `Will save: ${pendingDiscriminator} ${discriminatorDraft.trim()}`
+                    : `Empty → auto #N`}
                 </div>
                 <div className="mt-2 flex flex-col gap-1">
                   <Button
@@ -245,7 +245,7 @@ function CheckpointWidget({ config }: WidgetProps) {
                     alignText="left"
                     text={
                       <span className="flex w-full items-center gap-2">
-                        <span className="flex-1 text-left">Lisää</span>
+                        <span className="flex-1 text-left">Add</span>
                         <span className="font-mono text-[10px] opacity-70">↵</span>
                       </span>
                     }
@@ -259,7 +259,7 @@ function CheckpointWidget({ config }: WidgetProps) {
                     alignText="left"
                     text={
                       <span className="flex w-full items-center gap-2">
-                        <span className="flex-1 text-left">Peruuta</span>
+                        <span className="flex-1 text-left">Cancel</span>
                         <span className="font-mono text-[10px] opacity-70">Esc</span>
                       </span>
                     }
@@ -296,26 +296,26 @@ function CheckpointWidget({ config }: WidgetProps) {
                 <div className="rounded border border-[var(--color-warning)] bg-[var(--color-warning)]/10 p-2 text-xs">
                   <div className="mb-2 font-semibold">
                     {N === 1
-                      ? `${pendingCollision.candidates[0].displayName} on jo sisällä`
-                      : `Sisällä on ${N} ${pendingCollision.name}-nimistä`}
+                      ? `${pendingCollision.candidates[0].displayName} is already inside`
+                      : `${N} people named ${pendingCollision.name} inside`}
                   </div>
                   <div className="flex flex-col gap-1">
                     {pendingCollision.candidates.map((c, i) =>
                       optionRow(
                         i,
-                        <>Kirjaa ulos: {c.displayName} — {formatSince(c.since)}</>,
+                        <>Log out: {c.displayName} — {formatSince(c.since)}</>,
                         () => { void (async () => { resetForm(); await logOut(c); })(); },
                         N > 1 ? `${i + 1}` : undefined,
                       ),
                     )}
                     {optionRow(
                       addIdx,
-                      `Lisää uusi ${pendingCollision.name}`,
+                      `Add new ${pendingCollision.name}`,
                       () => enterDiscriminatorMode(pendingCollision.name),
                     )}
                     {optionRow(
                       cancelIdx,
-                      "Peruuta",
+                      "Cancel",
                       () => resetForm(),
                       "Esc",
                     )}
@@ -332,7 +332,7 @@ function CheckpointWidget({ config }: WidgetProps) {
           </div>
           {roster.length === 0 ? (
             <div className="px-2 py-3 text-center text-xs text-[var(--color-muted-foreground)]">
-              Ei sisällä olevia
+              Nobody inside
             </div>
           ) : (
             roster.map((person) => (
@@ -363,11 +363,11 @@ function CheckpointConfigPanel({ config, onChange }: ConfigPanelProps) {
   const cfg = config as CheckpointConfig;
   return (
     <div className="flex flex-col gap-3">
-      <FormGroup label="Sijainti" helperText="Liitetään jokaiseen tapahtumaan (esim. Portti 1).">
+      <FormGroup label="Location">
         <InputGroup
           value={cfg.location ?? ""}
           onChange={(e) => onChange({ ...config, location: e.target.value })}
-          placeholder="Portti 1"
+          placeholder="Gate 1"
         />
       </FormGroup>
     </div>
@@ -378,24 +378,23 @@ function CheckpointHelp() {
   const kbd = "rounded bg-[var(--color-field)] border border-[var(--color-border)] px-1.5 py-0.5 font-mono text-[10px]";
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-sm font-semibold">Checkpoint — pikaohje</div>
+      <div className="text-sm font-semibold">Checkpoint — quick help</div>
       <div className="text-[var(--color-muted-foreground)]">
-        Kirjoita nimi ja paina Enter. Tunnetut sisällä-olevat samannimiset näytetään valikkona.
+        Type a name and press Enter. Anyone already inside with the same name is shown as a picker.
       </div>
       <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-        Pikanäppäimet
+        Keyboard shortcuts
       </div>
       <table className="w-full text-left">
         <tbody>
-          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Enter</kbd></td><td>Kirjaa sisään tai ulos (älykäs toggle)</td></tr>
-          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>↑</kbd> / <kbd className={kbd}>↓</kbd></td><td>Valitse päällekkäisten samannimisten välillä</td></tr>
-          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>1</kbd>–<kbd className={kbd}>9</kbd></td><td>Valitse numerolla suoraan</td></tr>
-          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>⇧</kbd>+<kbd className={kbd}>Enter</kbd></td><td>Lisää uusi samanniminen (esim. toinen Matti)</td></tr>
-          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Esc</kbd></td><td>Peruuta valinta</td></tr>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Enter</kbd></td><td>Log in or out (smart toggle)</td></tr>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>↑</kbd> / <kbd className={kbd}>↓</kbd></td><td>Navigate same-name candidates</td></tr>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>1</kbd>–<kbd className={kbd}>9</kbd></td><td>Pick a candidate by number</td></tr>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Esc</kbd></td><td>Cancel selection</td></tr>
         </tbody>
       </table>
       <div className="mt-1 text-[var(--color-muted-foreground)]">
-        Vinkki: jos sisällä on jo monta Matti-nimistä, kirjoita esim. <code className="font-mono">Matti #2</code> kirjataksesi juuri sen henkilön ulos.
+        Tip: if several people named Matti are inside, type e.g. <code className="font-mono">Matti #2</code> to log that specific person out.
       </div>
     </div>
   );
@@ -404,9 +403,9 @@ function CheckpointHelp() {
 export const checkpointDescriptor: WidgetDescriptor = {
   type: "checkpoint",
   name: "Checkpoint",
-  description: "Kirjaa henkilöiden kulkua tarkastuspisteen läpi",
+  description: "Log personnel passing through a checkpoint",
   icon: <MdSecurity className="text-lg" />,
-  defaultSize: { w: 8, h: 8, minW: 5, minH: 5 },
+  defaultSize: { w: 6, h: 9, minW: 4, minH: 5 },
   defaultConfig: { location: "" },
   component: CheckpointWidget,
   configPanel: CheckpointConfigPanel,

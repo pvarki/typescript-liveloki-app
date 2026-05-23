@@ -1,5 +1,6 @@
 import { Button, Card } from "@blueprintjs/core";
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 
 import { useDashboardStore } from "../stores/dashboard-store";
@@ -32,6 +33,18 @@ export default function WidgetWrapper({ widget, isEditMode }: WidgetWrapperProps
   const isSelected = selectedWidgetId === widget.id;
   const ref = useRef<HTMLDivElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpPos, setHelpPos] = useState<{ top: number; right: number } | null>(null);
+  const helpWrapperRef = useRef<HTMLDivElement | null>(null);
+  const openHelp = () => {
+    const rect = helpWrapperRef.current?.getBoundingClientRect();
+    if (rect) setHelpPos({ top: rect.bottom + 4, right: globalThis.innerWidth - rect.right });
+    setHelpOpen(true);
+  };
+  const closeHelp = () => {
+    setHelpOpen(false);
+    setHelpPos(null);
+  };
   const settings = activeDashboard?.settings ?? DEFAULT_DASHBOARD_SETTINGS;
   const showHeader =
     settings.widgetHeaders === "always" || (settings.widgetHeaders === "edit-only" && isEditMode);
@@ -160,6 +173,36 @@ export default function WidgetWrapper({ widget, isEditMode }: WidgetWrapperProps
           />
         </div>
       </Card>
+      {descriptor.help && (
+        <div ref={helpWrapperRef} className={`absolute top-1 z-50 ${isEditMode ? "right-8" : "right-1"}`}>
+          <Button
+            icon="help"
+            size="small"
+            variant="minimal"
+            className="flex h-6 w-6 items-center justify-center rounded-full bg-[var(--color-surface)] text-xs opacity-0 transition-opacity hover:opacity-100 group-hover:opacity-100"
+            style={{ opacity: helpOpen ? 1 : undefined }}
+            onClick={(event) => {
+              event.stopPropagation();
+              if (helpOpen) closeHelp(); else openHelp();
+            }}
+            title="Pikaohje"
+            aria-label="Pikaohje"
+          />
+        </div>
+      )}
+      {descriptor.help && helpOpen && helpPos && createPortal(
+        <>
+          <div className="fixed inset-0 z-[100]" onClick={closeHelp} aria-hidden="true" />
+          <div
+            className="fixed z-[101] w-72 max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain rounded border border-[var(--color-separator)] bg-[var(--color-surface)] p-3 text-xs text-[var(--color-foreground)] shadow-lg"
+            style={{ top: helpPos.top, right: helpPos.right }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {descriptor.help}
+          </div>
+        </>,
+        document.body,
+      )}
       {isEditMode && (
         <div className="absolute right-1 top-1 z-50">
           <Button

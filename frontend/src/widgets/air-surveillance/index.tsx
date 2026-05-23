@@ -503,6 +503,66 @@ function AirSurveillanceConfigPanel({ config, onChange }: ConfigPanelProps) {
   );
 }
 
+function AirSurveillanceHelp() {
+  const kbd = "rounded bg-[var(--color-field)] border border-[var(--color-border)] px-1.5 py-0.5 font-mono text-[10px]";
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="text-sm font-semibold">Air Surveillance — pikaohje</div>
+      <div className="text-[var(--color-muted-foreground)]">
+        Kirjaa ilmavalvontaselosteen maaleja sitä mukaa kun ne luetaan ULA-radiossa. Widget arvioi uhkaa oman sijaintisi suhteen.
+      </div>
+
+      <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+        Aloitus
+      </div>
+      <div className="text-[var(--color-muted-foreground)]">
+        Aseta oma ruudukko (esim. <code className="font-mono">MH 45</code>) widgetin asetuksista. Ilman sitä uhka-arvio ei toimi.
+      </div>
+
+      <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+        Kenttien syöttö
+      </div>
+      <table className="w-full text-left">
+        <tbody>
+          <tr><td className="py-0.5 pr-3 font-semibold">TUNNUS</td><td>Maalin nelinumeroinen tunnus, esim. 3456</td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">SIJAINTI</td><td>100 km ruutu + 10 km koordinaatit, esim. <code className="font-mono">MH 45</code></td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">SUUNTA</td><td>Asteet (esim. 350) tai ilmansuunta: <code className="font-mono">P KO I KA E LO L LU</code></td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">NOPEUS</td><td>km/h, 50 yksikön tarkkuus</td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">KORKEUS</td><td>PINNASSA / MATALALLA / KORKEALLA</td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">LUKUMÄÄRÄ</td><td>Maalien määrä</td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">LAATU</td><td>Konetyyppi (autotäydennys, drooni → lennokki)</td></tr>
+        </tbody>
+      </table>
+
+      <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+        Pikanäppäimet
+      </div>
+      <table className="w-full text-left">
+        <tbody>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Tab</kbd></td><td>Seuraavaan kenttään (KORKEUS: yksi tab-pysähdys)</td></tr>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>↑</kbd> / <kbd className={kbd}>↓</kbd></td><td>Vaihda KORKEUS-vaihtoehtoa</td></tr>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Enter</kbd></td><td>Lähetä lomake (toimii kaikista tekstikentistä)</td></tr>
+        </tbody>
+      </table>
+
+      <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+        Uhka-arvio
+      </div>
+      <table className="w-full text-left">
+        <tbody>
+          <tr><td className="py-0.5 pr-3"><span className="rounded bg-[var(--color-field)] px-1 py-0.5 text-[9px] font-semibold uppercase text-[var(--color-muted-foreground)]">vakaa</span></td><td>Ei lähesty omaa ruutua</td></tr>
+          <tr><td className="py-0.5 pr-3"><span className="rounded bg-orange-500 px-1 py-0.5 text-[9px] font-semibold uppercase text-white">lähestyy</span></td><td>Suunta osoittaa omaan sijaintiin (±30°)</td></tr>
+          <tr><td className="py-0.5 pr-3"><span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-semibold uppercase text-white">omassa</span></td><td>Maali on omassa 10 km ruudussa — ilmestyy ILMAHÄLYTYS-painike</td></tr>
+        </tbody>
+      </table>
+
+      <div className="mt-1 text-[var(--color-muted-foreground)]">
+        ILMAHÄLYTYS näkyy banner-palkkina kaikille käyttäjille. Tyhjennä <span className="font-semibold">VAARA OHI</span> -painikkeesta toimintarivillä.
+      </div>
+    </div>
+  );
+}
+
 export const airSurveillanceDescriptor: WidgetDescriptor = {
   type: "air-surveillance",
   name: "Air Surveillance",
@@ -513,4 +573,5 @@ export const airSurveillanceDescriptor: WidgetDescriptor = {
   component: AirSurveillanceWidget,
   configPanel: AirSurveillanceConfigPanel,
   needsScroll: false,
+  help: <AirSurveillanceHelp />,
 };

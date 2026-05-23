@@ -105,6 +105,7 @@ export interface WidgetDescriptor {
   toClipboardConfig?: (config: Record<string, unknown>) => Record<string, unknown>;
   fromClipboardConfig?: (config: Record<string, unknown>) => Record<string, unknown>;
   needsScroll?: boolean;
+  help?: ReactNode;
 }
 
 export interface WidgetProps {

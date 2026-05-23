@@ -1,4 +1,5 @@
 import { useWidgetRegistry } from "../stores/widget-registry";
+import { airSurveillanceDescriptor } from "./air-surveillance";
 import { calendarDescriptor } from "./calendar";
 import { clockDescriptor } from "./clock";
 import { detailViewDescriptor } from "./detail-view";
@@ -19,6 +20,7 @@ import { weatherMapDescriptor } from "./weather-map";
 
 export function registerAllWidgets() {
   const { register } = useWidgetRegistry.getState();
+  register(airSurveillanceDescriptor);
   register(calendarDescriptor);
   register(clockDescriptor);
   register(detailViewDescriptor);

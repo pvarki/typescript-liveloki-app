@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Outlet, useNavigate, useParams } from "react-router-dom";
 
 import EventDetailOverlay from "./battlelog/EventDetailOverlay";
+import { AirAlarmBanner } from "./components/AirAlarmBanner";
 import DashboardGrid from "./dashboard/DashboardGrid";
 import { createDefaultBattlelogWidgets } from "./dashboard/default-dashboard";
 import GridLinesOverlay from "./dashboard/GridLinesOverlay";
@@ -24,6 +25,7 @@ export function DashboardLayout() {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-[var(--color-background)] text-[var(--color-foreground)]">
       <TopBar />
+      <AirAlarmBanner />
       <NotificationHost />
       <EventDetailOverlay />
       <div className="relative flex-1 overflow-hidden">

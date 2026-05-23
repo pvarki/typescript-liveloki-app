@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 
 import {
   createDashboard,
@@ -12,7 +13,12 @@ import { requireAdmin } from '../middleware/requireAdmin.js';
 
 const router = express.Router();
 
-router.get('/dashboards', listDashboards);
+const dashboardsReadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+});
+
+router.get('/dashboards', dashboardsReadLimiter, listDashboards);
 router.post('/dashboards', requireAdmin, createDashboard);
 router.delete('/dashboards', requireAdmin, deleteAllDashboards);
 router.get('/dashboards/:id', getDashboard);

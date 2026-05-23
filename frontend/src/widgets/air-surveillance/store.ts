@@ -8,9 +8,11 @@ export const DEFAULT_TRACK_TTL_MS = 15 * 60 * 1000;
 interface AirSurveillanceState {
   tracks: AirTrack[];
   addOrReplaceTrack: (track: AirTrack) => void;
-  removeTrack: (id: string) => void;
-  pruneExpired: (ttlMs?: number, now?: number) => void;
-  clearAll: () => void;
+  archiveTrack: (id: string) => void;
+  restoreTrack: (id: string, now?: number) => void;
+  deleteTrack: (id: string) => void;
+  autoArchive: (ttlMs?: number, now?: number) => void;
+  clearArchive: () => void;
 }
 
 export const useAirSurveillanceStore = create<AirSurveillanceState>()(
@@ -20,13 +22,31 @@ export const useAirSurveillanceStore = create<AirSurveillanceState>()(
       addOrReplaceTrack: (track) =>
         set((state) => {
           const remaining = state.tracks.filter((t) => t.trackId !== track.trackId);
-          return { tracks: [...remaining, track] };
+          return { tracks: [...remaining, { ...track, archived: false }] };
         }),
-      removeTrack: (id) =>
+      archiveTrack: (id) =>
+        set((state) => ({
+          tracks: state.tracks.map((t) => (t.id === id ? { ...t, archived: true } : t)),
+        })),
+      restoreTrack: (id, now = Date.now()) =>
+        set((state) => ({
+          tracks: state.tracks.map((t) => (t.id === id ? { ...t, archived: false, capturedAt: now } : t)),
+        })),
+      deleteTrack: (id) =>
         set((state) => ({ tracks: state.tracks.filter((t) => t.id !== id) })),
-      pruneExpired: (ttlMs = DEFAULT_TRACK_TTL_MS, now = Date.now()) =>
-        set((state) => ({ tracks: state.tracks.filter((t) => now - t.capturedAt < ttlMs) })),
-      clearAll: () => set({ tracks: [] }),
+      autoArchive: (ttlMs = DEFAULT_TRACK_TTL_MS, now = Date.now()) =>
+        set((state) => {
+          let changed = false;
+          const next = state.tracks.map((t) => {
+            if (t.archived) return t;
+            if (now - t.capturedAt < ttlMs) return t;
+            changed = true;
+            return { ...t, archived: true };
+          });
+          return changed ? { tracks: next } : state;
+        }),
+      clearArchive: () =>
+        set((state) => ({ tracks: state.tracks.filter((t) => !t.archived) })),
     }),
     { name: "air-surveillance-tracks" },
   ),

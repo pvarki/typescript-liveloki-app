@@ -14,8 +14,8 @@ export function AirAlarmBanner() {
       }`}
     >
       <span className="font-mono text-base">{isImmediate ? "⚠" : "!"}</span>
-      <span>{isImmediate ? "ILMAHÄLYTYS" : "ILMAVAROITUS"}</span>
-      <span className="text-xs font-normal opacity-80">annettu {new Date(alarm.declaredAt).toLocaleTimeString()}</span>
+      <span>{isImmediate ? "AIR ALARM" : "AIR WARNING"}</span>
+      <span className="text-xs font-normal opacity-80">sounded {new Date(alarm.declaredAt).toLocaleTimeString()}</span>
     </div>
   );
 }

@@ -17,6 +17,7 @@ export interface AirTrack extends BroadcastInput {
   lat: number;
   lng: number;
   capturedAt: number;
+  archived: boolean;
 }
 
 export type ThreatTier = "clear" | "heading_toward" | "inside_square";

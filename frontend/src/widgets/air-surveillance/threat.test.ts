@@ -18,6 +18,7 @@ function makeTrack(partial: Partial<AirTrack> = {}): AirTrack {
     lat: 60.9,
     lng: 26.7,
     capturedAt: 0,
+    archived: false,
     ...partial,
   };
 }

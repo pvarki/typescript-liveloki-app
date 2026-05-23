@@ -11,22 +11,23 @@ import { DEFAULT_FINNISH_ZONE, formatGridString, gridToLatLng, parseGridString }
 import { DEFAULT_TRACK_TTL_MS, useAirSurveillanceStore } from "./store";
 import { assessThreat } from "./threat";
 import type { AirTrack, AltitudeCode, BroadcastInput, OperatorLocation } from "./types";
+import { useAirTrackVisibilityStore } from "./visibility";
 
 const ALT_OPTIONS: Array<{ code: AltitudeCode; label: string; range: string }> = [
-  { code: "pinnassa", label: "PINNASSA", range: "< 300 m" },
-  { code: "matalalla", label: "MATALALLA", range: "300–3000 m" },
-  { code: "korkealla", label: "KORKEALLA", range: "> 3000 m" },
+  { code: "pinnassa", label: "SURFACE", range: "< 300 m" },
+  { code: "matalalla", label: "LOW", range: "300–3000 m" },
+  { code: "korkealla", label: "HIGH", range: "> 3000 m" },
 ];
 
 const COMPASS_DIRS: Record<string, number> = {
-  P: 0,    // pohjoinen
-  KO: 45,  // koillinen
-  I: 90,   // itä
-  KA: 135, // kaakko
-  E: 180,  // etelä
-  LO: 225, // lounas
-  L: 270,  // länsi
-  LU: 315, // luode
+  N: 0,
+  NE: 45,
+  E: 90,
+  SE: 135,
+  S: 180,
+  SW: 225,
+  W: 270,
+  NW: 315,
 };
 
 function parseHeading(raw: string): number | null {
@@ -39,38 +40,49 @@ function parseHeading(raw: string): number | null {
 }
 
 const AIRCRAFT_TYPES = [
-  "rynnäkkökone",
-  "hävittäjä",
-  "pommikone",
-  "tiedustelukone",
-  "kuljetuskone",
-  "helikopteri",
-  "taisteluhelikopteri",
-  "kuljetushelikopteri",
-  "tiedusteluhelikopteri",
-  "lennokki",
-  "drooni",
-  "ohjus",
+  "attack aircraft",
+  "fighter",
+  "bomber",
+  "recon aircraft",
+  "transport aircraft",
+  "helicopter",
+  "combat helicopter",
+  "transport helicopter",
+  "recon helicopter",
+  "drone",
+  "missile",
 ] as const;
 
 const TYPE_ALIASES: Record<string, string> = {
-  drooni: "lennokki",
-  droonit: "lennokki",
-  drooneja: "lennokki",
-  drone: "lennokki",
-  drones: "lennokki",
-  helikopterit: "helikopteri",
-  helikoptereita: "helikopteri",
-  rynnäkkökoneita: "rynnäkkökone",
-  hävittäjiä: "hävittäjä",
-  pommikoneita: "pommikone",
-  tiedustelukoneita: "tiedustelukone",
-  kuljetuskoneita: "kuljetuskone",
-  taisteluhelikoptereita: "taisteluhelikopteri",
-  kuljetushelikoptereita: "kuljetushelikopteri",
-  tiedusteluhelikoptereita: "tiedusteluhelikopteri",
-  lennokkeja: "lennokki",
-  ohjuksia: "ohjus",
+  // English variants
+  drones: "drone",
+  // Finnish backward compat (operators may type these)
+  drooni: "drone",
+  droonit: "drone",
+  drooneja: "drone",
+  lennokki: "drone",
+  lennokkeja: "drone",
+  helikopteri: "helicopter",
+  helikopterit: "helicopter",
+  helikoptereita: "helicopter",
+  rynnäkkökone: "attack aircraft",
+  rynnäkkökoneita: "attack aircraft",
+  hävittäjä: "fighter",
+  hävittäjiä: "fighter",
+  pommikone: "bomber",
+  pommikoneita: "bomber",
+  tiedustelukone: "recon aircraft",
+  tiedustelukoneita: "recon aircraft",
+  kuljetuskone: "transport aircraft",
+  kuljetuskoneita: "transport aircraft",
+  taisteluhelikopteri: "combat helicopter",
+  taisteluhelikoptereita: "combat helicopter",
+  kuljetushelikopteri: "transport helicopter",
+  kuljetushelikoptereita: "transport helicopter",
+  tiedusteluhelikopteri: "recon helicopter",
+  tiedusteluhelikoptereita: "recon helicopter",
+  ohjus: "missile",
+  ohjuksia: "missile",
 };
 
 function canonicalizeType(raw: string): string {
@@ -101,13 +113,13 @@ function describeAltitude(alt: AltitudeCode): string {
 function describeThreat(tier: ReturnType<typeof assessThreat>): { label: string; className: string } {
   switch (tier) {
     case "inside_square": {
-      return { label: "OMASSA RUUDUSSA", className: "bg-red-600 text-white" };
+      return { label: "IN SQUARE", className: "bg-red-600 text-white" };
     }
     case "heading_toward": {
-      return { label: "LÄHESTYY", className: "bg-orange-500 text-white" };
+      return { label: "APPROACHING", className: "bg-orange-500 text-white" };
     }
     default: {
-      return { label: "vakaa", className: "bg-[var(--color-field)] text-[var(--color-muted-foreground)]" };
+      return { label: "stable", className: "bg-[var(--color-field)] text-[var(--color-muted-foreground)]" };
     }
   }
 }
@@ -138,25 +150,24 @@ function BroadcastForm({
   const [headingRaw, setHeadingRaw] = useState("0");
   const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(altitudeOverride?: AltitudeCode) {
-    const altitude = altitudeOverride ?? draft.altitude;
+  function handleSubmit() {
     const parsedGrid = parseGridString(gridRaw);
     if (!parsedGrid) {
-      setError("Sijainti odottaa muotoa 'MH 45'");
+      setError("Location format expected: 'MH 45'");
       return;
     }
     if (!draft.trackId.trim()) {
-      setError("Tunnus puuttuu");
+      setError("ID required");
       return;
     }
     const heading = parseHeading(headingRaw);
     if (heading === null) {
-      setError("Suunta odottaa joko asteita (0–350) tai ilmansuuntaa (N, NE, E, …)");
+      setError("Heading expects degrees (0–350) or compass (N, NE, E, …)");
       return;
     }
     const point = gridToLatLng(parsedGrid.letters, parsedGrid.e10, parsedGrid.n10, operatorZone);
     if (!point) {
-      setError(`Ruudukko ${formatGridString(parsedGrid)} ei ratkea vyöhykkeessä ${operatorZone}`);
+      setError(`Grid ${formatGridString(parsedGrid)} not resolvable in zone ${operatorZone}`);
       return;
     }
     const track: AirTrack = {
@@ -167,16 +178,17 @@ function BroadcastForm({
       gridN10: parsedGrid.n10,
       heading,
       speed: draft.speed,
-      altitude,
+      altitude: draft.altitude,
       count: draft.count,
-      type: canonicalizeType(draft.type) || "tuntematon",
+      type: canonicalizeType(draft.type) || "unknown",
+      archived: false,
       lat: point.lat,
       lng: point.lng,
       capturedAt: Date.now(),
     };
     setError(null);
     void onSubmit(track);
-    setDraft({ ...emptyBroadcast(), heading, speed: draft.speed, altitude });
+    setDraft({ ...emptyBroadcast(), heading, speed: draft.speed, altitude: draft.altitude });
     setGridRaw("");
   }
 
@@ -189,7 +201,7 @@ function BroadcastForm({
       }}
     >
       <div className="grid grid-cols-2 gap-2">
-        <FormGroup label="TUNNUS" className="!mb-0">
+        <FormGroup label="ID" className="!mb-0">
           <InputGroup
             autoFocus
             placeholder="3456"
@@ -197,7 +209,7 @@ function BroadcastForm({
             onChange={(e) => setDraft({ ...draft, trackId: e.target.value })}
           />
         </FormGroup>
-        <FormGroup label="SIJAINTI" className="!mb-0">
+        <FormGroup label="LOCATION" className="!mb-0">
           <InputGroup
             placeholder="MH 45"
             value={gridRaw}
@@ -206,26 +218,26 @@ function BroadcastForm({
         </FormGroup>
       </div>
 
-      <FormGroup label="SUUNTA" className="!mb-0" helperText="Asteet (esim. 350) tai ilmansuunta: P, KO, I, KA, E, LO, L, LU">
+      <FormGroup label="HEADING" className="!mb-0">
         <InputGroup
           list="air-track-headings"
-          placeholder="350 tai P / KO / I / KA / E / LO / L / LU"
+          placeholder="350 or N / NE / E / SE / S / SW / W / NW"
           value={headingRaw}
           onChange={(e) => setHeadingRaw(e.target.value)}
         />
         <datalist id="air-track-headings">
-          <option value="P">pohjoinen</option>
-          <option value="KO">koillinen</option>
-          <option value="I">itä</option>
-          <option value="KA">kaakko</option>
-          <option value="E">etelä</option>
-          <option value="LO">lounas</option>
-          <option value="L">länsi</option>
-          <option value="LU">luode</option>
+          <option value="N">north</option>
+          <option value="NE">northeast</option>
+          <option value="E">east</option>
+          <option value="SE">southeast</option>
+          <option value="S">south</option>
+          <option value="SW">southwest</option>
+          <option value="W">west</option>
+          <option value="NW">northwest</option>
         </datalist>
       </FormGroup>
 
-      <FormGroup label="NOPEUS km/h" className="!mb-0">
+      <FormGroup label="SPEED km/h" className="!mb-0">
         <InputGroup
           type="number"
           step={50}
@@ -235,8 +247,8 @@ function BroadcastForm({
         />
       </FormGroup>
 
-      <FormGroup label="KORKEUS" className="!mb-0" helperText="Tab selaa, välilyönti valitsee, Enter valitsee ja lähettää">
-        <div className="grid grid-cols-3 gap-1" role="radiogroup" aria-label="Korkeus">
+      <FormGroup label="ALTITUDE" className="!mb-0">
+        <div className="grid grid-cols-3 gap-1" role="radiogroup" aria-label="Altitude">
           {ALT_OPTIONS.map((opt) => (
             <label key={opt.code} className="cursor-pointer">
               <input
@@ -248,10 +260,9 @@ function BroadcastForm({
                   if (e.key === "Enter") {
                     e.preventDefault();
                     setDraft({ ...draft, altitude: opt.code });
-                    handleSubmit(opt.code);
                   }
                 }}
-                aria-label={`Korkeus ${opt.label}`}
+                aria-label={`Altitude ${opt.label}`}
                 className="peer sr-only"
               />
               <div
@@ -269,7 +280,7 @@ function BroadcastForm({
         </div>
       </FormGroup>
 
-      <FormGroup label="LUKUMÄÄRÄ" className="!mb-0">
+      <FormGroup label="COUNT" className="!mb-0">
         <InputGroup
           type="number"
           min={1}
@@ -278,10 +289,10 @@ function BroadcastForm({
         />
       </FormGroup>
 
-      <FormGroup label="LAATU" className="!mb-0" helperText="Drooni → lennokki">
+      <FormGroup label="TYPE" className="!mb-0">
         <InputGroup
           list="air-track-types"
-          placeholder="rynnäkkökone"
+          placeholder="attack aircraft"
           value={draft.type}
           onChange={(e) => setDraft({ ...draft, type: e.target.value })}
         />
@@ -295,16 +306,33 @@ function BroadcastForm({
           {error}
         </div>
       )}
-      <Button intent="primary" icon="add" text="Tallenna maali" type="submit" />
+      <Button intent="primary" icon="add" text="Save track" type="submit" tabIndex={0} className="!mt-2" />
     </form>
   );
 }
 
-function TrackRow({ track, user, onRemove }: { track: AirTrack; user: OperatorLocation | null; onRemove: () => void }) {
+function TrackRow({
+  track,
+  user,
+  now,
+  onArchive,
+  onRestore,
+  onDelete,
+}: {
+  track: AirTrack;
+  user: OperatorLocation | null;
+  now: number;
+  onArchive?: () => void;
+  onRestore?: () => void;
+  onDelete?: () => void;
+}) {
   const tier = assessThreat(track, user);
   const badge = describeThreat(tier);
+  const isVisible = useAirTrackVisibilityStore((s) => s.visibleTrackIds.has(track.trackId));
+  const toggleVisibility = useAirTrackVisibilityStore((s) => s.toggle);
+  const minutesAgo = Math.max(0, Math.floor((now - track.capturedAt) / 60_000));
   return (
-    <div className="border-b border-[var(--color-border)] px-2 py-1 text-xs hover:bg-[var(--color-field)]">
+    <div className={`border-b border-[var(--color-border)] px-2 py-1 text-xs hover:bg-[var(--color-field)] ${track.archived ? "opacity-60" : ""}`}>
       <div className="flex items-center justify-between gap-1">
         <div className="flex items-baseline gap-2 truncate">
           <span className="font-mono text-sm font-semibold">{track.trackId}</span>
@@ -312,14 +340,33 @@ function TrackRow({ track, user, onRemove }: { track: AirTrack; user: OperatorLo
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <span className={`rounded px-1 py-0.5 text-[9px] font-semibold uppercase ${badge.className}`}>{badge.label}</span>
-          <Button minimal small icon="cross" onClick={onRemove} aria-label="Remove track" />
+          {!track.archived && (
+            <Button
+              minimal
+              small
+              icon={isVisible ? "eye-open" : "eye-off"}
+              intent={isVisible ? "primary" : "none"}
+              onClick={() => toggleVisibility(track.trackId)}
+              aria-label={isVisible ? "Hide from map" : "Show on map"}
+              title={isVisible ? "Hide from map" : "Show on map"}
+            />
+          )}
+          {track.archived ? (
+            <>
+              <Button minimal small icon="undo" onClick={onRestore} aria-label="Restore" title="Restore to active" />
+              <Button minimal small icon="trash" intent="danger" onClick={onDelete} aria-label="Delete permanently" title="Delete permanently" />
+            </>
+          ) : (
+            <Button minimal small icon="archive" onClick={onArchive} aria-label="Archive" title="Archive track" />
+          )}
         </div>
       </div>
       <div className="mt-0.5 flex flex-wrap gap-x-2 gap-y-0.5 font-mono text-[10px] text-[var(--color-muted-foreground)]">
-        <span>SUUNTA {track.heading}°</span>
+        <span>HDG {track.heading}°</span>
         <span>{track.speed} km/h</span>
         <span>{describeAltitude(track.altitude)}</span>
         <span>{track.count}× <span className="text-[var(--color-foreground)]">{track.type}</span></span>
+        <span>{minutesAgo} min ago</span>
       </div>
     </div>
   );
@@ -330,20 +377,40 @@ function AirSurveillanceWidget({ config }: WidgetProps) {
   const operator = useMemo(() => getOperatorLocation(cfg), [cfg]);
   const tracks = useAirSurveillanceStore((s) => s.tracks);
   const addOrReplaceTrack = useAirSurveillanceStore((s) => s.addOrReplaceTrack);
-  const removeTrack = useAirSurveillanceStore((s) => s.removeTrack);
-  const pruneExpired = useAirSurveillanceStore((s) => s.pruneExpired);
+  const archiveTrack = useAirSurveillanceStore((s) => s.archiveTrack);
+  const restoreTrack = useAirSurveillanceStore((s) => s.restoreTrack);
+  const deleteTrack = useAirSurveillanceStore((s) => s.deleteTrack);
+  const autoArchive = useAirSurveillanceStore((s) => s.autoArchive);
+  const clearArchive = useAirSurveillanceStore((s) => s.clearArchive);
+  const hideVisibility = useAirTrackVisibilityStore((s) => s.hide);
   const { data: events } = useBattlelogEvents();
   const activeAlarm = useMemo(() => deriveActiveAlarm(events), [events]);
   const ttlMs = (cfg.ttlMinutes ?? DEFAULT_TRACK_TTL_MS / 60_000) * 60_000;
+  const [now, setNow] = useState(() => Date.now());
+  const [activeTab, setActiveTab] = useState<"active" | "archived">("active");
 
   useEffect(() => {
-    pruneExpired(ttlMs);
-    const interval = setInterval(() => pruneExpired(ttlMs), 30_000);
+    autoArchive(ttlMs);
+    const interval = setInterval(() => {
+      setNow(Date.now());
+      autoArchive(ttlMs);
+    }, 30_000);
     return () => clearInterval(interval);
-  }, [pruneExpired, ttlMs]);
+  }, [autoArchive, ttlMs]);
+
+  function handleArchive(track: AirTrack) {
+    archiveTrack(track.id);
+    hideVisibility(track.trackId);
+  }
+  function handleDeleteAll() {
+    const archivedCount = tracks.filter((t) => t.archived).length;
+    if (archivedCount === 0) return;
+    if (!globalThis.confirm(`Delete ${archivedCount} archived tracks permanently?`)) return;
+    clearArchive();
+  }
 
   const tier3Track = useMemo(
-    () => operator && tracks.find((t) => assessThreat(t, operator) === "inside_square"),
+    () => operator && tracks.find((t) => !t.archived && assessThreat(t, operator) === "inside_square"),
     [operator, tracks],
   );
 
@@ -351,7 +418,7 @@ function AirSurveillanceWidget({ config }: WidgetProps) {
     addOrReplaceTrack(track);
     const payload = {
       ...createEmptyBattlelogEvent(),
-      header: `Ilmavalvonta ${track.trackId}: ${track.gridLetters} ${track.gridE10}${track.gridN10} — ${track.count}× ${track.type}, ${track.heading}°/${track.speed} km/h, ${describeAltitude(track.altitude).toLowerCase()}`,
+      header: `Air track ${track.trackId}: ${track.gridLetters} ${track.gridE10}${track.gridN10} — ${track.count}× ${track.type}, ${track.heading}°/${track.speed} km/h, ${describeAltitude(track.altitude).toLowerCase()}`,
       source: "air-surveillance-widget",
       keywords: [
         "air-track",
@@ -370,21 +437,21 @@ function AirSurveillanceWidget({ config }: WidgetProps) {
     };
     try {
       await submitBattlelogEvents([payload]);
-      toast.success(`Maali ${track.trackId} kirjattu`);
+      toast.success(`Track ${track.trackId} logged`);
     } catch (error) {
       console.error("Failed to log air track", error);
-      toast.error("Maali tallennettu paikallisesti — palvelimelle kirjaus epäonnistui");
+      toast.error("Track saved locally — server log failed");
     }
   }
 
   async function declareAlarm(state: "ilmahalytys" | "vaara_ohi", triggeringTrack?: AirTrack) {
     if (!operator) {
-      toast.error("Aseta oma sijainti widgetin asetuksista");
+      toast.error("Set your location in the widget settings");
       return;
     }
     const payload = {
       ...createEmptyBattlelogEvent(),
-      header: state === "ilmahalytys" ? "ILMAHÄLYTYS" : "VAARA OHI",
+      header: state === "ilmahalytys" ? "AIR ALARM" : "ALL CLEAR",
       source: "air-surveillance-widget",
       keywords: ["alarm", `alarm:${state}`],
       event_time: new Date().toISOString(),
@@ -392,29 +459,30 @@ function AirSurveillanceWidget({ config }: WidgetProps) {
       location_lat: operator.lat,
       location_lng: operator.lng,
       author: "air-surveillance",
-      notes: triggeringTrack ? `Trigger: maali ${triggeringTrack.trackId} (${triggeringTrack.type})` : undefined,
+      notes: triggeringTrack ? `Trigger: track ${triggeringTrack.trackId} (${triggeringTrack.type})` : undefined,
     };
     try {
       await submitBattlelogEvents([payload]);
-      toast.success(state === "ilmahalytys" ? "ILMAHÄLYTYS annettu" : "VAARA OHI");
+      toast.success(state === "ilmahalytys" ? "AIR ALARM sounded" : "ALL CLEAR");
     } catch (error) {
       console.error("Failed to declare alarm", error);
-      toast.error("Hälytyksen kirjaus epäonnistui");
+      toast.error("Failed to log alarm");
     }
   }
 
-  const sortedTracks = tracks.toSorted((a, b) => b.capturedAt - a.capturedAt);
+  const activeTracks = tracks.filter((t) => !t.archived).toSorted((a, b) => b.capturedAt - a.capturedAt);
+  const archivedTracks = tracks.filter((t) => t.archived).toSorted((a, b) => b.capturedAt - a.capturedAt);
 
   return (
     <div className="flex h-full flex-col">
       {!operator && (
         <div className="m-2 rounded border border-[var(--color-warning)] bg-[var(--color-warning)]/10 px-2 py-1 text-xs text-[var(--color-warning)]">
-          Aseta oma ruudukko widgetin asetuksista (esim. <code className="font-mono">MH 45</code>) jotta uhka-arvio toimii.
+          Set your grid in the widget settings (e.g. <code className="font-mono">MH 45</code>) so threat assessment works.
         </div>
       )}
       {activeAlarm && (
         <div className={`m-2 rounded px-2 py-1 text-xs font-semibold uppercase ${activeAlarm.state === "ilmahalytys" ? "bg-red-700 text-white" : "bg-orange-600 text-white"}`}>
-          {activeAlarm.state === "ilmahalytys" ? "ILMAHÄLYTYS voimassa" : "ILMAVAROITUS voimassa"}
+          {activeAlarm.state === "ilmahalytys" ? "AIR ALARM active" : "AIR WARNING active"}
         </div>
       )}
       {tier3Track && !activeAlarm && (
@@ -423,36 +491,101 @@ function AirSurveillanceWidget({ config }: WidgetProps) {
           onClick={() => declareAlarm("ilmahalytys", tier3Track)}
           className="m-2 rounded bg-red-600 px-3 py-3 text-center text-sm font-bold uppercase text-white shadow hover:bg-red-700"
         >
-          Maali {tier3Track.trackId} omassa ruudussa — Anna ILMAHÄLYTYS
+          Track {tier3Track.trackId} in your square — Sound AIR ALARM
         </button>
       )}
       <div className="flex min-h-0 flex-1">
         <div className="min-h-0 w-1/2 shrink-0 overflow-y-auto border-r border-[var(--color-border)]">
           <BroadcastForm onSubmit={handleSubmitTrack} operatorZone={cfg.operatorZone || DEFAULT_FINNISH_ZONE} />
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          {sortedTracks.length === 0 ? (
-            <div className="px-2 py-3 text-center text-xs text-[var(--color-muted-foreground)]">
-              Ei aktiivisia maaleja
-            </div>
-          ) : (
-            sortedTracks.map((track) => (
-              <TrackRow key={track.id} track={track} user={operator} onRemove={() => removeTrack(track.id)} />
-            ))
-          )}
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="flex shrink-0 items-stretch border-b border-[var(--color-border)] text-xs">
+            <button
+              type="button"
+              onClick={() => setActiveTab("active")}
+              className={`flex-1 px-2 py-1 text-center font-semibold uppercase tracking-wider ${
+                activeTab === "active"
+                  ? "border-b-2 border-[var(--color-accent)] text-[var(--color-foreground)]"
+                  : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-field)]"
+              }`}
+            >
+              Active ({activeTracks.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("archived")}
+              className={`flex-1 px-2 py-1 text-center font-semibold uppercase tracking-wider ${
+                activeTab === "archived"
+                  ? "border-b-2 border-[var(--color-accent)] text-[var(--color-foreground)]"
+                  : "text-[var(--color-muted-foreground)] hover:bg-[var(--color-field)]"
+              }`}
+            >
+              Archive ({archivedTracks.length})
+            </button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            {activeTab === "active" ? (
+              activeTracks.length === 0 ? (
+                <div className="px-2 py-3 text-center text-xs text-[var(--color-muted-foreground)]">
+                  No active tracks
+                </div>
+              ) : (
+                activeTracks.map((track) => (
+                  <TrackRow
+                    key={track.id}
+                    track={track}
+                    user={operator}
+                    now={now}
+                    onArchive={() => handleArchive(track)}
+                  />
+                ))
+              )
+            ) : (
+              <>
+                {archivedTracks.length > 0 && (
+                  <div className="flex justify-end border-b border-[var(--color-border)] px-2 py-1">
+                    <Button
+                      minimal
+                      small
+                      intent="danger"
+                      icon="trash"
+                      text="Clear archive"
+                      onClick={handleDeleteAll}
+                    />
+                  </div>
+                )}
+                {archivedTracks.length === 0 ? (
+                  <div className="px-2 py-3 text-center text-xs text-[var(--color-muted-foreground)]">
+                    Archive empty
+                  </div>
+                ) : (
+                  archivedTracks.map((track) => (
+                    <TrackRow
+                      key={track.id}
+                      track={track}
+                      user={operator}
+                      now={now}
+                      onRestore={() => restoreTrack(track.id)}
+                      onDelete={() => deleteTrack(track.id)}
+                    />
+                  ))
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
       <WidgetActionBar
         primary={
           activeAlarm ? (
-            <Button intent="warning" text="VAARA OHI" fill small onClick={() => declareAlarm("vaara_ohi")} />
+            <Button intent="warning" text="ALL CLEAR" fill small onClick={() => declareAlarm("vaara_ohi")} />
           ) : (
-            <Button minimal text={`${sortedTracks.length} maalia`} fill small disabled />
+            <Button minimal text={`${activeTracks.length} active · ${archivedTracks.length} archived`} fill small disabled />
           )
         }
         secondary={
           operator ? (
-            <Button minimal small icon="map-marker" text={`Oma: ${operator.gridLetters} ${operator.gridE10}${operator.gridN10}`} disabled />
+            <Button minimal small icon="map-marker" text={`Self: ${operator.gridLetters} ${operator.gridE10}${operator.gridN10}`} disabled />
           ) : undefined
         }
       />
@@ -480,13 +613,13 @@ function AirSurveillanceConfigPanel({ config, onChange }: ConfigPanelProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <FormGroup label="Oma ruudukko (esim. MH 45)" helperText="Käytetään uhka-arvioon ja ILMAHÄLYTYS-tapahtuman sijaintiin.">
+      <FormGroup label="Your grid">
         <InputGroup value={gridDraft} onChange={(e) => setGridDraft(e.target.value)} onBlur={commit} placeholder="MH 45" />
       </FormGroup>
-      <FormGroup label="UTM-vyöhyke" helperText="Suomessa yleensä 35V; läntinen Suomi 34V.">
+      <FormGroup label="UTM zone">
         <InputGroup value={zoneDraft} onChange={(e) => setZoneDraft(e.target.value)} onBlur={commit} />
       </FormGroup>
-      <FormGroup label="Maalin vanheneminen (min)" helperText="Maali poistuu listalta tämän ajan kuluttua viime havainnosta.">
+      <FormGroup label="Archive after (min)">
         <InputGroup type="number" min={1} value={String(ttlDraft)} onChange={(e) => setTtlDraft(Number(e.target.value) || 15)} onBlur={commit} />
       </FormGroup>
       {parsed && preview && (
@@ -496,7 +629,7 @@ function AirSurveillanceConfigPanel({ config, onChange }: ConfigPanelProps) {
       )}
       {gridDraft.trim() && !parsed && (
         <div className="rounded border border-[var(--color-danger)] bg-[var(--color-danger)]/10 p-2 text-xs text-[var(--color-danger)]">
-          Ruudukon muoto pitäisi olla &quot;MH 45&quot; (kaksi kirjainta + kaksi numeroa).
+          Grid format should be &quot;MH 45&quot; (two letters + two digits).
         </div>
       )}
     </div>
@@ -507,57 +640,57 @@ function AirSurveillanceHelp() {
   const kbd = "rounded bg-[var(--color-field)] border border-[var(--color-border)] px-1.5 py-0.5 font-mono text-[10px]";
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-sm font-semibold">Air Surveillance — pikaohje</div>
+      <div className="text-sm font-semibold">Air Surveillance — quick help</div>
       <div className="text-[var(--color-muted-foreground)]">
-        Kirjaa ilmavalvontaselosteen maaleja sitä mukaa kun ne luetaan ULA-radiossa. Widget arvioi uhkaa oman sijaintisi suhteen.
+        Log targets as they&apos;re read over the air-surveillance radio broadcast. The widget assesses threat against your own position.
       </div>
 
       <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-        Aloitus
+        Getting started
       </div>
       <div className="text-[var(--color-muted-foreground)]">
-        Aseta oma ruudukko (esim. <code className="font-mono">MH 45</code>) widgetin asetuksista. Ilman sitä uhka-arvio ei toimi.
+        Set your grid (e.g. <code className="font-mono">MH 45</code>) in the widget settings. Threat assessment doesn&apos;t work without it.
       </div>
 
       <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-        Kenttien syöttö
+        Fields
       </div>
       <table className="w-full text-left">
         <tbody>
-          <tr><td className="py-0.5 pr-3 font-semibold">TUNNUS</td><td>Maalin nelinumeroinen tunnus, esim. 3456</td></tr>
-          <tr><td className="py-0.5 pr-3 font-semibold">SIJAINTI</td><td>100 km ruutu + 10 km koordinaatit, esim. <code className="font-mono">MH 45</code></td></tr>
-          <tr><td className="py-0.5 pr-3 font-semibold">SUUNTA</td><td>Asteet (esim. 350) tai ilmansuunta: <code className="font-mono">P KO I KA E LO L LU</code></td></tr>
-          <tr><td className="py-0.5 pr-3 font-semibold">NOPEUS</td><td>km/h, 50 yksikön tarkkuus</td></tr>
-          <tr><td className="py-0.5 pr-3 font-semibold">KORKEUS</td><td>PINNASSA / MATALALLA / KORKEALLA</td></tr>
-          <tr><td className="py-0.5 pr-3 font-semibold">LUKUMÄÄRÄ</td><td>Maalien määrä</td></tr>
-          <tr><td className="py-0.5 pr-3 font-semibold">LAATU</td><td>Konetyyppi (autotäydennys, drooni → lennokki)</td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">ID</td><td>Four-digit target ID, e.g. 3456</td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">LOCATION</td><td>100 km square + 10 km offsets, e.g. <code className="font-mono">MH 45</code></td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">HEADING</td><td>Degrees (e.g. 350) or compass: <code className="font-mono">N NE E SE S SW W NW</code></td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">SPEED</td><td>km/h, 50-unit step</td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">ALTITUDE</td><td>SURFACE / LOW / HIGH</td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">COUNT</td><td>Number of targets</td></tr>
+          <tr><td className="py-0.5 pr-3 font-semibold">TYPE</td><td>Aircraft type (autocomplete, drone variants normalized)</td></tr>
         </tbody>
       </table>
 
       <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-        Pikanäppäimet
+        Keyboard shortcuts
       </div>
       <table className="w-full text-left">
         <tbody>
-          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Tab</kbd></td><td>Seuraavaan kenttään (KORKEUS: yksi tab-pysähdys)</td></tr>
-          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>↑</kbd> / <kbd className={kbd}>↓</kbd></td><td>Vaihda KORKEUS-vaihtoehtoa</td></tr>
-          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Enter</kbd></td><td>Lähetä lomake (toimii kaikista tekstikentistä)</td></tr>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Tab</kbd></td><td>Next field (ALTITUDE: one tab stop)</td></tr>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>↑</kbd> / <kbd className={kbd}>↓</kbd></td><td>Cycle ALTITUDE option</td></tr>
+          <tr><td className="py-0.5 pr-3"><kbd className={kbd}>Enter</kbd></td><td>Submit form (works from any text field)</td></tr>
         </tbody>
       </table>
 
       <div className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-        Uhka-arvio
+        Threat assessment
       </div>
       <table className="w-full text-left">
         <tbody>
-          <tr><td className="py-0.5 pr-3"><span className="rounded bg-[var(--color-field)] px-1 py-0.5 text-[9px] font-semibold uppercase text-[var(--color-muted-foreground)]">vakaa</span></td><td>Ei lähesty omaa ruutua</td></tr>
-          <tr><td className="py-0.5 pr-3"><span className="rounded bg-orange-500 px-1 py-0.5 text-[9px] font-semibold uppercase text-white">lähestyy</span></td><td>Suunta osoittaa omaan sijaintiin (±30°)</td></tr>
-          <tr><td className="py-0.5 pr-3"><span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-semibold uppercase text-white">omassa</span></td><td>Maali on omassa 10 km ruudussa — ilmestyy ILMAHÄLYTYS-painike</td></tr>
+          <tr><td className="py-0.5 pr-3"><span className="rounded bg-[var(--color-field)] px-1 py-0.5 text-[9px] font-semibold uppercase text-[var(--color-muted-foreground)]">stable</span></td><td>Not approaching your square</td></tr>
+          <tr><td className="py-0.5 pr-3"><span className="rounded bg-orange-500 px-1 py-0.5 text-[9px] font-semibold uppercase text-white">approaching</span></td><td>Heading points at your location (±30°)</td></tr>
+          <tr><td className="py-0.5 pr-3"><span className="rounded bg-red-600 px-1 py-0.5 text-[9px] font-semibold uppercase text-white">in square</span></td><td>Track in your 10 km square — AIR ALARM button appears</td></tr>
         </tbody>
       </table>
 
       <div className="mt-1 text-[var(--color-muted-foreground)]">
-        ILMAHÄLYTYS näkyy banner-palkkina kaikille käyttäjille. Tyhjennä <span className="font-semibold">VAARA OHI</span> -painikkeesta toimintarivillä.
+        AIR ALARM appears as a banner for all users. Clear it via the <span className="font-semibold">ALL CLEAR</span> button in the action bar.
       </div>
     </div>
   );
@@ -566,7 +699,7 @@ function AirSurveillanceHelp() {
 export const airSurveillanceDescriptor: WidgetDescriptor = {
   type: "air-surveillance",
   name: "Air Surveillance",
-  description: "Kirjaa ilmavalvontaselosteen maaleja, arvioi uhkaa ja anna ILMAHÄLYTYS",
+  description: "Capture air-surveillance broadcasts, assess threats, sound AIR ALARM",
   icon: <MdRadar className="text-lg" />,
   defaultSize: { w: 12, h: 10, minW: 6, minH: 6 },
   defaultConfig: { operatorGrid: "", operatorZone: DEFAULT_FINNISH_ZONE, ttlMinutes: DEFAULT_TRACK_TTL_MS / 60_000 },

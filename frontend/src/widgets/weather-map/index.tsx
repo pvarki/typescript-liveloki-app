@@ -10,7 +10,7 @@ import OlMap from "ol/Map";
 import { fromLonLat } from "ol/proj";
 import OSM from "ol/source/OSM";
 import VectorSource from "ol/source/Vector";
-import { Circle as CircleStyle, Fill, RegularShape, Stroke, Style, Text } from "ol/style";
+import { Circle as CircleStyle, Fill, Icon, Stroke, Style, Text } from "ol/style";
 import View from "ol/View";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -18,7 +18,8 @@ import { useBattlelogEvents } from "../../battlelog/event-data";
 import { useEventDetailStore } from "../../battlelog/event-detail-store";
 import { useWidgetParams } from "../../hooks/use-widget-params";
 import type { ConfigPanelProps, Event, WidgetDescriptor, WidgetProps } from "../../types";
-import { DEFAULT_TRACK_TTL_MS } from "../air-surveillance/store";
+import { useAirSurveillanceStore } from "../air-surveillance/store";
+import { useAirTrackVisibilityStore } from "../air-surveillance/visibility";
 
 function readNumber(value: unknown, fallback: number) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
@@ -87,17 +88,11 @@ function extractAirTrackPoint(event: Event): AirTrackPoint | null {
   };
 }
 
-function groupAirTrackPoints(
-  events: readonly Event[],
-  ttlMs: number,
-  now: number,
-): Map<string, AirTrackPoint[]> {
-  const cutoff = now - ttlMs;
+function groupAirTrackPoints(events: readonly Event[]): Map<string, AirTrackPoint[]> {
   const groups = new Map<string, AirTrackPoint[]>();
   for (const event of events) {
     const point = extractAirTrackPoint(event);
     if (!point) continue;
-    if (point.capturedAt < cutoff) continue;
     const arr = groups.get(point.trackId) ?? [];
     arr.push(point);
     groups.set(point.trackId, arr);
@@ -110,6 +105,13 @@ function groupAirTrackPoints(
 
 const TRACK_COLOR = "236, 72, 153";        // pink-500 RGB
 const TRACK_COLOR_SELECTED = "245, 158, 11"; // amber-500 RGB
+
+function arrowDataUrl(fill: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="30" viewBox="0 0 22 30">` +
+    `<polygon points="11,1.5 19,26 11,21 3,26" fill="${fill}" stroke="#ffffff" stroke-width="1.5" stroke-linejoin="round"/>` +
+    `</svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
 
 function createAirTrackFeatures(points: readonly AirTrackPoint[], selected: string | null): Feature[] {
   const features: Feature[] = [];
@@ -160,16 +162,15 @@ function createAirTrackFeatures(points: readonly AirTrackPoint[], selected: stri
   });
   arrow.setStyle(
     new Style({
-      image: new RegularShape({
-        points: 3,
-        radius: 11,
+      image: new Icon({
+        src: arrowDataUrl(`rgb(${rgb})`),
         rotation: (latest.heading * Math.PI) / 180,
-        fill: new Fill({ color: `rgb(${rgb})` }),
-        stroke: new Stroke({ color: "#ffffff", width: 2 }),
+        rotateWithView: true,
+        anchor: [0.5, 0.5],
       }),
       text: new Text({
         text: latest.trackId,
-        offsetX: 14,
+        offsetX: 16,
         textAlign: "left",
         font: "bold 12px sans-serif",
         fill: new Fill({ color: "#ffffff" }),
@@ -233,6 +234,13 @@ function WeatherMapWidget({ config, isEditMode }: WidgetProps) {
     mapRef.current?.getView().setZoom(zoom);
   }, [center, zoom]);
 
+  const visibleTrackIds = useAirTrackVisibilityStore((s) => s.visibleTrackIds);
+  const airTracks = useAirSurveillanceStore((s) => s.tracks);
+  const archivedTrackIds = useMemo(
+    () => new Set(airTracks.filter((t) => t.archived).map((t) => t.trackId)),
+    [airTracks],
+  );
+
   useEffect(() => {
     const renderFeatures = () => {
       const source = vectorSourceRef.current;
@@ -245,15 +253,17 @@ function WeatherMapWidget({ config, isEditMode }: WidgetProps) {
           .filter(eventHasCoordinates)
           .map((event) => createEventFeature(event, String(event.id) === selectedItem)),
       );
-      const trackGroups = groupAirTrackPoints(all.filter(isAirTrackEvent), DEFAULT_TRACK_TTL_MS, Date.now());
-      for (const points of trackGroups.values()) {
+      const trackGroups = groupAirTrackPoints(all.filter(isAirTrackEvent));
+      for (const [trackId, points] of trackGroups) {
+        if (!visibleTrackIds.has(trackId)) continue;
+        if (archivedTrackIds.has(trackId)) continue;
         source.addFeatures(createAirTrackFeatures(points, selectedItem));
       }
     };
     renderFeatures();
     const interval = setInterval(renderFeatures, 30_000);
     return () => clearInterval(interval);
-  }, [events, selectedItem]);
+  }, [events, selectedItem, visibleTrackIds, archivedTrackIds]);
 
   return (
     <div className="relative h-full w-full overflow-hidden">

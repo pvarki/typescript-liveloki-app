@@ -3,14 +3,15 @@ import express from 'express';
 import config from '../config/index.js';
 import { mtlsUserMiddleware } from '../middleware/mtlsUserMiddleware.js';
 import dashboardRoutes from './dashboardRoutes.js';
-import docsRoutes from './docsRoutes.js';
+import { openApiJsonHandler, swaggerUiHandler } from './docsRoutes.js';
 import eventRoutes from './eventRoutes.js';
 import rmRoutes from './rmRoutes.js';
 
 const router = express.Router();
 
 if (config.useSwagger) {
-  router.use(docsRoutes);
+  router.get('/api-docs', swaggerUiHandler);
+  router.get('/openapi.json', openApiJsonHandler);
 }
 
 router.use('/api', mtlsUserMiddleware, dashboardRoutes);

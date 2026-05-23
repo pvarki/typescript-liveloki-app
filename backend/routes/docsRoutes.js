@@ -1,14 +1,10 @@
-import express from 'express';
-
 import { openApiDocument } from '../docs/openapi.js';
 
-const router = express.Router();
-
-router.get('/openapi.json', (_request, response) => {
+export const openApiJsonHandler = (_request, response) => {
   response.json(openApiDocument);
-});
+};
 
-router.get('/api-docs', (_request, response) => {
+export const swaggerUiHandler = (_request, response) => {
   response.type('html').send(`<!doctype html>
 <html lang="en">
   <head>
@@ -33,6 +29,4 @@ router.get('/api-docs', (_request, response) => {
     </script>
   </body>
 </html>`);
-});
-
-export default router;
+};

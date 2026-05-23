@@ -185,8 +185,8 @@ export default function WidgetWrapper({ widget, isEditMode }: WidgetWrapperProps
               event.stopPropagation();
               if (helpOpen) closeHelp(); else openHelp();
             }}
-            title="Pikaohje"
-            aria-label="Pikaohje"
+            title="Quick help"
+            aria-label="Quick help"
           />
         </div>
       )}

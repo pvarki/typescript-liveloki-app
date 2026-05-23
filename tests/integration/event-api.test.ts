@@ -37,6 +37,7 @@ interface EventInput {
   author: string;
   location_lat: string;
   location_lng: string;
+  notes?: string;
 }
 
 interface KeywordCount {
@@ -104,6 +105,30 @@ describe("Event API Integration Tests", () => {
 
       // Response should have a message property
       expect(response.data).to.have.property("message");
+    });
+
+    it("should persist notes and HCOE domains columns", async () => {
+      const uniqueHeader = `Columns Test Event ${Date.now()}`;
+      const eventWithColumns = {
+        ...sampleEvent,
+        header: uniqueHeader,
+        notes: "This note verifies the notes column.",
+        hcoe_domains: ["Cyber", "Information"],
+      };
+
+      const createResponse = await axios.post(`${API_BASE_URL}/api/v1/events`, {
+        events: [eventWithColumns],
+      });
+      expect(createResponse.status).to.equal(201);
+
+      const eventsResponse: AxiosResponse<Event[]> = await axios.get(
+        `${API_BASE_URL}/api/v1/events`,
+      );
+      const foundEvent = eventsResponse.data.find((event) => event.header === uniqueHeader);
+
+      expect(foundEvent).to.not.be.undefined;
+      expect(foundEvent?.notes).to.equal(eventWithColumns.notes);
+      expect(foundEvent?.hcoe_domains).to.deep.equal(eventWithColumns.hcoe_domains);
     });
 
     it("should reject an invalid event submission", async () => {

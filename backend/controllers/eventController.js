@@ -39,15 +39,17 @@ export const addEvents = async (req, res) => {
         location_lng,
         location_lat,
         author,
-        groups
+        groups,
+        type,
+        data
       } = event;
       const id = uuidv7();
       const keywordArray = convertTagArray(keywords);
       const groupsArray = groups ? (Array.isArray(groups) ? groups : [groups]) : [];
 
       return client.query(
-        "INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)",
-        [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groupsArray]
+        "INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups, \"type\", data) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)",
+        [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groupsArray, type, data ?? null]
       );
     });
 

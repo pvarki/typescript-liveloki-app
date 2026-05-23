@@ -25,8 +25,8 @@ Database is currently preseeded with test data from preseed/preseed.csv
 
 ## Migrations
 
-To add new migration, locally run: `./node_modules/.bin/node-pg-migrate create <MIGRATION_NAME>` and modify created file in `/migrations` directory.
-Migrations are run (if needed) when docker container starts. `wait-for-it.sh` will ensure that psql container is up and accepting connections before running migrations.
+The project keeps the local database schema in one baseline file: `backend/migrations/1719901796697_events-table.cjs`.
+The baseline is run when the Docker container starts. If `PRESEED=true`, it also imports `preseed/preseed.csv`.
 
 ## JWT testing
 

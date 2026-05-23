@@ -6,26 +6,11 @@ export const openApiDocument = {
     description: 'Live OpenAPI documentation for the BattleLog backend.',
   },
   servers: [{ url: '/api/v1' }],
-  tags: [
-    { name: 'Events' },
-    { name: 'Dashboards' },
-    { name: 'Groups' },
-    { name: 'Metrics' },
-    { name: 'Uploads' },
-  ],
   paths: {
     '/events': {
       get: {
         tags: ['Events'],
         summary: 'List events',
-        parameters: [
-          {
-            name: 'search',
-            in: 'query',
-            required: false,
-            schema: { type: 'string' },
-          },
-        ],
         responses: {
           200: {
             description: 'Events',
@@ -64,7 +49,7 @@ export const openApiDocument = {
       get: {
         tags: ['Events'],
         summary: 'Get one event',
-        parameters: [{ $ref: '#/components/parameters/EventId' }],
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }],
         responses: {
           200: {
             description: 'Event',
@@ -72,20 +57,6 @@ export const openApiDocument = {
           },
           404: { $ref: '#/components/responses/Error' },
         },
-      },
-    },
-    '/events/trending/day': {
-      get: {
-        tags: ['Events'],
-        summary: 'Get trending events from the last day',
-        responses: { 200: { description: 'Trending events' } },
-      },
-    },
-    '/events/trending/week': {
-      get: {
-        tags: ['Events'],
-        summary: 'Get trending events from the last week',
-        responses: { 200: { description: 'Trending events' } },
       },
     },
     '/keywords': {
@@ -104,123 +75,6 @@ export const openApiDocument = {
         },
       },
     },
-    '/locationsearch': {
-      get: {
-        tags: ['Events'],
-        summary: 'Search events by location radius',
-        parameters: [
-          { name: 'longitude', in: 'query', required: true, schema: { type: 'number' } },
-          { name: 'latitude', in: 'query', required: true, schema: { type: 'number' } },
-          { name: 'radius', in: 'query', required: true, schema: { type: 'number' } },
-        ],
-        responses: {
-          200: {
-            description: 'Events inside radius',
-            content: {
-              'application/json': {
-                schema: { type: 'array', items: { $ref: '#/components/schemas/Event' } },
-              },
-            },
-          },
-          400: { $ref: '#/components/responses/Error' },
-        },
-      },
-    },
-    '/metrics': {
-      get: {
-        tags: ['Metrics'],
-        summary: 'Get event metrics',
-        responses: { 200: { description: 'Metrics' } },
-      },
-    },
-    '/upload': {
-      post: {
-        tags: ['Uploads'],
-        summary: 'Upload event media',
-        requestBody: {
-          required: true,
-          content: {
-            'multipart/form-data': {
-              schema: {
-                type: 'object',
-                properties: {
-                  eventId: { type: 'string' },
-                  files: { type: 'array', items: { type: 'string', format: 'binary' } },
-                },
-              },
-            },
-          },
-        },
-        responses: { 201: { description: 'Images uploaded successfully' } },
-      },
-    },
-    '/groups': {
-      get: {
-        tags: ['Groups'],
-        summary: 'List groups',
-        responses: {
-          200: {
-            description: 'Groups',
-            content: {
-              'application/json': {
-                schema: { type: 'array', items: { $ref: '#/components/schemas/Group' } },
-              },
-            },
-          },
-        },
-      },
-      post: {
-        tags: ['Groups'],
-        summary: 'Create a group from event ids',
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['eventIds', 'groupName'],
-                properties: {
-                  eventIds: { type: 'array', items: { type: 'string' } },
-                  groupName: { type: 'string' },
-                },
-              },
-            },
-          },
-        },
-        responses: { 201: { description: 'Group created' } },
-      },
-    },
-    '/groups/{groupName}': {
-      get: {
-        tags: ['Groups'],
-        summary: 'List events in a group',
-        parameters: [{ name: 'groupName', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: {
-          200: {
-            description: 'Events',
-            content: {
-              'application/json': {
-                schema: { type: 'array', items: { $ref: '#/components/schemas/Event' } },
-              },
-            },
-          },
-        },
-      },
-    },
-    '/events/{eventId}/group': {
-      put: {
-        tags: ['Groups'],
-        summary: 'Update event groups',
-        parameters: [{ name: 'eventId', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Event group updated' } },
-      },
-      delete: {
-        tags: ['Groups'],
-        summary: 'Remove event from group',
-        parameters: [{ name: 'eventId', in: 'path', required: true, schema: { type: 'string' } }],
-        responses: { 200: { description: 'Event removed from group' } },
-      },
-    },
     '/dashboards': {
       get: {
         tags: ['Dashboards'],
@@ -236,51 +90,9 @@ export const openApiDocument = {
           },
         },
       },
-      post: {
-        tags: ['Dashboards'],
-        summary: 'Create dashboard',
-        requestBody: {
-          required: false,
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/DashboardInput' } } },
-        },
-        responses: { 201: { description: 'Dashboard created' } },
-      },
-      delete: {
-        tags: ['Dashboards'],
-        summary: 'Delete all dashboards',
-        responses: { 200: { description: 'Dashboards deleted' } },
-      },
-    },
-    '/dashboards/{id}': {
-      get: {
-        tags: ['Dashboards'],
-        summary: 'Get dashboard',
-        parameters: [{ $ref: '#/components/parameters/DashboardId' }],
-        responses: { 200: { description: 'Dashboard' }, 404: { $ref: '#/components/responses/Error' } },
-      },
-      put: {
-        tags: ['Dashboards'],
-        summary: 'Update dashboard',
-        parameters: [{ $ref: '#/components/parameters/DashboardId' }],
-        requestBody: {
-          required: true,
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/DashboardInput' } } },
-        },
-        responses: { 200: { description: 'Dashboard updated' } },
-      },
-      delete: {
-        tags: ['Dashboards'],
-        summary: 'Delete dashboard',
-        parameters: [{ $ref: '#/components/parameters/DashboardId' }],
-        responses: { 200: { description: 'Dashboard deleted' } },
-      },
     },
   },
   components: {
-    parameters: {
-      EventId: { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
-      DashboardId: { name: 'id', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } },
-    },
     responses: {
       Error: {
         description: 'Error response',
@@ -310,6 +122,8 @@ export const openApiDocument = {
           location_lat: { type: 'number' },
           author: { type: 'string' },
           groups: { type: 'array', items: { type: 'string' } },
+          type: { type: 'string' },
+          data: { type: 'object', additionalProperties: true },
         },
       },
       Event: {
@@ -325,35 +139,18 @@ export const openApiDocument = {
           },
         ],
       },
-      Group: {
+      Dashboard: {
         type: 'object',
         properties: {
-          group_name: { type: 'string' },
-          event_count: { type: 'integer' },
-        },
-      },
-      DashboardInput: {
-        type: 'object',
-        properties: {
+          id: { type: 'string', format: 'uuid' },
           name: { type: 'string' },
           cols: { type: 'integer' },
           rowHeight: { type: 'integer' },
-          layout: { oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'object' } }] },
+          layout: { type: 'string' },
           settings: { type: 'object' },
+          createdAt: { type: 'string' },
+          updatedAt: { type: 'string' },
         },
-      },
-      Dashboard: {
-        allOf: [
-          { $ref: '#/components/schemas/DashboardInput' },
-          {
-            type: 'object',
-            properties: {
-              id: { type: 'string', format: 'uuid' },
-              createdAt: { type: 'string' },
-              updatedAt: { type: 'string' },
-            },
-          },
-        ],
       },
     },
   },

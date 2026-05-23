@@ -3,6 +3,7 @@ import { convertTagArray, getTrendingEvents } from "../utils/helpers.js";
 import { v7 as uuidv7 } from "uuid";
 import path from "path";
 import logger from "../logger.js";
+import { broadcastEventCreated } from "./wsController.js";
 
 export const addEvents = async (req, res) => {
   const { events } = req.body;
@@ -46,14 +47,15 @@ export const addEvents = async (req, res) => {
       const groupsArray = groups ? (Array.isArray(groups) ? groups : [groups]) : [];
 
       return client.query(
-        "INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)",
+        "INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *",
         [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groupsArray]
       );
     });
 
-    await Promise.all(eventPromises);
+    const insertedEvents = (await Promise.all(eventPromises)).flatMap(result => result.rows);
 
     await client.query("COMMIT");
+    insertedEvents.forEach(broadcastEventCreated);
     logger.info("Events added successfully");
     res.status(201).json({ message: "Events added successfully" });
   } catch (error) {

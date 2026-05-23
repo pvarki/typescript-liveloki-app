@@ -12,11 +12,7 @@ import {
   resolveNotificationDecision,
   upsertOverdueNotification,
 } from "./notification-policy";
-import type {
-  NotificationItem,
-  NotificationPermissionState,
-  NotificationSource,
-} from "./types";
+import type { NotificationItem, NotificationPermissionState, NotificationSource } from "./types";
 
 const STORAGE_KEY = "dashboard-overdue-notifications-v1";
 
@@ -46,10 +42,7 @@ interface NotificationStoreState {
   dismiss: (id: string) => void;
   dismissBySource: (sourceType: string, sourceId: string) => void;
   queueOverdue: (source: NotificationSource, createdAt?: string) => void;
-  deliverOrQueue: (
-    source: NotificationSource,
-    createdAt?: string
-  ) => { delivered: boolean; queued: boolean };
+  deliverOrQueue: (source: NotificationSource, createdAt?: string) => { delivered: boolean; queued: boolean };
   getVisibleForDashboard: (dashboardId: string | null | undefined) => NotificationItem[];
 }
 
@@ -68,11 +61,7 @@ export const useNotificationStore = create<NotificationStoreState>((set, get) =>
   },
   dismiss: (id) =>
     set((state) => {
-      const next = dismissOverdueNotification(
-        state.overdueItems,
-        id,
-        new Date().toISOString()
-      );
+      const next = dismissOverdueNotification(state.overdueItems, id, new Date().toISOString());
       persistItems(next);
       return { overdueItems: next };
     }),
@@ -82,7 +71,7 @@ export const useNotificationStore = create<NotificationStoreState>((set, get) =>
         state.overdueItems,
         sourceType,
         sourceId,
-        new Date().toISOString()
+        new Date().toISOString(),
       );
       persistItems(next);
       return { overdueItems: next };
@@ -105,6 +94,5 @@ export const useNotificationStore = create<NotificationStoreState>((set, get) =>
     get().queueOverdue(source, createdAt);
     return { delivered: false, queued: true };
   },
-  getVisibleForDashboard: (dashboardId) =>
-    filterNotificationsByDashboard(get().overdueItems, dashboardId),
+  getVisibleForDashboard: (dashboardId) => filterNotificationsByDashboard(get().overdueItems, dashboardId),
 }));

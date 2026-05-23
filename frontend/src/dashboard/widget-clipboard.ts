@@ -31,10 +31,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function readClampedGridSize(value: unknown, fallback: number): number {
   const numeric = typeof value === "number" && Number.isFinite(value) ? value : fallback;
-  return Math.min(
-    MAX_CLIPBOARD_GRID_SIZE,
-    Math.max(MIN_CLIPBOARD_GRID_SIZE, Math.round(numeric)),
-  );
+  return Math.min(MAX_CLIPBOARD_GRID_SIZE, Math.max(MIN_CLIPBOARD_GRID_SIZE, Math.round(numeric)));
 }
 
 function cloneConfig(config: Record<string, unknown>): Record<string, unknown> {

@@ -22,7 +22,7 @@ import {
 function buildNotificationPayload(
   dashboardId: string,
   instanceId: string,
-  timer: TimerWidgetConfig
+  timer: TimerWidgetConfig,
 ): NotificationPayload | null {
   if (!timer.endAt) return null;
 
@@ -61,9 +61,7 @@ function PermissionHint({
   onRequestPermission?: () => void | Promise<unknown>;
 }) {
   if (permission === "granted") {
-    return (
-      <p className="text-xs text-[var(--color-success)]">Browser notifications enabled.</p>
-    );
+    return <p className="text-xs text-[var(--color-success)]">Browser notifications enabled.</p>;
   }
 
   if (permission === "denied") {
@@ -120,9 +118,9 @@ function TimerEditor({
         <span className="text-xs text-[var(--color-muted-foreground)]">
           {isRunning
             ? `Ends at ${formatEndTime(config.endAt)}`
-            : (isCompleted
+            : isCompleted
               ? "Timer finished"
-              : "Set a reminder")}
+              : "Set a reminder"}
         </span>
       </div>
 
@@ -171,26 +169,15 @@ function TimerEditor({
 
       <div className="flex gap-2">
         {isRunning ? (
-          <Button
-            type="button"
-            onClick={onStop}
-          >
+          <Button type="button" onClick={onStop}>
             Stop
           </Button>
         ) : (
-          <Button
-            type="button"
-            className="flex-1"
-            intent="primary"
-            onClick={onStart}
-          >
+          <Button type="button" className="flex-1" intent="primary" onClick={onStart}>
             Start
           </Button>
         )}
-        <Button
-          type="button"
-          onClick={onClear}
-        >
+        <Button type="button" onClick={onClear}>
           Clear
         </Button>
       </div>
@@ -201,7 +188,10 @@ function TimerEditor({
 }
 
 function TimerReadOnly({ timer }: { timer: TimerWidgetConfig }) {
-  const remaining = timer.status === "running" ? formatRemainingTime(getTimerRuntimeState(timer, new Date()).remainingMs) : "--:--";
+  const remaining =
+    timer.status === "running"
+      ? formatRemainingTime(getTimerRuntimeState(timer, new Date()).remainingMs)
+      : "--:--";
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-2 p-3 text-center">
@@ -265,7 +255,7 @@ function TimerWidget({ instanceId, config, isEditMode }: WidgetProps) {
   const runtimeState = useMemo(() => getTimerRuntimeState(timer, now), [now, timer]);
   const notificationPayload = useMemo(
     () => (activeDashboardId ? buildNotificationPayload(activeDashboardId, instanceId, timer) : null),
-    [activeDashboardId, instanceId, timer]
+    [activeDashboardId, instanceId, timer],
   );
 
   useEffect(() => {
@@ -288,7 +278,7 @@ function TimerWidget({ instanceId, config, isEditMode }: WidgetProps) {
 
     void persistPatchedWidgetConfigNow(
       instanceId,
-      markTimerHandled(timer, new Date().toISOString(), notificationKey)
+      markTimerHandled(timer, new Date().toISOString(), notificationKey),
     );
   }, [
     deliverOrQueue,
@@ -308,7 +298,7 @@ function TimerWidget({ instanceId, config, isEditMode }: WidgetProps) {
         relativeInput: draftRelativeInput.trim(),
         absoluteTime: draftAbsoluteTime.trim(),
       },
-      new Date()
+      new Date(),
     );
 
     if (!next.ok) {
@@ -355,9 +345,9 @@ function TimerWidget({ instanceId, config, isEditMode }: WidgetProps) {
   const remainingText =
     runtimeState.phase === "running"
       ? formatRemainingTime(runtimeState.remainingMs)
-      : (runtimeState.phase === "completed" || runtimeState.phase === "due"
+      : runtimeState.phase === "completed" || runtimeState.phase === "due"
         ? "Done"
-        : "--:--");
+        : "--:--";
 
   if (isEditMode) {
     return <TimerReadOnly timer={timer} />;
@@ -403,9 +393,9 @@ function TimerConfigPanel({ config, onChange }: ConfigPanelProps) {
   const remainingText =
     runtimeState.phase === "running"
       ? formatRemainingTime(runtimeState.remainingMs)
-      : (runtimeState.phase === "completed" || runtimeState.phase === "due"
+      : runtimeState.phase === "completed" || runtimeState.phase === "due"
         ? "Done"
-        : "--:--");
+        : "--:--";
 
   return (
     <TimerEditor

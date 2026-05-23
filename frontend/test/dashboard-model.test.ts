@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { parseLayout, serializeLayout } from "../src/api/client";
-import {
-  DEFAULT_DASHBOARD_SETTINGS,
-  sanitizeDashboardSettings,
-} from "../src/dashboard/dashboard-settings";
+import { DEFAULT_DASHBOARD_SETTINGS, sanitizeDashboardSettings } from "../src/dashboard/dashboard-settings";
 import { useDashboardStore } from "../src/stores/dashboard-store";
 import type { WidgetInstance } from "../src/types";
 
@@ -91,6 +88,8 @@ describe("dashboard model", () => {
   it("patches widget config in the active dashboard", () => {
     useDashboardStore.getState().patchWidgetConfig("widget-1", { text: "updated" });
 
-    expect(useDashboardStore.getState().activeDashboard?.widgets[0].config).toMatchObject({ text: "updated" });
+    expect(useDashboardStore.getState().activeDashboard?.widgets[0].config).toMatchObject({
+      text: "updated",
+    });
   });
 });

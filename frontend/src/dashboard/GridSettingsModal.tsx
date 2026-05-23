@@ -69,10 +69,7 @@ export default function GridSettingsModal({ isOpen, onClose }: GridSettingsModal
     onClose();
   };
 
-  const patchSettings = <K extends keyof DashboardSettings>(
-    key: K,
-    value: DashboardSettings[K],
-  ) => {
+  const patchSettings = <K extends keyof DashboardSettings>(key: K, value: DashboardSettings[K]) => {
     setSettings((current) => ({ ...current, [key]: value }));
   };
 
@@ -117,10 +114,7 @@ export default function GridSettingsModal({ isOpen, onClose }: GridSettingsModal
             fill
             value={settings.padding}
             onChange={(event) =>
-              patchSettings(
-                "padding",
-                Number(event.currentTarget.value) as DashboardSettings["padding"],
-              )
+              patchSettings("padding", Number(event.currentTarget.value) as DashboardSettings["padding"])
             }
           >
             {DASHBOARD_PADDING_OPTIONS.map((value) => (
@@ -135,10 +129,7 @@ export default function GridSettingsModal({ isOpen, onClose }: GridSettingsModal
             fill
             value={settings.widgetBorders}
             onChange={(event) =>
-              patchSettings(
-                "widgetBorders",
-                event.currentTarget.value as DashboardSettings["widgetBorders"],
-              )
+              patchSettings("widgetBorders", event.currentTarget.value as DashboardSettings["widgetBorders"])
             }
           >
             {DASHBOARD_WIDGET_BORDER_OPTIONS.map((value) => (
@@ -153,10 +144,7 @@ export default function GridSettingsModal({ isOpen, onClose }: GridSettingsModal
             fill
             value={settings.widgetHeaders}
             onChange={(event) =>
-              patchSettings(
-                "widgetHeaders",
-                event.currentTarget.value as DashboardSettings["widgetHeaders"],
-              )
+              patchSettings("widgetHeaders", event.currentTarget.value as DashboardSettings["widgetHeaders"])
             }
           >
             {DASHBOARD_WIDGET_HEADER_OPTIONS.map((value) => (

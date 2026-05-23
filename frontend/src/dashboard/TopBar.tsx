@@ -90,9 +90,7 @@ export default function TopBar() {
               onChange={handleDashboardSelection}
             />
           )}
-          <span className="text-sm text-[var(--color-muted-foreground)]">
-            {activeDashboard?.name}
-          </span>
+          <span className="text-sm text-[var(--color-muted-foreground)]">{activeDashboard?.name}</span>
         </Navbar.Group>
         <Navbar.Group className="flex items-center gap-2">
           <Button
@@ -130,10 +128,14 @@ export default function TopBar() {
             onChange={handleDashboardSelection}
           />
 
-          <Button variant="minimal" size="small" onClick={async () => {
-            const id = await createDashboard();
-            navigate(`/d/${id}`);
-          }}>
+          <Button
+            variant="minimal"
+            size="small"
+            onClick={async () => {
+              const id = await createDashboard();
+              navigate(`/d/${id}`);
+            }}
+          >
             + New Dashboard
           </Button>
 
@@ -165,26 +167,13 @@ export default function TopBar() {
               <Button variant="minimal" size="small" onClick={() => setSettingsOpen(true)}>
                 Dashboard
               </Button>
-              <Button
-                intent="primary"
-                size="small"
-                onClick={saveDashboard}
-                loading={isSaving}
-              >
+              <Button intent="primary" size="small" onClick={saveDashboard} loading={isSaving}>
                 {isDirty ? "Save*" : "Saved"}
               </Button>
-              <Button
-                variant="minimal"
-                size="small"
-                onClick={() => setConfirmAction("single")}
-              >
+              <Button variant="minimal" size="small" onClick={() => setConfirmAction("single")}>
                 Delete
               </Button>
-              <Button
-                variant="minimal"
-                size="small"
-                onClick={() => setConfirmAction("all")}
-              >
+              <Button variant="minimal" size="small" onClick={() => setConfirmAction("all")}>
                 Delete all
               </Button>
             </>

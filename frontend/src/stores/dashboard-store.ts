@@ -36,9 +36,7 @@ interface DashboardState {
   addWidget: (widget: WidgetInstance) => void;
   updateWidget: (id: string, updates: Partial<WidgetInstance>) => void;
   removeWidget: (id: string) => void;
-  updateWidgetPositions: (
-    layouts: { i: string; x: number; y: number; w: number; h: number }[]
-  ) => void;
+  updateWidgetPositions: (layouts: { i: string; x: number; y: number; w: number; h: number }[]) => void;
   updateGridConfig: (cols: number, rowHeight: number, settings: DashboardSettings) => void;
   updateName: (name: string) => void;
   selectWidget: (id: string | null) => void;
@@ -125,7 +123,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
       isDirty: false,
       isSaving: false,
       dashboards: get().dashboards.map((d) =>
-        d.id === activeDashboard.id ? { ...d, name: activeDashboard.name } : d
+        d.id === activeDashboard.id ? { ...d, name: activeDashboard.name } : d,
       ),
     });
   },
@@ -153,9 +151,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         isDirty: true,
         activeDashboard: {
           ...s.activeDashboard,
-          widgets: s.activeDashboard.widgets.map((w) =>
-            w.id === id ? { ...w, ...updates } : w
-          ),
+          widgets: s.activeDashboard.widgets.map((w) => (w.id === id ? { ...w, ...updates } : w)),
         },
       };
     }),
@@ -225,9 +221,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         isDirty: true,
         activeDashboard: {
           ...s.activeDashboard,
-          widgets: s.activeDashboard.widgets.map((w) =>
-            w.id === id ? { ...w, config } : w
-          ),
+          widgets: s.activeDashboard.widgets.map((w) => (w.id === id ? { ...w, config } : w)),
         },
       };
     }),
@@ -240,7 +234,7 @@ export const useDashboardStore = create<DashboardState>((set, get) => ({
         activeDashboard: {
           ...s.activeDashboard,
           widgets: s.activeDashboard.widgets.map((w) =>
-            w.id === id ? { ...w, config: { ...w.config, ...patch } } : w
+            w.id === id ? { ...w, config: { ...w.config, ...patch } } : w,
           ),
         },
       };

@@ -43,7 +43,9 @@ export const DEFAULT_CATEGORIES: InventoryCategory[] = [
     icon: "person",
     items: [
       {
-        id: "soldiers", name: "Soldiers", count: 0,
+        id: "soldiers",
+        name: "Soldiers",
+        count: 0,
         linkedTo: [
           { type: "category", targetId: "weapons" },
           { type: "category", targetId: "vehicles" },
@@ -75,9 +77,7 @@ export const DEFAULT_CATEGORIES: InventoryCategory[] = [
 ];
 
 export function getCategories(config: Record<string, unknown>): InventoryCategory[] {
-  return Array.isArray(config.categories)
-    ? (config.categories as InventoryCategory[])
-    : DEFAULT_CATEGORIES;
+  return Array.isArray(config.categories) ? (config.categories as InventoryCategory[]) : DEFAULT_CATEGORIES;
 }
 
 export function getLogChanges(config: Record<string, unknown>): boolean {
@@ -88,10 +88,7 @@ export function categoryTotal(category: InventoryCategory): number {
   return category.items.reduce((sum, item) => sum + item.count, 0);
 }
 
-export function computeDeltas(
-  original: InventoryCategory[],
-  draft: InventoryCategory[],
-): PendingChange[] {
+export function computeDeltas(original: InventoryCategory[], draft: InventoryCategory[]): PendingChange[] {
   const changes: PendingChange[] = [];
   for (const draftCat of draft) {
     const origCat = original.find((c) => c.id === draftCat.id);
@@ -135,9 +132,8 @@ export function checkCorrelationWarnings(
       if (link.type === "item") {
         if (!changedItemIds.has(link.targetId)) {
           // Find the target item's name
-          const targetName = original
-            .flatMap((c) => c.items)
-            .find((i) => i.id === link.targetId)?.name ?? link.targetId;
+          const targetName =
+            original.flatMap((c) => c.items).find((i) => i.id === link.targetId)?.name ?? link.targetId;
           warnings.push({
             sourceItemName: delta.itemName,
             sourceDelta: delta.delta,
@@ -164,10 +160,7 @@ export function checkCorrelationWarnings(
   return warnings;
 }
 
-export function buildBatchLogHeader(
-  changes: PendingChange[],
-  note?: string,
-): string {
+export function buildBatchLogHeader(changes: PendingChange[], note?: string): string {
   const parts = changes.map((c) => {
     const sign = c.delta > 0 ? "+" : "";
     return `${c.itemName} ${sign}${c.delta}`;

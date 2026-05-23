@@ -21,7 +21,7 @@ export default function GridLinesOverlay() {
         padding: `${padding}px`,
         height: "100%",
       }) as React.CSSProperties,
-    [cols, gap, padding, rowHeight]
+    [cols, gap, padding, rowHeight],
   );
 
   const lines = useMemo(() => {

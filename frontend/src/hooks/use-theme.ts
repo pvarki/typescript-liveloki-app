@@ -1,4 +1,4 @@
-import { useCallback,useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function getInitialTheme(): boolean {
   const stored = localStorage.getItem("dashboard-theme");

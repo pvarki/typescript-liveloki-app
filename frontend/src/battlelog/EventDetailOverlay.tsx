@@ -37,8 +37,12 @@ function EventDetails({ event }: { event: FilteredEvent }) {
             <EventLocationLink event={event} />
           </DetailRow>
           <DetailRow label="Groups">{event.groups?.length ? event.groups.join(", ") : "—"}</DetailRow>
-          <DetailRow label="Keywords"><Keywords keywords={event.keywords} /></DetailRow>
-          <DetailRow label="Domains"><Keywords keywords={event.hcoe_domains ?? []} /></DetailRow>
+          <DetailRow label="Keywords">
+            <Keywords keywords={event.keywords} />
+          </DetailRow>
+          <DetailRow label="Domains">
+            <Keywords keywords={event.hcoe_domains ?? []} />
+          </DetailRow>
           <DetailRow label="Author">{event.author || "—"}</DetailRow>
           <DetailRow label="Notes">
             {event.notes ? <span className="whitespace-pre-wrap">{event.notes}</span> : "—"}
@@ -52,21 +56,32 @@ function EventDetails({ event }: { event: FilteredEvent }) {
 export default function EventDetailOverlay() {
   const selectedEventId = useEventDetailStore((state) => state.selectedEventId);
   const closeEvent = useEventDetailStore((state) => state.closeEvent);
-  const { data: event, error, isLoading } = useSWR(
-    selectedEventId ? ["event", selectedEventId] : null,
-    ([, id]) => getEvent(id),
-  );
+  const {
+    data: event,
+    error,
+    isLoading,
+  } = useSWR(selectedEventId ? ["event", selectedEventId] : null, ([, id]) => getEvent(id));
 
   return (
-    <Overlay2 isOpen={Boolean(selectedEventId)} onClose={closeEvent} hasBackdrop canEscapeKeyClose canOutsideClickClose>
+    <Overlay2
+      isOpen={Boolean(selectedEventId)}
+      onClose={closeEvent}
+      hasBackdrop
+      canEscapeKeyClose
+      canOutsideClickClose
+    >
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
         <Card className="w-full max-w-3xl !bg-[var(--color-surface)] !text-[var(--color-foreground)]">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <span className="text-sm font-semibold text-[var(--color-muted-foreground)]">Battlelog event detail</span>
+            <span className="text-sm font-semibold text-[var(--color-muted-foreground)]">
+              Battlelog event detail
+            </span>
             <Button icon="cross" minimal onClick={closeEvent} aria-label="Close event details" />
           </div>
           {isLoading && <p className="text-sm text-[var(--color-muted-foreground)]">Loading event...</p>}
-          {error && <p className="text-sm text-[var(--color-danger)]">Failed to load event: {String(error)}</p>}
+          {error && (
+            <p className="text-sm text-[var(--color-danger)]">Failed to load event: {String(error)}</p>
+          )}
           {event && <EventDetails event={{ ...event, alert: false }} />}
         </Card>
       </div>

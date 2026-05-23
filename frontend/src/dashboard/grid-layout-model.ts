@@ -7,10 +7,7 @@ function toFiniteInteger(value: unknown, fallback: number): number {
   return Math.max(0, Math.round(value));
 }
 
-export function sanitizeGridPosition(
-  position: GridPosition,
-  fallbackY: number
-): GridPosition {
+export function sanitizeGridPosition(position: GridPosition, fallbackY: number): GridPosition {
   const minW = toFiniteInteger(position.minW, 1);
   const minH = toFiniteInteger(position.minH, 1);
   const w = Math.max(minW, toFiniteInteger(position.w, minW));
@@ -26,9 +23,7 @@ export function sanitizeGridPosition(
   };
 }
 
-export function sanitizeWidgetsLayout(
-  widgets: WidgetInstance[]
-): WidgetInstance[] {
+export function sanitizeWidgetsLayout(widgets: WidgetInstance[]): WidgetInstance[] {
   let nextY = 0;
 
   return widgets.map((widget) => {
@@ -43,7 +38,7 @@ export function sanitizeWidgetsLayout(
 
 export function createWidgetGridPosition(
   _widgets: WidgetInstance[],
-  defaultSize: WidgetDescriptor["defaultSize"]
+  defaultSize: WidgetDescriptor["defaultSize"],
 ): GridPosition {
   return {
     x: 0,

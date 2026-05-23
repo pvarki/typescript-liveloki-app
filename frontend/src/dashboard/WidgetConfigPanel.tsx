@@ -18,10 +18,7 @@ export default function WidgetConfigPanel() {
   return (
     <div className="absolute right-0 top-0 z-40 h-full w-64 border-l border-[var(--color-separator)] bg-[var(--color-surface)] p-4">
       <h3 className="mb-3 text-sm font-semibold">{descriptor.name} Settings</h3>
-      <ConfigPanel
-        config={widget.config}
-        onChange={(config) => updateWidgetConfig(widget.id, config)}
-      />
+      <ConfigPanel config={widget.config} onChange={(config) => updateWidgetConfig(widget.id, config)} />
     </div>
   );
 }

@@ -18,8 +18,8 @@ import {
 export interface CalendarEvent {
   id: string;
   title: string;
-  date: string;           // "YYYY-MM-DD"
-  time: string | null;    // "HH:mm" or null (all-day)
+  date: string; // "YYYY-MM-DD"
+  time: string | null; // "HH:mm" or null (all-day)
   endTime: string | null; // "HH:mm" or null
   notes: string;
   color: string;
@@ -47,16 +47,37 @@ export interface CalendarWidgetConfig {
 
 export const EVENT_COLOR_PRESETS = [
   // Row 1: vivid
-  "#ef4444", "#f97316", "#eab308", "#22c55e",
-  "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899",
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#22c55e",
+  "#06b6d4",
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
   // Row 2: deeper / darker
-  "#b91c1c", "#c2410c", "#a16207", "#15803d",
-  "#0e7490", "#1d4ed8", "#6d28d9", "#be185d",
+  "#b91c1c",
+  "#c2410c",
+  "#a16207",
+  "#15803d",
+  "#0e7490",
+  "#1d4ed8",
+  "#6d28d9",
+  "#be185d",
   // Row 3: muted / pastel
-  "#f87171", "#fdba74", "#fde047", "#86efac",
-  "#67e8f9", "#93c5fd", "#c4b5fd", "#f9a8d4",
+  "#f87171",
+  "#fdba74",
+  "#fde047",
+  "#86efac",
+  "#67e8f9",
+  "#93c5fd",
+  "#c4b5fd",
+  "#f9a8d4",
   // Row 4: neutral
-  "#64748b", "#475569", "#334155", "#1e293b",
+  "#64748b",
+  "#475569",
+  "#334155",
+  "#1e293b",
 ];
 
 export const DEFAULT_EVENT_COLOR = "#3b82f6";
@@ -73,16 +94,10 @@ export const HOUR_HEIGHT_PX = 40;
 // Config parsing
 // ---------------------------------------------------------------------------
 
-export function getCalendarConfig(
-  config: Record<string, unknown>,
-): CalendarWidgetConfig {
-  const events = Array.isArray(config.events)
-    ? (config.events as CalendarEvent[])
-    : [];
+export function getCalendarConfig(config: Record<string, unknown>): CalendarWidgetConfig {
+  const events = Array.isArray(config.events) ? (config.events as CalendarEvent[]) : [];
   const upcomingDays =
-    typeof config.upcomingDays === "number" && config.upcomingDays > 0
-      ? config.upcomingDays
-      : 7;
+    typeof config.upcomingDays === "number" && config.upcomingDays > 0 ? config.upcomingDays : 7;
   const viewMode =
     typeof config.viewMode === "string" &&
     ["auto", "month", "week", "5day", "3day", "list"].includes(config.viewMode)
@@ -138,11 +153,7 @@ export function minutesToTime(minutes: number): string {
 
 export type ResolvedView = "month" | "week" | "5day" | "3day" | "list";
 
-export function getViewForSize(
-  width: number,
-  height: number,
-  viewMode: ViewMode,
-): ResolvedView {
+export function getViewForSize(width: number, height: number, viewMode: ViewMode): ResolvedView {
   if (viewMode !== "auto") return viewMode as ResolvedView;
   if (width < 300) return "list";
   if (width > 500) return "week";
@@ -176,17 +187,26 @@ export function getDaysForView(view: ResolvedView, referenceDate: Date): Date[] 
       const start = subDays(referenceDate, 1);
       return eachDayOfInterval({ start, end: addDays(start, 2) });
     }
-    default:
+    default: {
       return [referenceDate];
+    }
   }
 }
 
 export function getNavigationStep(view: ResolvedView): number {
   switch (view) {
-    case "week": return 7;
-    case "5day": return 5;
-    case "3day": return 3;
-    default: return 1;
+    case "week": {
+      return 7;
+    }
+    case "5day": {
+      return 5;
+    }
+    case "3day": {
+      return 3;
+    }
+    default: {
+      return 1;
+    }
   }
 }
 
@@ -194,13 +214,10 @@ export function getNavigationStep(view: ResolvedView): number {
 // Event queries
 // ---------------------------------------------------------------------------
 
-export function getEventsForDate(
-  events: CalendarEvent[],
-  dateStr: string,
-): CalendarEvent[] {
+export function getEventsForDate(events: CalendarEvent[], dateStr: string): CalendarEvent[] {
   return events
     .filter((e) => e.date === dateStr)
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       if (!a.time && !b.time) return 0;
       if (!a.time) return -1;
       if (!b.time) return 1;
@@ -216,11 +233,7 @@ export function getEventsInRange(
   return events.filter((e) => e.date >= startDate && e.date <= endDate);
 }
 
-export function getUpcomingEvents(
-  events: CalendarEvent[],
-  fromDate: string,
-  days: number,
-): CalendarEvent[] {
+export function getUpcomingEvents(events: CalendarEvent[], fromDate: string, days: number): CalendarEvent[] {
   const from = parseISO(fromDate);
   const to = addDays(from, days);
   return events
@@ -228,7 +241,7 @@ export function getUpcomingEvents(
       const d = parseISO(e.date);
       return !isBefore(d, from) && isBefore(d, to);
     })
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       const cmp = a.date.localeCompare(b.date);
       if (cmp !== 0) return cmp;
       if (!a.time && !b.time) return 0;
@@ -250,23 +263,15 @@ export function groupByDate(events: CalendarEvent[]): Record<string, CalendarEve
 // Event CRUD
 // ---------------------------------------------------------------------------
 
-export function createCalendarEvent(
-  fields: Omit<CalendarEvent, "id">,
-): CalendarEvent {
+export function createCalendarEvent(fields: Omit<CalendarEvent, "id">): CalendarEvent {
   return { id: generateId(), ...fields };
 }
 
-export function updateCalendarEvent(
-  events: CalendarEvent[],
-  updated: CalendarEvent,
-): CalendarEvent[] {
+export function updateCalendarEvent(events: CalendarEvent[], updated: CalendarEvent): CalendarEvent[] {
   return events.map((e) => (e.id === updated.id ? updated : e));
 }
 
-export function deleteCalendarEvent(
-  events: CalendarEvent[],
-  id: string,
-): CalendarEvent[] {
+export function deleteCalendarEvent(events: CalendarEvent[], id: string): CalendarEvent[] {
   return events.filter((e) => e.id !== id);
 }
 
@@ -274,10 +279,7 @@ export function deleteCalendarEvent(
 // Notifications
 // ---------------------------------------------------------------------------
 
-export function getEventsDue(
-  events: CalendarEvent[],
-  now: Date,
-): CalendarEvent[] {
+export function getEventsDue(events: CalendarEvent[], now: Date): CalendarEvent[] {
   const nowMs = now.getTime();
   return events.filter((e) => {
     if (!e.notify || e.notified || !e.time) return false;
@@ -286,11 +288,7 @@ export function getEventsDue(
   });
 }
 
-export function getEventsSoonDue(
-  events: CalendarEvent[],
-  now: Date,
-  windowMinutes: number,
-): CalendarEvent[] {
+export function getEventsSoonDue(events: CalendarEvent[], now: Date, windowMinutes: number): CalendarEvent[] {
   const nowMs = now.getTime();
   const windowMs = windowMinutes * 60_000;
   return events.filter((e) => {
@@ -300,13 +298,8 @@ export function getEventsSoonDue(
   });
 }
 
-export function markNotified(
-  events: CalendarEvent[],
-  id: string,
-): CalendarEvent[] {
-  return events.map((e) =>
-    e.id === id ? { ...e, notified: true } : e,
-  );
+export function markNotified(events: CalendarEvent[], id: string): CalendarEvent[] {
+  return events.map((e) => (e.id === id ? { ...e, notified: true } : e));
 }
 
 // ---------------------------------------------------------------------------
@@ -331,14 +324,16 @@ export function eventHeightPx(startTime: string, endTime: string | null): number
 // ---------------------------------------------------------------------------
 
 export function layoutOverlappingEvents(events: CalendarEvent[]): LayoutEvent[] {
-  const timed = events.filter((e) => e.time).sort((a, b) => {
-    const cmp = a.time!.localeCompare(b.time!);
-    if (cmp !== 0) return cmp;
-    // Longer events first
-    const aDur = a.endTime ? timeToMinutes(a.endTime) - timeToMinutes(a.time!) : 30;
-    const bDur = b.endTime ? timeToMinutes(b.endTime) - timeToMinutes(b.time!) : 30;
-    return bDur - aDur;
-  });
+  const timed = events
+    .filter((e) => e.time)
+    .toSorted((a, b) => {
+      const cmp = a.time!.localeCompare(b.time!);
+      if (cmp !== 0) return cmp;
+      // Longer events first
+      const aDur = a.endTime ? timeToMinutes(a.endTime) - timeToMinutes(a.time!) : 30;
+      const bDur = b.endTime ? timeToMinutes(b.endTime) - timeToMinutes(b.time!) : 30;
+      return bDur - aDur;
+    });
 
   const result: LayoutEvent[] = [];
   // Track end times per column
@@ -350,8 +345,8 @@ export function layoutOverlappingEvents(events: CalendarEvent[]): LayoutEvent[] 
 
     // Find first column where event fits (no overlap)
     let placed = -1;
-    for (let c = 0; c < columnEnds.length; c++) {
-      if (columnEnds[c] <= startMin) {
+    for (const [c, columnEnd] of columnEnds.entries()) {
+      if (columnEnd <= startMin) {
         placed = c;
         break;
       }
@@ -367,19 +362,15 @@ export function layoutOverlappingEvents(events: CalendarEvent[]): LayoutEvent[] 
   // Compute totalColumns per overlap group using a sweep
   // Group events that overlap transitively
   const groups: number[][] = [];
-  const eventGroup: number[] = new Array(result.length).fill(-1);
+  const eventGroup: number[] = Array.from({ length: result.length }).fill(-1);
 
   for (let i = 0; i < result.length; i++) {
     const iStart = timeToMinutes(result[i].event.time!);
-    const iEnd = result[i].event.endTime
-      ? timeToMinutes(result[i].event.endTime!)
-      : iStart + 30;
+    const iEnd = result[i].event.endTime ? timeToMinutes(result[i].event.endTime!) : iStart + 30;
 
     for (let j = 0; j < i; j++) {
       const jStart = timeToMinutes(result[j].event.time!);
-      const jEnd = result[j].event.endTime
-        ? timeToMinutes(result[j].event.endTime!)
-        : jStart + 30;
+      const jEnd = result[j].event.endTime ? timeToMinutes(result[j].event.endTime!) : jStart + 30;
 
       if (iStart < jEnd && iEnd > jStart) {
         // Overlap — merge groups

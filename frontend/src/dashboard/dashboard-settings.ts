@@ -33,15 +33,7 @@ export function sanitizeDashboardSettings(
   return {
     gap: oneOf(settings.gap, DASHBOARD_GAP_OPTIONS, fallback.gap),
     padding: oneOf(settings.padding, DASHBOARD_PADDING_OPTIONS, fallback.padding),
-    widgetBorders: oneOf(
-      settings.widgetBorders,
-      DASHBOARD_WIDGET_BORDER_OPTIONS,
-      fallback.widgetBorders,
-    ),
-    widgetHeaders: oneOf(
-      settings.widgetHeaders,
-      DASHBOARD_WIDGET_HEADER_OPTIONS,
-      fallback.widgetHeaders,
-    ),
+    widgetBorders: oneOf(settings.widgetBorders, DASHBOARD_WIDGET_BORDER_OPTIONS, fallback.widgetBorders),
+    widgetHeaders: oneOf(settings.widgetHeaders, DASHBOARD_WIDGET_HEADER_OPTIONS, fallback.widgetHeaders),
   };
 }

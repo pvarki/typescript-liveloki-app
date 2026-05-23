@@ -20,8 +20,7 @@ export interface TimerRuntimeState {
   shouldHandleDue: boolean;
 }
 
-const RELATIVE_PART_RE =
-  /(\d+)\s*(hours?|hrs?|hr|h|minutes?|mins?|min|m|seconds?|secs?|sec|s)\b/gi;
+const RELATIVE_PART_RE = /(\d+)\s*(hours?|hrs?|hr|h|minutes?|mins?|min|m|seconds?|secs?|sec|s)\b/gi;
 
 const UNIT_TO_MS: Record<string, number> = {
   h: 60 * 60 * 1000,
@@ -77,13 +76,12 @@ export function getTimerConfig(config: Record<string, unknown>): TimerWidgetConf
     startedAt: typeof config.startedAt === "string" ? config.startedAt : null,
     status: readStatus(config.status),
     lastHandledAt: typeof config.lastHandledAt === "string" ? config.lastHandledAt : null,
-    lastNotificationId:
-      typeof config.lastNotificationId === "string" ? config.lastNotificationId : null,
+    lastNotificationId: typeof config.lastNotificationId === "string" ? config.lastNotificationId : null,
   };
 }
 
 export function parseRelativeDuration(
-  input: string
+  input: string,
 ): { ok: true; milliseconds: number } | { ok: false; error: string } {
   const normalized = input.trim().toLowerCase();
   if (!normalized) {
@@ -122,7 +120,7 @@ export function parseRelativeDuration(
 
 export function resolveSameDayAbsoluteTime(
   input: string,
-  now = new Date()
+  now = new Date(),
 ): { ok: true; endAt: Date } | { ok: false; error: string } {
   const match = input.trim().match(/^(\d{2}):(\d{2})$/);
   if (!match) {
@@ -154,7 +152,7 @@ export function computeRemainingMs(endAt: string | null, now = new Date()): numb
 
 export function startTimer(
   config: TimerWidgetConfig,
-  now = new Date()
+  now = new Date(),
 ): { ok: true; config: TimerWidgetConfig } | { ok: false; error: string } {
   let endAt: Date;
 
@@ -195,7 +193,7 @@ export function clearTimer(config: TimerWidgetConfig): TimerWidgetConfig {
 export function markTimerHandled(
   config: TimerWidgetConfig,
   handledAt: string,
-  notificationId: string
+  notificationId: string,
 ): TimerWidgetConfig {
   return {
     ...config,
@@ -205,10 +203,7 @@ export function markTimerHandled(
   };
 }
 
-export function getTimerRuntimeState(
-  config: TimerWidgetConfig,
-  now = new Date()
-): TimerRuntimeState {
+export function getTimerRuntimeState(config: TimerWidgetConfig, now = new Date()): TimerRuntimeState {
   if (!config.endAt || config.status === "idle") {
     return { phase: "idle", remainingMs: 0, shouldHandleDue: false };
   }

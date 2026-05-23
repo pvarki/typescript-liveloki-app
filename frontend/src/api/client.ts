@@ -52,7 +52,7 @@ export async function updateDashboard(
     rowHeight?: number;
     settings?: DashboardSettings;
     widgets?: WidgetInstance[];
-  }
+  },
 ): Promise<DashboardData> {
   const body: Record<string, unknown> = { ...data };
   if (data.widgets) {

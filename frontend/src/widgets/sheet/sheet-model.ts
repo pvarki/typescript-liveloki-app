@@ -14,16 +14,16 @@ export interface SheetRow {
 }
 
 export interface CellFormat {
-  b?: boolean;  // bold
-  i?: boolean;  // italic
-  u?: boolean;  // underline
+  b?: boolean; // bold
+  i?: boolean; // italic
+  u?: boolean; // underline
 }
 
 export interface SheetConfig {
   name: string;
   columns: SheetColumn[];
   rows: SheetRow[];
-  formats?: Record<string, CellFormat>;  // key: "rowId:colKey"
+  formats?: Record<string, CellFormat>; // key: "rowId:colKey"
 }
 
 // ---------------------------------------------------------------------------
@@ -76,9 +76,10 @@ export function getSheetConfig(config: Record<string, unknown>): SheetConfig {
       )
     : DEFAULT_SHEET_CONFIG.rows;
   const name = typeof config.name === "string" ? config.name : "Sheet";
-  const formats = config.formats && typeof config.formats === "object"
-    ? config.formats as Record<string, CellFormat>
-    : undefined;
+  const formats =
+    config.formats && typeof config.formats === "object"
+      ? (config.formats as Record<string, CellFormat>)
+      : undefined;
   return { name, columns, rows, formats };
 }
 
@@ -86,7 +87,11 @@ export function formatKey(rowId: string, colKey: string): string {
   return `${rowId}:${colKey}`;
 }
 
-export function getCellFormat(formats: Record<string, CellFormat> | undefined, rowId: string, colKey: string): CellFormat {
+export function getCellFormat(
+  formats: Record<string, CellFormat> | undefined,
+  rowId: string,
+  colKey: string,
+): CellFormat {
   return formats?.[formatKey(rowId, colKey)] ?? {};
 }
 
@@ -95,7 +100,7 @@ export function toggleCellFormat(
   cells: Array<{ rowId: string; colKey: string }>,
   prop: "b" | "i" | "u",
 ): Record<string, CellFormat> {
-  const result = { ...(formats ?? {}) };
+  const result = { ...formats };
   // If all selected cells have the property, turn it off; otherwise turn it on
   const allHave = cells.every((c) => result[formatKey(c.rowId, c.colKey)]?.[prop]);
   for (const c of cells) {
@@ -117,7 +122,7 @@ export function columnIndexToLetter(index: number): string {
   let result = "";
   let n = index;
   while (n >= 0) {
-    result = String.fromCharCode(65 + (n % 26)) + result;
+    result = String.fromCodePoint(65 + (n % 26)) + result;
     n = Math.floor(n / 26) - 1;
   }
   return result;
@@ -126,17 +131,14 @@ export function columnIndexToLetter(index: number): string {
 export function letterToColumnIndex(letter: string): number {
   let result = 0;
   for (let i = 0; i < letter.length; i++) {
-    result = result * 26 + (letter.charCodeAt(i) - 64);
+    result = result * 26 + ((letter.codePointAt(i) ?? 64) - 64);
   }
   return result - 1;
 }
 
-export function columnKeyToLetter(
-  columns: SheetColumn[],
-  key: string,
-): string {
+export function columnKeyToLetter(columns: SheetColumn[], key: string): string {
   const idx = columns.findIndex((c) => c.key === key);
-  return idx >= 0 ? columnIndexToLetter(idx) : "?";
+  return idx === -1 ? "?" : columnIndexToLetter(idx);
 }
 
 // ---------------------------------------------------------------------------
@@ -186,11 +188,7 @@ function resolveRange(range: string, get: CellGetter): number[] {
 const FUNC_RE = /^(SUM|AVERAGE|AVG|COUNT|MIN|MAX|PRODUCT)\((.+)\)$/i;
 const SIMPLE_REF_RE = /^[A-Z]+\d+$/i;
 
-function evaluateFormula(
-  formula: string,
-  get: CellGetter,
-  evaluating: Set<string>,
-): number | string {
+function evaluateFormula(formula: string, get: CellGetter, evaluating: Set<string>): number | string {
   const expr = formula.slice(1).trim(); // remove "="
 
   // Function call: =SUM(A1:A5)
@@ -200,21 +198,28 @@ function evaluateFormula(
     const arg = funcMatch[2].trim();
     const values = resolveRange(arg, get);
     switch (func) {
-      case "SUM":
+      case "SUM": {
         return values.reduce((a, b) => a + b, 0);
+      }
       case "AVERAGE":
-      case "AVG":
+      case "AVG": {
         return values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
-      case "COUNT":
+      }
+      case "COUNT": {
         return values.length;
-      case "MIN":
+      }
+      case "MIN": {
         return values.length > 0 ? Math.min(...values) : 0;
-      case "MAX":
+      }
+      case "MAX": {
         return values.length > 0 ? Math.max(...values) : 0;
-      case "PRODUCT":
+      }
+      case "PRODUCT": {
         return values.length > 0 ? values.reduce((a, b) => a * b, 1) : 0;
-      default:
+      }
+      default: {
         return "#ERR!";
+      }
     }
   }
 
@@ -229,7 +234,7 @@ function evaluateFormula(
   // Arithmetic expression: =A1+B1*2
   // Replace cell references with their values, then evaluate
   try {
-    const replaced = expr.replace(/[A-Z]+\d+/gi, (match) => {
+    const replaced = expr.replaceAll(/[A-Z]+\d+/gi, (match) => {
       const ref = parseCellRef(match);
       if (!ref) return "0";
       const key = `${ref.col},${ref.row}`;
@@ -239,7 +244,7 @@ function evaluateFormula(
     });
     // Only allow safe characters: digits, operators, parentheses, dots, spaces
     if (!/^[\d+\-*/().  ]+$/.test(replaced)) return "#ERR!";
-    // eslint-disable-next-line no-eval
+
     const result = new Function(`return (${replaced})`)();
     if (typeof result !== "number" || !Number.isFinite(result)) return "#ERR!";
     return result;
@@ -260,8 +265,7 @@ export function computeSheet(
   const evaluating = new Set<string>();
 
   const getRawCell = (col: number, row: number): string => {
-    if (col < 0 || col >= columns.length || row < 0 || row >= rows.length)
-      return "";
+    if (col < 0 || col >= columns.length || row < 0 || row >= rows.length) return "";
     return rows[row].cells[columns[col].key] ?? "";
   };
 
@@ -280,8 +284,7 @@ export function computeSheet(
     return Number.isFinite(num) ? num : null;
   };
 
-  for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
-    const row = rows[rowIdx];
+  for (const [rowIdx, row] of rows.entries()) {
     const rowResult: Record<string, string> = {};
     for (const col of columns) {
       const raw = row.cells[col.key] ?? "";
@@ -291,10 +294,11 @@ export function computeSheet(
         evaluating.add(`${colIdx},${rowIdx}`);
         const val = evaluateFormula(raw, getCellValue, evaluating);
         evaluating.delete(`${colIdx},${rowIdx}`);
-        rowResult[col.key] =
-          typeof val === "number"
-            ? Number.isInteger(val) ? String(val) : val.toFixed(2)
-            : String(val);
+        if (typeof val === "number") {
+          rowResult[col.key] = Number.isInteger(val) ? String(val) : val.toFixed(2);
+        } else {
+          rowResult[col.key] = String(val);
+        }
       } else {
         rowResult[col.key] = raw;
       }
@@ -308,15 +312,8 @@ export function computeSheet(
 // Cell CRUD
 // ---------------------------------------------------------------------------
 
-export function updateCell(
-  rows: SheetRow[],
-  rowId: string,
-  colKey: string,
-  value: string,
-): SheetRow[] {
-  return rows.map((r) =>
-    r.id === rowId ? { ...r, cells: { ...r.cells, [colKey]: value } } : r,
-  );
+export function updateCell(rows: SheetRow[], rowId: string, colKey: string, value: string): SheetRow[] {
+  return rows.map((r) => (r.id === rowId ? { ...r, cells: { ...r.cells, [colKey]: value } } : r));
 }
 
 export function addRow(config: SheetConfig, position: "top" | "bottom" = "bottom"): SheetConfig {
@@ -412,10 +409,10 @@ export function parsePastedData(
   anchorRowIdx: number,
 ): SheetConfig {
   const lines = text.split(/\r?\n/).filter((l) => l.length > 0);
-  const newRows = [...rows.map((r) => ({ ...r, cells: { ...r.cells } }))];
+  const newRows = rows.map((r) => ({ ...r, cells: { ...r.cells } }));
 
-  for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
-    const cells = lines[lineIdx].split("\t");
+  for (const [lineIdx, line] of lines.entries()) {
+    const cells = line.split("\t");
     const rowIdx = anchorRowIdx + lineIdx;
 
     // Extend rows if needed
@@ -423,10 +420,10 @@ export function parsePastedData(
       newRows.push(createEmptyRow(columns));
     }
 
-    for (let cellIdx = 0; cellIdx < cells.length; cellIdx++) {
+    for (const [cellIdx, cell] of cells.entries()) {
       const colIdx = anchorColIdx + cellIdx;
       if (colIdx < columns.length) {
-        newRows[rowIdx].cells[columns[colIdx].key] = cells[cellIdx];
+        newRows[rowIdx].cells[columns[colIdx].key] = cell;
       }
     }
   }
@@ -447,16 +444,20 @@ export function getNextCell(
 ): { colKey: string; rowId: string } | null {
   const colIdx = columns.findIndex((c) => c.key === colKey);
   const rowIdx = rows.findIndex((r) => r.id === rowId);
-  if (colIdx < 0 || rowIdx < 0) return null;
+  if (colIdx === -1 || rowIdx === -1) return null;
 
   switch (direction) {
-    case "right":
+    case "right": {
       return colIdx + 1 < columns.length ? { colKey: columns[colIdx + 1].key, rowId } : null;
-    case "left":
+    }
+    case "left": {
       return colIdx - 1 >= 0 ? { colKey: columns[colIdx - 1].key, rowId } : null;
-    case "down":
+    }
+    case "down": {
       return rowIdx + 1 < rows.length ? { colKey, rowId: rows[rowIdx + 1].id } : null;
-    case "up":
+    }
+    case "up": {
       return rowIdx - 1 >= 0 ? { colKey, rowId: rows[rowIdx - 1].id } : null;
+    }
   }
 }

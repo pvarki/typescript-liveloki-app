@@ -1,6 +1,6 @@
 import { FormGroup, HTMLSelect, InputGroup } from "@blueprintjs/core";
 
-import type { ConfigPanelProps,WidgetDescriptor, WidgetProps } from "../../types";
+import type { ConfigPanelProps, WidgetDescriptor, WidgetProps } from "../../types";
 
 function MetricWidget({ config }: WidgetProps) {
   const label = (config.label as string) || "Metric";
@@ -17,9 +17,7 @@ function MetricWidget({ config }: WidgetProps) {
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-1">
-      <span className="text-xs uppercase tracking-wider text-[var(--color-muted-foreground)]">
-        {label}
-      </span>
+      <span className="text-xs uppercase tracking-wider text-[var(--color-muted-foreground)]">{label}</span>
       <span className={`text-3xl font-bold font-mono ${statusColors[status] || statusColors.normal}`}>
         {value}
         {unit && <span className="text-lg ml-1">{unit}</span>}
@@ -32,35 +30,35 @@ function MetricConfigPanel({ config, onChange }: ConfigPanelProps) {
   return (
     <div className="flex flex-col gap-2">
       <FormGroup label="Label">
-      <InputGroup
-        value={(config.label as string) || ""}
-        onChange={(e) => onChange({ ...config, label: e.target.value })}
-      />
+        <InputGroup
+          value={(config.label as string) || ""}
+          onChange={(e) => onChange({ ...config, label: e.target.value })}
+        />
       </FormGroup>
       <FormGroup label="Value">
-      <InputGroup
-        value={(config.value as string) || ""}
-        onChange={(e) => onChange({ ...config, value: e.target.value })}
-      />
+        <InputGroup
+          value={(config.value as string) || ""}
+          onChange={(e) => onChange({ ...config, value: e.target.value })}
+        />
       </FormGroup>
       <FormGroup label="Unit">
-      <InputGroup
-        value={(config.unit as string) || ""}
-        onChange={(e) => onChange({ ...config, unit: e.target.value })}
-      />
+        <InputGroup
+          value={(config.unit as string) || ""}
+          onChange={(e) => onChange({ ...config, unit: e.target.value })}
+        />
       </FormGroup>
       <FormGroup label="Status">
-      <HTMLSelect
-        fill
-        value={(config.status as string) || "normal"}
-        onChange={(e) => onChange({ ...config, status: e.target.value })}
-        options={[
-          { value: "normal", label: "Normal" },
-          { value: "success", label: "Success" },
-          { value: "warning", label: "Warning" },
-          { value: "danger", label: "Danger" },
-        ]}
-      />
+        <HTMLSelect
+          fill
+          value={(config.status as string) || "normal"}
+          onChange={(e) => onChange({ ...config, status: e.target.value })}
+          options={[
+            { value: "normal", label: "Normal" },
+            { value: "success", label: "Success" },
+            { value: "warning", label: "Warning" },
+            { value: "danger", label: "Danger" },
+          ]}
+        />
       </FormGroup>
     </div>
   );

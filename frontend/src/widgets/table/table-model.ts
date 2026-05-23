@@ -52,16 +52,14 @@ export function getTableRows(config: Record<string, unknown>): TableRow[] {
 
   return rows.filter(isTableRow).map((row) => ({
     id: row.id,
-    cells: Object.fromEntries(
-      Object.entries(row.cells).map(([key, value]) => [key, String(value ?? "")])
-    ),
+    cells: Object.fromEntries(Object.entries(row.cells).map(([key, value]) => [key, String(value ?? "")])),
   }));
 }
 
 export function createTableRow(
   columns: TableColumn[],
   values: Record<string, string>,
-  id = Math.random().toString(36).slice(2, 10)
+  id = Math.random().toString(36).slice(2, 10),
 ): TableRow {
   return {
     id,
@@ -105,13 +103,13 @@ function parseCsv(csv: string): string[][] {
 
 export function createTableRowsFromCsv(
   csv: string,
-  columns: TableColumn[] = DEFAULT_TABLE_COLUMNS
+  columns: TableColumn[] = DEFAULT_TABLE_COLUMNS,
 ): TableRow[] {
   const [headers, ...records] = parseCsv(csv);
   if (!headers) return [];
 
   const columnIndexes = columns.map((column) =>
-    headers.findIndex((header) => header.trim().toLowerCase() === column.label.toLowerCase())
+    headers.findIndex((header) => header.trim().toLowerCase() === column.label.toLowerCase()),
   );
 
   return records.map((record, recordIndex) => ({
@@ -119,8 +117,8 @@ export function createTableRowsFromCsv(
     cells: Object.fromEntries(
       columns.map((column, columnIndex) => {
         const recordIndexForColumn = columnIndexes[columnIndex];
-        return [column.key, recordIndexForColumn >= 0 ? record[recordIndexForColumn] ?? "" : ""];
-      })
+        return [column.key, recordIndexForColumn >= 0 ? (record[recordIndexForColumn] ?? "") : ""];
+      }),
     ),
   }));
 }
@@ -135,7 +133,7 @@ export function createPreseededTableConfig(csv: string): TableWidgetConfig {
 export function addTableRow(
   config: Record<string, unknown>,
   values: Record<string, string>,
-  id?: string
+  id?: string,
 ): TableWidgetConfig {
   const columns = getTableColumns(config);
   return {

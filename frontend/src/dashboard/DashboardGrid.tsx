@@ -17,13 +17,8 @@ import WidgetWrapper from "./WidgetWrapper";
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 export default function DashboardGrid() {
-  const {
-    activeDashboard,
-    gridPreview,
-    isEditMode,
-    updateWidgetPositions,
-    selectWidget,
-  } = useDashboardStore();
+  const { activeDashboard, gridPreview, isEditMode, updateWidgetPositions, selectWidget } =
+    useDashboardStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -52,10 +47,10 @@ export default function DashboardGrid() {
           y: l.y,
           w: l.w,
           h: l.h,
-        }))
+        })),
       );
     },
-    [isEditMode, updateWidgetPositions]
+    [isEditMode, updateWidgetPositions],
   );
 
   if (!activeDashboard) {
@@ -68,15 +63,10 @@ export default function DashboardGrid() {
 
   const effectiveCols = gridPreview?.cols ?? activeDashboard.cols;
   const effectiveRowHeight = gridPreview?.rowHeight ?? activeDashboard.rowHeight;
-  const effectiveSettings =
-    gridPreview?.settings ?? activeDashboard.settings ?? DEFAULT_DASHBOARD_SETTINGS;
+  const effectiveSettings = gridPreview?.settings ?? activeDashboard.settings ?? DEFAULT_DASHBOARD_SETTINGS;
 
   return (
-    <div
-      ref={containerRef}
-      className="h-full w-full overflow-hidden"
-      onClick={() => selectWidget(null)}
-    >
+    <div ref={containerRef} className="h-full w-full overflow-hidden" onClick={() => selectWidget(null)}>
       <ResponsiveGridLayout
         className="layout"
         layouts={layouts}

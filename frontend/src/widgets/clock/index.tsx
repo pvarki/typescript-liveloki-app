@@ -1,4 +1,4 @@
-import { useEffect,useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { WidgetDescriptor, WidgetProps } from "../../types";
 
@@ -22,9 +22,7 @@ function ClockWidget({ isEditMode }: WidgetProps) {
     <div className="flex h-full flex-col items-center justify-center gap-1">
       <span className="text-4xl font-mono font-bold text-[var(--color-foreground)]">{time}</span>
       <span className="text-sm text-[var(--color-muted-foreground)]">{date}</span>
-      {isEditMode && (
-        <span className="text-xs text-[var(--color-muted-foreground)] mt-2">Clock Widget</span>
-      )}
+      {isEditMode && <span className="text-xs text-[var(--color-muted-foreground)] mt-2">Clock Widget</span>}
     </div>
   );
 }

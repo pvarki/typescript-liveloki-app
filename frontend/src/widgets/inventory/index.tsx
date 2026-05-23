@@ -2,15 +2,32 @@ import { Button, Checkbox, FormGroup, InputGroup } from "@blueprintjs/core";
 import { type ComponentType, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import {
-  MdBuild, MdDevices, MdDirectionsCar, MdEngineering, MdFlight,
-  MdGroups, MdHome, MdInventory2, MdLocalShipping, MdMedicalServices,
-  MdMilitaryTech, MdPerson, MdRadio, MdRestaurant, MdSailing,
-  MdSecurity, MdShield, MdTerrain, MdVisibility, MdWater,
+  MdBuild,
+  MdDevices,
+  MdDirectionsCar,
+  MdEngineering,
+  MdFlight,
+  MdGroups,
+  MdHome,
+  MdInventory2,
+  MdLocalShipping,
+  MdMedicalServices,
+  MdMilitaryTech,
+  MdPerson,
+  MdRadio,
+  MdRestaurant,
+  MdSailing,
+  MdSecurity,
+  MdShield,
+  MdTerrain,
+  MdVisibility,
+  MdWater,
 } from "react-icons/md";
 
 import { createEmptyBattlelogEvent, submitBattlelogEvents } from "../../battlelog/event-data";
 import { useDashboardStore } from "../../stores/dashboard-store";
 import type { ConfigPanelProps, WidgetDescriptor, WidgetProps } from "../../types";
+import { WidgetActionBar } from "../WidgetActionBar";
 import {
   buildBatchLogHeader,
   categoryTotal,
@@ -23,7 +40,6 @@ import {
   getLogChanges,
   type InventoryCategory,
 } from "./inventory-model";
-import { WidgetActionBar } from "../WidgetActionBar";
 
 // ---------------------------------------------------------------------------
 // Icon map — expanded set for custom categories
@@ -32,19 +48,44 @@ import { WidgetActionBar } from "../WidgetActionBar";
 // Simple geometric shape components
 function SvgShape({ d, className }: { d: string; className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className ?? "text-base"} width="1em" height="1em">
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className ?? "text-base"}
+      width="1em"
+      height="1em"
+    >
       <path d={d} />
     </svg>
   );
 }
-const ShapeCircle = ({ className }: { className?: string }) => <SvgShape className={className} d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />;
-const ShapeSquare = ({ className }: { className?: string }) => <SvgShape className={className} d="M3 3h18v18H3z" />;
-const ShapeTriangle = ({ className }: { className?: string }) => <SvgShape className={className} d="M12 2L2 22h20z" />;
-const ShapeDiamond = ({ className }: { className?: string }) => <SvgShape className={className} d="M12 2l10 10-10 10L2 12z" />;
-const ShapeHexagon = ({ className }: { className?: string }) => <SvgShape className={className} d="M12 2l9 5v10l-9 5-9-5V7z" />;
-const ShapeStar = ({ className }: { className?: string }) => <SvgShape className={className} d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01z" />;
-const ShapePlus = ({ className }: { className?: string }) => <SvgShape className={className} d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z" />;
-const ShapePentagon = ({ className }: { className?: string }) => <SvgShape className={className} d="M12 2l10 7.5-3.8 11.5H5.8L2 9.5z" />;
+const ShapeCircle = ({ className }: { className?: string }) => (
+  <SvgShape className={className} d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z" />
+);
+const ShapeSquare = ({ className }: { className?: string }) => (
+  <SvgShape className={className} d="M3 3h18v18H3z" />
+);
+const ShapeTriangle = ({ className }: { className?: string }) => (
+  <SvgShape className={className} d="M12 2L2 22h20z" />
+);
+const ShapeDiamond = ({ className }: { className?: string }) => (
+  <SvgShape className={className} d="M12 2l10 10-10 10L2 12z" />
+);
+const ShapeHexagon = ({ className }: { className?: string }) => (
+  <SvgShape className={className} d="M12 2l9 5v10l-9 5-9-5V7z" />
+);
+const ShapeStar = ({ className }: { className?: string }) => (
+  <SvgShape
+    className={className}
+    d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14l-5-4.87 6.91-1.01z"
+  />
+);
+const ShapePlus = ({ className }: { className?: string }) => (
+  <SvgShape className={className} d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z" />
+);
+const ShapePentagon = ({ className }: { className?: string }) => (
+  <SvgShape className={className} d="M12 2l10 7.5-3.8 11.5H5.8L2 9.5z" />
+);
 
 const ICON_MAP: Record<string, ComponentType<{ className?: string }>> = {
   // Geometric shapes
@@ -96,7 +137,9 @@ function IconPicker({ value, onChange }: { value: string; onChange: (key: string
     <div>
       <Button minimal className="!min-h-0 !min-w-0 !p-1" title="Choose icon" onClick={() => setOpen(!open)}>
         {renderCategoryIcon(value)}
-        <span className="ml-0.5 text-[9px] text-[var(--color-muted-foreground)]">{open ? "\u25B2" : "\u25BC"}</span>
+        <span className="ml-0.5 text-[9px] text-[var(--color-muted-foreground)]">
+          {open ? "\u25B2" : "\u25BC"}
+        </span>
       </Button>
       {open && (
         <div className="mt-1 grid grid-cols-5 gap-1 rounded border border-[var(--color-border)] bg-[var(--color-field)] p-1">
@@ -107,7 +150,10 @@ function IconPicker({ value, onChange }: { value: string; onChange: (key: string
                 key={key}
                 minimal
                 className={`!min-h-0 !min-w-0 !p-1 ${key === value ? "ring-1 ring-[var(--color-accent)]" : ""}`}
-                onClick={() => { onChange(key); setOpen(false); }}
+                onClick={() => {
+                  onChange(key);
+                  setOpen(false);
+                }}
                 title={key}
               >
                 <Icon className="text-base" />
@@ -139,12 +185,8 @@ function CategorySection({ category }: { category: InventoryCategory }) {
         <span className="flex-1 text-xs font-medium uppercase tracking-wider text-[var(--color-muted-foreground)]">
           {category.name}
         </span>
-        <span className="font-mono text-xl font-bold text-[var(--color-foreground)]">
-          {total}
-        </span>
-        <span className="text-xs text-[var(--color-muted-foreground)]">
-          {open ? "\u25B2" : "\u25BC"}
-        </span>
+        <span className="font-mono text-xl font-bold text-[var(--color-foreground)]">{total}</span>
+        <span className="text-xs text-[var(--color-muted-foreground)]">{open ? "\u25B2" : "\u25BC"}</span>
       </button>
       {open && (
         <div className="ml-7 flex flex-col gap-0.5 border-l border-[var(--color-border)] py-1 pl-2">
@@ -182,16 +224,18 @@ function EditForm({
   );
   const [note, setNote] = useState("");
 
-  const warnings = useMemo(
-    () => checkCorrelationWarnings(categories, draft),
-    [categories, draft],
-  );
+  const warnings = useMemo(() => checkCorrelationWarnings(categories, draft), [categories, draft]);
 
   const updateCount = (catId: string, itemId: string, value: number) => {
     setDraft((prev) =>
       prev.map((cat) =>
         cat.id === catId
-          ? { ...cat, items: cat.items.map((item) => item.id === itemId ? { ...item, count: Math.max(0, value) } : item) }
+          ? {
+              ...cat,
+              items: cat.items.map((item) =>
+                item.id === itemId ? { ...item, count: Math.max(0, value) } : item,
+              ),
+            }
           : cat,
       ),
     );
@@ -225,21 +269,27 @@ function EditForm({
 
       {warnings.length > 0 && (
         <div className="rounded border border-[var(--color-warning)] bg-[var(--color-warning)]/10 p-2">
-          <div className="mb-1 text-xs font-semibold text-[var(--color-warning)]">
-            Check these changes
-          </div>
+          <div className="mb-1 text-xs font-semibold text-[var(--color-warning)]">Check these changes</div>
           {warnings.map((w, i) => (
             <div key={i} className="text-xs text-[var(--color-foreground)]">
-              {w.sourceItemName} {w.sourceDelta > 0 ? "+" : ""}{w.sourceDelta} — {w.targetName} ({w.targetType}) is unchanged
+              {w.sourceItemName} {w.sourceDelta > 0 ? "+" : ""}
+              {w.sourceDelta} — {w.targetName} ({w.targetType}) is unchanged
             </div>
           ))}
         </div>
       )}
 
       <div className="mt-auto border-t border-[var(--color-border)] pt-2">
-        <InputGroup placeholder="Reason / note (optional)" value={note} onChange={(e) => setNote(e.target.value)} className="mb-2" />
+        <InputGroup
+          placeholder="Reason / note (optional)"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          className="mb-2"
+        />
         <div className="flex gap-2">
-          {logChanges && <Button intent="primary" text="Save & Log" onClick={() => onSave(draft, note, true)} />}
+          {logChanges && (
+            <Button intent="primary" text="Save & Log" onClick={() => onSave(draft, note, true)} />
+          )}
           <Button text="Save" onClick={() => onSave(draft, note, false)} />
           <Button minimal text="Cancel" onClick={onCancel} />
         </div>
@@ -288,7 +338,14 @@ function InventoryWidget({ instanceId, config, isEditMode }: WidgetProps) {
   };
 
   if (editing) {
-    return <EditForm categories={categories} logChanges={logChanges} onSave={handleSave} onCancel={() => setEditing(false)} />;
+    return (
+      <EditForm
+        categories={categories}
+        logChanges={logChanges}
+        onSave={handleSave}
+        onCancel={() => setEditing(false)}
+      />
+    );
   }
 
   if (categories.length === 0) {
@@ -303,11 +360,22 @@ function InventoryWidget({ instanceId, config, isEditMode }: WidgetProps) {
     <div className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col gap-0.5">
-          {categories.map((cat) => <CategorySection key={cat.id} category={cat} />)}
+          {categories.map((cat) => (
+            <CategorySection key={cat.id} category={cat} />
+          ))}
         </div>
       </div>
       <WidgetActionBar
-        primary={<Button text="Edit quantities" icon="edit" small fill disabled={isEditMode} onClick={() => setEditing(true)} />}
+        primary={
+          <Button
+            text="Edit quantities"
+            icon="edit"
+            small
+            fill
+            disabled={isEditMode}
+            onClick={() => setEditing(true)}
+          />
+        }
       />
     </div>
   );
@@ -340,9 +408,7 @@ function InlineLinkEditor({
   };
 
   // Filter out the category this item belongs to
-  const otherCategories = allCategories.filter(
-    (cat) => !cat.items.some((i) => i.id === item.id),
-  );
+  const otherCategories = allCategories.filter((cat) => !cat.items.some((i) => i.id === item.id));
 
   return (
     <div className="ml-2 mt-1 rounded border border-[var(--color-border)] bg-[var(--color-field)] p-2">
@@ -413,8 +479,18 @@ function CategoryEditor({
     <div className="rounded border border-[var(--color-border)] p-2">
       <div className="mb-2 flex items-center gap-2">
         <IconPicker value={category.icon} onChange={(icon) => onUpdate({ ...category, icon })} />
-        <InputGroup className="flex-1" value={category.name} onChange={(e) => onUpdate({ ...category, name: e.target.value })} />
-        <Button icon="cross" minimal size="small" className="text-[var(--color-muted-foreground)] hover:text-[var(--color-danger)]" onClick={onRemove} />
+        <InputGroup
+          className="flex-1"
+          value={category.name}
+          onChange={(e) => onUpdate({ ...category, name: e.target.value })}
+        />
+        <Button
+          icon="cross"
+          minimal
+          size="small"
+          className="text-[var(--color-muted-foreground)] hover:text-[var(--color-danger)]"
+          onClick={onRemove}
+        />
       </div>
       <div className="flex flex-col gap-1">
         {category.items.map((item) => (
@@ -424,7 +500,10 @@ function CategoryEditor({
                 className="flex-1"
                 value={item.name}
                 onChange={(e) =>
-                  onUpdate({ ...category, items: category.items.map((i) => i.id === item.id ? { ...i, name: e.target.value } : i) })
+                  onUpdate({
+                    ...category,
+                    items: category.items.map((i) => (i.id === item.id ? { ...i, name: e.target.value } : i)),
+                  })
                 }
               />
               <InputGroup
@@ -432,7 +511,12 @@ function CategoryEditor({
                 type="number"
                 value={String(item.count)}
                 onChange={(e) =>
-                  onUpdate({ ...category, items: category.items.map((i) => i.id === item.id ? { ...i, count: Math.max(0, Number(e.target.value) || 0) } : i) })
+                  onUpdate({
+                    ...category,
+                    items: category.items.map((i) =>
+                      i.id === item.id ? { ...i, count: Math.max(0, Number(e.target.value) || 0) } : i,
+                    ),
+                  })
                 }
               />
               <Button
@@ -449,7 +533,9 @@ function CategoryEditor({
                 minimal
                 size="small"
                 className="text-[var(--color-muted-foreground)] hover:text-[var(--color-danger)]"
-                onClick={() => onUpdate({ ...category, items: category.items.filter((i) => i.id !== item.id) })}
+                onClick={() =>
+                  onUpdate({ ...category, items: category.items.filter((i) => i.id !== item.id) })
+                }
               />
             </div>
             {expandedLinks === item.id && (
@@ -462,7 +548,15 @@ function CategoryEditor({
           </div>
         ))}
         <div className="mt-1 flex gap-2">
-          <InputGroup className="flex-1" placeholder="New item..." value={newItemName} onChange={(e) => setNewItemName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") addItem(); }} />
+          <InputGroup
+            className="flex-1"
+            placeholder="New item..."
+            value={newItemName}
+            onChange={(e) => setNewItemName(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") addItem();
+            }}
+          />
           <Button icon="plus" onClick={addItem} aria-label="Add item" />
         </div>
       </div>
@@ -498,7 +592,16 @@ function InventoryConfigPanel({ config, onChange }: ConfigPanelProps) {
           />
         ))}
       </div>
-      <Button icon="plus" text="Add category" onClick={() => updateCategories([...categories, { id: generateId(), name: "New Category", icon: "inventory", items: [] }])} />
+      <Button
+        icon="plus"
+        text="Add category"
+        onClick={() =>
+          updateCategories([
+            ...categories,
+            { id: generateId(), name: "New Category", icon: "inventory", items: [] },
+          ])
+        }
+      />
     </div>
   );
 }

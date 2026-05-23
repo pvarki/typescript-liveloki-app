@@ -6,7 +6,7 @@ import type {
 } from "./types";
 
 export function getNotificationDeliveryStrategy(
-  permission: NotificationPermissionState
+  permission: NotificationPermissionState,
 ): NotificationDeliveryStrategy {
   return permission === "granted" ? "deliver" : "queue";
 }
@@ -17,10 +17,7 @@ export function buildNotificationId(payload: NotificationPayload): string {
   return [payload.dashboardId, payload.sourceType, payload.sourceId, payload.dueAt].join(":");
 }
 
-export function createOverdueNotification(
-  payload: NotificationPayload,
-  createdAt: string
-): NotificationItem {
+export function createOverdueNotification(payload: NotificationPayload, createdAt: string): NotificationItem {
   return {
     ...payload,
     id: buildNotificationId(payload),
@@ -33,7 +30,7 @@ export function createOverdueNotification(
 export function upsertQueuedNotification(
   items: NotificationItem[],
   payload: NotificationPayload,
-  createdAt: string
+  createdAt: string,
 ): NotificationItem[] {
   const id = buildNotificationId(payload);
   if (items.some((item) => item.id === id)) {
@@ -48,7 +45,7 @@ export const upsertOverdueNotification = upsertQueuedNotification;
 export function dismissNotificationItem(
   items: NotificationItem[],
   id: string,
-  dismissedAt: string
+  dismissedAt: string,
 ): NotificationItem[] {
   return items.map((item) =>
     item.id === id
@@ -57,7 +54,7 @@ export function dismissNotificationItem(
           status: "dismissed",
           dismissedAt,
         }
-      : item
+      : item,
   );
 }
 
@@ -67,7 +64,7 @@ export function dismissNotificationsForSource(
   items: NotificationItem[],
   sourceType: string,
   sourceId: string,
-  dismissedAt: string
+  dismissedAt: string,
 ): NotificationItem[] {
   return items.map((item) =>
     item.sourceType === sourceType && item.sourceId === sourceId
@@ -76,19 +73,17 @@ export function dismissNotificationsForSource(
           status: "dismissed",
           dismissedAt,
         }
-      : item
+      : item,
   );
 }
 
 export function filterNotificationsForDashboard(
   items: NotificationItem[],
-  dashboardId: string | null | undefined
+  dashboardId: string | null | undefined,
 ): NotificationItem[] {
   if (!dashboardId) return [];
 
-  return items.filter(
-    (item) => item.dashboardId === dashboardId && item.status !== "dismissed"
-  );
+  return items.filter((item) => item.dashboardId === dashboardId && item.status !== "dismissed");
 }
 
 export const filterNotificationsByDashboard = filterNotificationsForDashboard;

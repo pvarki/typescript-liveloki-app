@@ -44,6 +44,7 @@ const config = {
     rmExpectedCertCn: process.env.RM_EXPECTED_CERT_CN || manifestRmCertCn || 'rasenmaeher',
     rmMtlsUserEnforce: parseBoolean(process.env.RM_MTLS_USER_ENFORCE, true),
     mainUiCardVisible: parseBoolean(process.env.BL_MAIN_UI_CARD_VISIBLE, false),
+    useSwagger: parseBoolean(process.env.USE_SWAGGER, false),
 };
 
 export default config;

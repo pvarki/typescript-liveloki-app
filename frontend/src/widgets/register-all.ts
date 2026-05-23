@@ -1,6 +1,7 @@
 import { useWidgetRegistry } from "../stores/widget-registry";
 import { clockDescriptor } from "./clock";
 import { detailViewDescriptor } from "./detail-view";
+import { eventsBarChartDescriptor } from "./events-bar-chart";
 import { eventsFeedDescriptor } from "./events-feed";
 import { externalEmbedDescriptor } from "./external-embed";
 import { formDescriptor } from "./form";
@@ -17,6 +18,7 @@ import { weatherMapDescriptor } from "./weather-map";
 export function registerAllWidgets() {
   const { register } = useWidgetRegistry.getState();
   register(clockDescriptor);
+  register(eventsBarChartDescriptor);
   register(eventsFeedDescriptor);
   register(detailViewDescriptor);
   register(externalEmbedDescriptor);

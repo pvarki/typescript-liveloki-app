@@ -21,7 +21,7 @@ const dashboardsReadLimiter = rateLimit({
 router.get('/dashboards', dashboardsReadLimiter, listDashboards);
 router.post('/dashboards', requireAdmin, createDashboard);
 router.delete('/dashboards', requireAdmin, deleteAllDashboards);
-router.get('/dashboards/:id', getDashboard);
+router.get('/dashboards/:id', dashboardsReadLimiter, getDashboard);
 router.put('/dashboards/:id', requireAdmin, updateDashboard);
 router.delete('/dashboards/:id', requireAdmin, deleteDashboard);
 

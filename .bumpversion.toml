@@ -28,4 +28,3 @@ calver_format = "{0Y}{0M}{0D}"
 filename = "backend/package.json"
 search = '"version": "{current_version}"'
 replace = '"version": "{new_version}"'
-

@@ -4,6 +4,10 @@ on:
       - main
   workflow_dispatch: # Allow manual triggering
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   publish:
     name: Publish Docker image

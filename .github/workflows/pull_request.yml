@@ -2,6 +2,10 @@ on:
   pull_request:
   workflow_dispatch: # Allow manual triggering
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   versiontag:
     name: Validate version bump

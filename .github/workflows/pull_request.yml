@@ -1,0 +1,97 @@
+on:
+  pull_request:
+  workflow_dispatch: # Allow manual triggering
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  versiontag:
+    name: Validate version bump
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pvarki/config-ci-library/.github/actions/validate-bumpversion@main
+
+  pre_commit:
+    name: Run pre-commit checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: "Set environment"
+        run: cp .env_example .env && echo "PRESEED=true" >> .env
+      - uses: j178/prek-action@v2
+
+  lint-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm i
+        working-directory: frontend
+      - run: npm run lint
+        working-directory: frontend
+      - run: npm run prettier -- --check
+        working-directory: frontend
+  lint-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm i
+        working-directory: backend
+      - run: npm run lint
+        working-directory: backend
+      - run: npm run prettier -- --check
+        working-directory: backend
+      - run: npm exec redocly lint ../dist/openapi.json
+        working-directory: backend
+
+  tests:
+    name: "Integration testing"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: "Set environment"
+        run: cp .env_example .env && echo "PRESEED=true" >> .env
+      - name: "Start service"
+        run: docker compose -f docker-compose.yml up -d
+      - name: "Test server"
+        run: docker compose run test npm run test:integration
+
+  publish:
+    name: Publish Docker image
+    needs: [versiontag, pre_commit, lint-backend, lint-frontend, tests]
+    runs-on: arc-runner-set
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - name: Publish Docker image
+        uses: pvarki/config-ci-library/.github/actions/publish-image@main
+        with:
+          product: battlelog
+          component: api
+          dockerhub-username: ${{ vars.DOCKERHUB_USERNAME }}
+          dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          acr-repo: ${{ vars.ACR_REPO }}
+          acr-username: ${{ vars.ACR_USERNAME }}
+          acr-token: ${{ secrets.ACR_TOKEN }}

@@ -1,4 +1,5 @@
 {
+  "//version": "!! Use bump-my-version to update version !!",
   "author": "",
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",

@@ -1,6 +1,7 @@
 import config from '../config/index.js';
 import logger from '../logger.js';
 import { getManifestProductUri } from '../utils/kraftwerkManifest.js';
+import { createUser, promoteUser, demoteUser, deleteUser, getUserCn, updateUserCallsign } from '../models/users.js';
 
 const BATTLELOG_DOCS_URL = 'https://github.com/pvarki/typescript-liveloki-app/';
 const BATTLELOG_SHORTNAME = 'bl';
@@ -96,24 +97,78 @@ export const noOp = async (_request, response) => {
     response.json({ success: true });
 };
 
-export const descriptionV1Handler = async (request, response) => {
-    if (!config.mainUiCardVisible) {
-        return response.status(404).json({ error: 'Not found' });
+export const userCreated = async (request, response) => {
+    try {
+        const { uuid, callsign, cert_cn, x509cert } = request.body || {};
+        const cn = getUserCn({ certCn: cert_cn, x509cert, callsign });
+        await createUser({ cn, rmUuid: uuid, callsign });
+        logger.info(`User created: cn=${cn}, uuid=${uuid}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userCreated: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
     }
+};
+
+export const userPromoted = async (request, response) => {
+    try {
+        const { uuid, callsign, cert_cn, x509cert } = request.body || {};
+        await promoteUser(uuid, { certCn: cert_cn, x509cert, callsign });
+        logger.info(`User promoted: uuid=${uuid}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userPromoted: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const userDemoted = async (request, response) => {
+    try {
+        const { uuid } = request.body || {};
+        await demoteUser(uuid);
+        logger.info(`User demoted: uuid=${uuid}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userDemoted: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const userRevoked = async (request, response) => {
+    try {
+        const { uuid } = request.body || {};
+        await deleteUser(uuid);
+        logger.info(`User revoked: uuid=${uuid}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userRevoked: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const userUpdated = async (request, response) => {
+    try {
+        const { uuid, callsign } = request.body || {};
+        await updateUserCallsign(uuid, callsign);
+        logger.info(`User updated: uuid=${uuid}, callsign=${callsign}`);
+        response.json({ success: true });
+    } catch (error) {
+        logger.error(`Error in userUpdated: ${error.message}`);
+        response.status(500).json({ success: false, error: error.message });
+    }
+};
+
+export const descriptionV1Handler = async (request, response) => {
     const { language } = request.params;
     return response.json(getDescriptionV1(language));
 };
 export const descriptionV2Handler = async (request, response) => {
-    if (!config.mainUiCardVisible) {
-        return response.status(404).json({ error: 'Not found' });
-    }
     const { language } = request.params;
     return response.json(getDescription(language));
 };
 
-export const descriptionV2AdminHandler = async (request, response) => {
-    const { language } = request.params;
-    return response.json(getDescription(language));
+export const descriptionV2AdminHandler = async (_request, response) => {
+    return response.status(404).json({ error: 'Not found' });
 };
 
 export const instructionsHandler = async (request, response) => {

@@ -4,6 +4,97 @@ import { v7 as uuidv7 } from "uuid";
 import path from "path";
 import logger from "../logger.js";
 
+const firstQueryValue = (value) => Array.isArray(value) ? value[0] : value;
+
+const queryValues = (query, ...names) => names
+  .flatMap(name => {
+    const value = query[name];
+    return Array.isArray(value) ? value : [value];
+  })
+  .filter(value => value !== undefined && value !== null && value !== "");
+
+const addCondition = (conditions, values, sql, value) => {
+  const placeholder = `$${values.length + 1}`;
+  values.push(value);
+  conditions.push(sql(placeholder));
+};
+
+const queryNumber = (value) => {
+  const number = Number(firstQueryValue(value));
+  return Number.isFinite(number) ? number : null;
+};
+
+const addEventFieldFilters = (query, conditions, values) => {
+  const exactTextFilters = [
+    ["header", "header"],
+    ["source", "source"],
+    ["author", "author"],
+  ];
+
+  for (const [queryName, column] of exactTextFilters) {
+    const value = firstQueryValue(query[queryName]);
+    if (value) {
+      addCondition(conditions, values, placeholder => `${column} = ${placeholder}`, value);
+    }
+  }
+
+  const keyword = firstQueryValue(query.keyword);
+  if (keyword) {
+    addCondition(conditions, values, placeholder => `${placeholder} = ANY(keywords)`, keyword);
+  }
+
+  const maxReliability = firstQueryValue(query.max_admiralty_reliability);
+  if (maxReliability) {
+    addCondition(
+      conditions,
+      values,
+      placeholder => `upper(admiralty_reliability) <= upper(${placeholder})`,
+      maxReliability,
+    );
+  }
+
+  const maxAccuracy = queryNumber(query.max_admiralty_accuracy);
+  if (maxAccuracy !== null) {
+    addCondition(
+      conditions,
+      values,
+      placeholder => `admiralty_accuracy ~ '^[0-9]+(\\.[0-9]+)?$' AND admiralty_accuracy::numeric <= ${placeholder}`,
+      maxAccuracy,
+    );
+  }
+
+  const eventTimeStart = firstQueryValue(query.event_time_start);
+  if (eventTimeStart) {
+    addCondition(conditions, values, placeholder => `event_time >= ${placeholder}`, eventTimeStart);
+  }
+
+  const eventTimeEnd = firstQueryValue(query.event_time_end);
+  if (eventTimeEnd) {
+    addCondition(conditions, values, placeholder => `event_time <= ${placeholder}`, eventTimeEnd);
+  }
+
+  const topLeftLat = queryNumber(query.top_left_lat);
+  const topLeftLng = queryNumber(query.top_left_lng);
+  const bottomRightLat = queryNumber(query.bottom_right_lat);
+  const bottomRightLng = queryNumber(query.bottom_right_lng);
+  if (topLeftLat !== null && topLeftLng !== null && bottomRightLat !== null && bottomRightLng !== null) {
+    addCondition(conditions, values, placeholder => `location_lat <= ${placeholder}`, topLeftLat);
+    addCondition(conditions, values, placeholder => `location_lat >= ${placeholder}`, bottomRightLat);
+    addCondition(conditions, values, placeholder => `location_lng >= ${placeholder}`, topLeftLng);
+    addCondition(conditions, values, placeholder => `location_lng <= ${placeholder}`, bottomRightLng);
+  }
+
+  const groupValues = queryValues(query, "group", "groups", "group[]", "groups[]");
+  if (groupValues.length > 0) {
+    addCondition(conditions, values, placeholder => `groups @> ${placeholder}::text[]`, groupValues);
+  }
+
+  const typeValues = queryValues(query, "type", "types", "type[]", "types[]");
+  if (typeValues.length > 0) {
+    addCondition(conditions, values, placeholder => `"type" = ANY(${placeholder}::text[])`, typeValues);
+  }
+};
+
 export const addEvents = async (req, res) => {
   const { events } = req.body;
 
@@ -39,15 +130,17 @@ export const addEvents = async (req, res) => {
         location_lng,
         location_lat,
         author,
-        groups
+        groups,
+        type,
+        data
       } = event;
       const id = uuidv7();
       const keywordArray = convertTagArray(keywords);
       const groupsArray = groups ? (Array.isArray(groups) ? groups : [groups]) : [];
 
       return client.query(
-        "INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)",
-        [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groupsArray]
+        "INSERT INTO events (id, header, link, source, admiralty_reliability, admiralty_accuracy, keywords, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groups, \"type\", data) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)",
+        [id, header, link, source, admiralty_reliability, admiralty_accuracy, keywordArray, event_time, notes, hcoe_domains, location, location_lng, location_lat, author, groupsArray, type, data ?? null]
       );
     });
 
@@ -72,12 +165,14 @@ export const fetchEvents = async (req, res) => {
   try {
     let query = "SELECT * FROM events";
     const values = [];
+    const conditions = [];
 
-    if (search) {
-      const searchWords = search.split(" ").map(word => word.trim()).filter(Boolean);
+    const searchValue = firstQueryValue(search);
+    if (searchValue) {
+      const searchWords = searchValue.split(" ").map(word => word.trim()).filter(Boolean);
 
       if (searchWords.length > 0) {
-        const conditions = searchWords.map((_, index) => `
+        const searchConditions = searchWords.map((_, index) => `
                     (
                         EXISTS (SELECT 1 FROM unnest(keywords) AS keyword WHERE keyword ILIKE $${index + 1}) OR
                         header ILIKE $${index + 1} OR
@@ -88,9 +183,15 @@ export const fetchEvents = async (req, res) => {
                     )
                 `);
 
-        query += ` WHERE ${conditions.join(" AND ")}`;
+        conditions.push(...searchConditions);
         values.push(...searchWords.map(word => `%${word}%`));
       }
+    }
+
+    addEventFieldFilters(req.query, conditions, values);
+
+    if (conditions.length > 0) {
+      query += ` WHERE ${conditions.join(" AND ")}`;
     }
 
     query += " ORDER BY creation_time DESC";

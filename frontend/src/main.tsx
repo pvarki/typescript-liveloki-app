@@ -1,6 +1,8 @@
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/700.css";
+import "@blueprintjs/core/lib/css/blueprint.css";
 import "maplibre-gl/dist/maplibre-gl.css";
+import "ol/ol.css";
 import "./style.css";
 
 import React from "react";

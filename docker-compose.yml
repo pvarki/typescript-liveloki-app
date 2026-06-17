@@ -28,6 +28,9 @@ services:
       - .env
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      # Direct localhost access has no reverse proxy to inject the mTLS user header.
+      # Keep local compose usable by default; set RM_MTLS_USER_ENFORCE=true to test proxied/RM auth.
+      RM_MTLS_USER_ENFORCE: ${RM_MTLS_USER_ENFORCE:-false}
     ports:
       - "3000:3000"
 #    expose:
@@ -40,19 +43,19 @@ services:
 #    networks:
 #      - testing-network
 
-  caddy:
-    image: caddy:latest
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-    depends_on:
-      app:
-        condition: service_started
+#  caddy:
+#    image: caddy:latest
+#    restart: unless-stopped
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+#      - caddy-data:/data
+#      - caddy-config:/config
+#    depends_on:
+#      app:
+#        condition: service_started
 
   test:
     profiles: ["cli-only"]
@@ -64,6 +67,8 @@ services:
     depends_on:
       app:
         condition: service_started
+    volumes:
+      - ./tests/integration:/usr/src/app/integration:ro
 #    networks:
 #      - testing-network
 

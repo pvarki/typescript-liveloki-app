@@ -1,12 +1,24 @@
 import express from 'express';
+
+import config from '../config/index.js';
+import { mtlsUserMiddleware } from '../middleware/mtlsUserMiddleware.js';
+import dashboardRoutes from './dashboardRoutes.js';
+import { openApiJsonHandler, swaggerUiHandler } from './docsRoutes.js';
 import eventRoutes from './eventRoutes.js';
 import rmRoutes from './rmRoutes.js';
 
 const router = express.Router();
 
-router.use('/api', eventRoutes);
+if (config.useSwagger) {
+  router.get('/api-docs', swaggerUiHandler);
+  router.get('/openapi.json', openApiJsonHandler);
+}
+
+router.use('/api', mtlsUserMiddleware, dashboardRoutes);
+router.use('/api', mtlsUserMiddleware, eventRoutes);
 router.use('/rmapi', rmRoutes);
 
-router.use('/api/v1', eventRoutes);
+router.use('/api/v1', mtlsUserMiddleware, dashboardRoutes);
+router.use('/api/v1', mtlsUserMiddleware, eventRoutes);
 
 export default router;

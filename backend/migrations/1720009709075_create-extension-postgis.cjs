@@ -9,9 +9,12 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
-    pgm.sql(`
-        CREATE EXTENSION IF NOT EXISTS postgis;
-    `);
+    // PostGIS is provisioned outside the application in production environments
+    // such as CloudNativePG, and the app role does not have permission to create
+    // extensions there. The current schema no longer depends on PostGIS types, so
+    // this historical migration is intentionally a no-op.
+
+    // If you need to use PostGIS types, you can create the extension manually with init script elsewhere.
 };
 
 /**

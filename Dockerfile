@@ -6,7 +6,7 @@ RUN npm run build
 
 # Dockerfile for Node.js server
 FROM node:22-slim AS production
-COPY --from=pvarki/kw_product_init:latest /kw_product_init /kw_product_init
+COPY --from=ghcr.io/pvarki/kraftwerk-helper-tool:1.4.1-261027 /kw_product_init /kw_product_init
 RUN apt-get update && apt-get install -y \
         curl \
     && rm -rf /var/lib/apt/lists/* \
